@@ -8,20 +8,20 @@
 *.pem
 *.key
 
-# --- Python ---
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.coverage
-.coverage.*
-htmlcov/
-*.egg-info/
-staticfiles/
-media/
+# --- .NET ---
+bin/
+obj/
+.vs/
+TestResults/
+*.user
+*.suo
+*.coverage
+coverage.cobertura.xml
+
+# --- Unity: shared library build output (recreated by `make rules`) ---
+apps/mobile/Assets/GameVerse/Plugins/Shared/*.dll
+apps/mobile/Assets/GameVerse/Plugins/Shared/*.pdb
+apps/mobile/Assets/GameVerse/Plugins/Shared/GameVerse.*.xml
 
 # --- Node / web ---
 node_modules/

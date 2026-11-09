@@ -3,7 +3,18 @@ GameVerse – A cross-platform gaming platform bringing together board, puzzle, 
 
 ## Status
 
-Phase 0 (foundation). No application code yet. Stack: C# end to end (.NET 10 backend, Unity 6 client, shared `GameVerse.Rules` library), see [ADR-0001](docs/architecture/adr-0001-core-technology-stack.md).
+Phase 0 (foundation). Shared rules and contracts libraries are in place (`shared/`); backend, web and Unity are next. Stack: C# end to end (.NET 10 backend, Unity 6 client, shared `GameVerse.Rules` library), see [ADR-0001](docs/architecture/adr-0001-core-technology-stack.md).
+
+## Build and test
+
+Prerequisites: .NET 10 SDK, GNU make (works from Git Bash or PowerShell).
+
+```
+make test     # run all .NET tests
+make rules    # build the shared libraries and copy them into the Unity project
+```
+
+See [shared/README.md](shared/README.md) for what the shared libraries contain and the rules for writing code there.
 
 ## Project docs
 

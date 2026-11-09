@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- netstandard2.1 and C# 9 are set and enforced in shared/Directory.Build.* -->
+  <PropertyGroup>
+    <RootNamespace>GameVerse.Contracts</RootNamespace>
+  </PropertyGroup>
+</Project>
