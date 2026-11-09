@@ -57,7 +57,7 @@ Change any of these only with explicit approval.
 - Auth: JWT via `djangorestframework-simplejwt` (access 15 min, rotating refresh). Guest accounts allowed and upgradable to full accounts.
 - `drf-spectacular` for OpenAPI. Clients are generated from the schema, never hand-written:
   - TypeScript: `openapi-typescript` + `openapi-fetch`
-  - C#: NSwag or a small generator script, committed to the Unity project
+  - C#: NSwag, run from a script, output committed to the Unity project
 - Tests: `pytest`, `pytest-django`, `factory_boy`. Rules engines need near-total branch coverage.
 - Lint/format: `ruff`, `mypy` on rules engines and services.
 - Observability: structured JSON logging, Sentry (env-gated).
@@ -66,7 +66,8 @@ Change any of these only with explicit approval.
 - Unity 6 LTS, C#, URP. 2D Renderer for 2D games, Forward+ for 3D games.
 - One Unity project. The platform shell and every game live in it. Games are separate assemblies (`.asmdef`) and Addressables groups so they can be downloaded on demand.
 - Platform UI is built with **UI Toolkit** (UXML + USS), not uGUI. These are text files, which keeps them reviewable and generatable. Use uGUI only inside a game where world-space UI demands it.
-- Animation: DOTween or LitMotion for code tweens, **Rive** for designed motion (shared with web).
+- Animation: LitMotion for code tweens, **Rive** for designed motion (shared with web).
+- Async: UniTask.
 - Networking to backend: REST via generated client, realtime via `NativeWebSocket`.
 - Input System package, Unity Localization package, Addressables, Cinemachine for 3D games.
 - Tests: Unity Test Framework (EditMode for rules/logic, PlayMode for flows). Run headless with `-batchmode -runTests`.
@@ -87,7 +88,9 @@ Change any of these only with explicit approval.
 Never hardcode a color, font size, radius or duration in components. If a token is missing, add it to `tokens.json`.
 
 ### Infrastructure
-- Docker Compose for local dev: `postgres`, `redis`, `api` (Django ASGI via Daphne or Uvicorn), `worker` (Celery), `beat`, `web`.
+- Docker Compose for local dev: `postgres`, `redis`, `api` (Django ASGI via Uvicorn), `worker` (Celery), `beat`, `web`.
+- Dev machine: Windows 11 + Docker Desktop (WSL2 backend). `make` targets must work from Git Bash and PowerShell.
+- Tooling: `uv` for Python, `pnpm` workspace for Node, GitHub Actions for CI, Git LFS for binary assets, LF line endings via `.gitattributes`. See ADR-0002.
 - Production: containers behind Traefik with Cloudflare in front. Environment-based config via `.env` files that are never committed. `.env.example` is always current.
 - Modular monolith. No microservices. The one planned exception is a dedicated real-time game server for twitch-action PvP (fighting, live racing), which is a later phase and needs approval.
 
@@ -236,6 +239,7 @@ Read `docs/design/DESIGN_SYSTEM.md` before writing any UI. The short version:
 ## 8. Out of scope until explicitly approved
 - Real money of any kind: entry fees, staking, cash prizes, withdrawals, crypto.
 - Paid loot boxes or any randomized reward bought with real money.
+- Ads of any kind, including rewarded ads (ADR-0002).
 - Microservices.
 - iOS native builds (web covers iPhone users first).
 
