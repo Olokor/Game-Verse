@@ -1,5 +1,5 @@
 # GameVerse root ignore rules.
-# Unity-specific rules live in apps/mobile/.gitignore (see ADR-0002).
+# Unity-specific rules live in apps/mobile/.gitignore (see CLAUDE.md section 3, Infrastructure).
 
 # --- Secrets and environment ---
 .env

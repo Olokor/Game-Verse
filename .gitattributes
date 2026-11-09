@@ -1,4 +1,4 @@
-# GameVerse line endings and binary handling (see ADR-0002).
+# GameVerse line endings and binary handling (see CLAUDE.md section 3, Infrastructure).
 
 # Normalize all text to LF in the repo and the working tree.
 * text=auto eol=lf
