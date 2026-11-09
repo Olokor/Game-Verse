@@ -1,0 +1,94 @@
+# Local development stack. Start with `make up`, stop with `make down`.
+# Values come from .env (copy .env.example). Web and admin services are added in Prompts 0.5 and 2.4.
+
+name: gameverse
+
+x-api-common: &api-common
+  build:
+    context: .
+    dockerfile: infrastructure/docker/api.Dockerfile
+  image: gameverse-api:dev
+  restart: unless-stopped
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+    migrate:
+      condition: service_completed_successfully
+
+x-api-env: &api-env
+  ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+  GameVerse__ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=${POSTGRES_DB:-gameverse};Username=${POSTGRES_USER:-gameverse};Password=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+  GameVerse__ConnectionStrings__Redis: redis:6379
+  GameVerse__Log__Pretty: ${GAMEVERSE_LOG_PRETTY:-false}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gameverse}
+      POSTGRES_USER: ${POSTGRES_USER:-gameverse}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # One-shot: applies EF Core migrations, then exits. api and worker wait for it.
+  migrate:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/api.Dockerfile
+    image: gameverse-api:dev
+    command: ["migrate"]
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *api-env
+      GameVerse__Role: api
+
+  api:
+    <<: *api-common
+    environment:
+      <<: *api-env
+      GameVerse__Role: api
+      # Dashboard is localhost-only in Development; from the host, Docker NAT makes requests non-local,
+      # so it stays denied here. Use `dotnet run` on the host to open /hangfire.
+      GameVerse__Hangfire__Dashboard: "true"
+    ports:
+      - "127.0.0.1:${API_PORT:-8080}:8080"
+
+  worker:
+    <<: *api-common
+    environment:
+      <<: *api-env
+      GameVerse__Role: worker
+
+volumes:
+  postgres-data:
+  redis-data:

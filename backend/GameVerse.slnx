@@ -4,4 +4,14 @@
     <Project Path="../shared/GameVerse.Rules/GameVerse.Rules.csproj" />
     <Project Path="../shared/GameVerse.Rules.Tests/GameVerse.Rules.Tests.csproj" />
   </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/GameVerse.Api/GameVerse.Api.csproj" />
+    <Project Path="src/GameVerse.Infrastructure/GameVerse.Infrastructure.csproj" />
+    <Project Path="src/GameVerse.Platform/GameVerse.Platform.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GameVerse.Api.IntegrationTests/GameVerse.Api.IntegrationTests.csproj" />
+    <Project Path="tests/GameVerse.Architecture.Tests/GameVerse.Architecture.Tests.csproj" />
+    <Project Path="tests/GameVerse.Platform.Tests/GameVerse.Platform.Tests.csproj" />
+  </Folder>
 </Solution>
