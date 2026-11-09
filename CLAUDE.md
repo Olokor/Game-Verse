@@ -318,8 +318,10 @@ Fill this in as tooling lands. Keep it accurate.
 make build         # dotnet build backend/GameVerse.slnx (backend + shared)
 make test          # dotnet test for backend + shared
 make rules         # build GameVerse.Rules + Contracts (Release) and copy DLLs into Unity
-make up            # (Prompt 0.3) start the stack (docker compose)
-make migrate       # (Prompt 0.3) apply EF Core migrations
+make up            # start postgres, redis, migrate, api, worker (docker compose, needs .env); waits until healthy
+make down          # stop the stack (volumes kept)
+make logs          # follow api + worker logs
+make migrate       # apply EF Core migrations (one-shot container)
+make schema        # export OpenAPI to packages/api-schema/openapi.json (TS client: Prompt 0.5)
 make tokens        # (Prompt 0.4) regenerate design tokens
-make schema        # (Prompt 1.1) export OpenAPI + regenerate TS client
 ```
