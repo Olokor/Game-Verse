@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
-  TOKENS_FILE, OUTPUTS, TokenError, parseTokens, render, renderCss, renderUss, renderCs,
+  TOKENS_FILE, OUTPUTS, TokenError, parseTokens, render, renderCss, renderUss, renderCs, renderTailwind, tailwindName,
   missingTokens, checkOutputs, ussSupports, csharpIdent, cssName,
 } from './build.mjs';
 
@@ -96,6 +96,24 @@ test('value formatting per output', () => {
   assert.match(cs, /new\[\] \{ "Satoshi", "Inter" \}/);
   assert.match(cs, /const float _16 = 16.0f;/);
   assert.match(cs, /const float Em = -0.02f;/);
+});
+
+test('tailwind theme maps namespaces onto token variables and resets defaults', () => {
+  const tokens = parseTokens(realTree);
+  const tw = renderTailwind(tokens);
+  assert.match(tw, /@theme inline \{/);
+  assert.match(tw, /--color-\*: initial;/);
+  assert.match(tw, /--spacing: initial;/);
+  assert.match(tw, /--spacing-0: 0px;/, 'zero utilities keep working');
+  assert.match(tw, /--color-brand-volt: var\(--gv-color-brand-volt\);/);
+  assert.match(tw, /--font-display: var\(--gv-font-family-display\);/);
+  assert.match(tw, /--text-hero-number: var\(--gv-font-size-hero-number\);/);
+  assert.match(tw, /--spacing-16: var\(--gv-space-16\);/);
+  assert.match(tw, /--spacing-gutter-mobile: var\(--gv-layout-gutter-mobile\);/);
+  assert.match(tw, /--ease-fast: var\(--gv-motion-fast-easing\);/);
+  assert.match(tw, /motion.fast.duration {2}--gv-motion-fast-duration/, 'unmapped tokens are listed');
+  assert.equal(tailwindName({ path: ['motion', 'press-scale'] }), null);
+  assert.match(errorsOf({ color: { 'a-b': tok('color', '#000000') }, 'color-a': { b: tok('color', '#000000') } }), /both become/);
 });
 
 test('naming helpers', () => {

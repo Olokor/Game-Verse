@@ -108,7 +108,7 @@ Add `make tokens`. Add a check that fails if any token in the JSON is missing fr
 ### Prompt 0.5: Web shell skeleton
 ```
 Plan mode. Create apps/web with React 19, TypeScript, Vite, Tailwind v4 wired to tokens.css, Radix, Motion, TanStack Query, Zustand, React Router.
-Load Clash Display and Satoshi. Build the Button, GameCard (hero/standard/compact), CurrencyPill, XPBar, PlayerChip and Skeleton components from DESIGN_SYSTEM.md section 6, with every state.
+Load Bricolage Grotesque and Manrope (open source, self-hosted; replaced Clash Display and Satoshi, see ADR-0003). Build the Button, GameCard (hero/standard/compact), CurrencyPill, XPBar, PlayerChip and Skeleton components from DESIGN_SYSTEM.md section 6, with every state.
 Create a /dev/components page that shows every component and state.
 Build the Home screen layout from DESIGN_SYSTEM.md section 7 using static mock catalog data clearly marked TODO(gameverse) until the API exists.
 Then run the ui-reviewer agent and fix what it finds.

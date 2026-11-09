@@ -1,0 +1,156 @@
+@import 'tailwindcss';
+@import './tokens.css';
+@import './theme.css';
+@import './fonts.css';
+
+/*
+ * Base layer. Every value here comes from a --gv-* token (tokens.css, generated). No raw colors.
+ */
+@layer base {
+  html {
+    color-scheme: dark;
+    background-color: var(--gv-color-bg-base);
+    -webkit-text-size-adjust: 100%;
+    /* Keep focused or scrolled-to elements clear of the sticky header and the fixed bottom bar. */
+    scroll-padding-top: calc(var(--gv-space-56) + var(--gv-space-8));
+    scroll-padding-bottom: calc(var(--gv-space-72) + var(--gv-space-16) + env(safe-area-inset-bottom));
+    @media (width >= 64rem) {
+      scroll-padding-top: calc(var(--gv-space-72) + var(--gv-space-8));
+      scroll-padding-bottom: var(--gv-space-16);
+    }
+  }
+
+  body {
+    min-height: 100dvh;
+    background-color: var(--gv-color-bg-base);
+    color: var(--gv-color-text-primary);
+    font-family: var(--gv-font-family-body);
+    font-size: var(--gv-font-size-body);
+    line-height: var(--gv-font-line-height-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--gv-color-brand-volt);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--gv-color-brand-volt);
+    color: var(--gv-color-brand-volt-ink);
+  }
+}
+
+/* Display type: tight leading and tracking from DESIGN_SYSTEM.md section 3. */
+@utility type-display {
+  font-family: var(--gv-font-family-display);
+  font-weight: var(--gv-font-weight-display-semibold);
+  line-height: var(--gv-font-line-height-display);
+  letter-spacing: var(--gv-font-letter-spacing-display);
+}
+
+/* Tiny uppercase labels: 11px, +0.08em tracking. */
+@utility type-label {
+  font-size: var(--gv-font-size-label);
+  font-weight: 700;
+  letter-spacing: var(--gv-font-letter-spacing-label);
+  text-transform: uppercase;
+  line-height: var(--gv-font-line-height-body);
+}
+
+/* Numbers that change (coins, XP, scores): tabular figures so digits don't jitter. */
+@utility type-numeric {
+  font-variant-numeric: var(--gv-font-numeric);
+}
+
+/* Press feedback for every pressable: scale on press, token duration and easing. */
+@utility pressable {
+  transition-property: transform, background-color, border-color, color, opacity, filter;
+  transition-duration: var(--gv-motion-instant-duration);
+  transition-timing-function: var(--gv-motion-instant-easing);
+  &:active:not(:disabled):not([aria-disabled='true']) {
+    transform: scale(var(--gv-motion-press-scale));
+  }
+  @media (prefers-reduced-motion: reduce) {
+    &:active:not(:disabled) {
+      transform: none;
+    }
+  }
+}
+
+/*
+ * Game art placeholder: one soft radial glow in the game's accent color on a dark backdrop.
+ * DESIGN_SYSTEM.md section 2 allows gradients only inside game art and as a single glow behind a hero.
+ * The accent comes from --art-accent, set inline to a category token, e.g. var(--gv-color-category-board).
+ */
+@utility art-glow {
+  background-color: var(--gv-color-bg-inset);
+  background-image: radial-gradient(
+    120% 90% at 78% 18%,
+    color-mix(in oklab, var(--art-accent) 42%, transparent) 0%,
+    color-mix(in oklab, var(--art-accent) 12%, transparent) 45%,
+    transparent 75%
+  );
+}
+
+/* The single soft colored glow allowed on the featured game card (section 4). */
+@utility featured-glow {
+  box-shadow: 0 0 var(--gv-space-56) calc(var(--gv-space-4) * -1) color-mix(in oklab, var(--art-accent) 35%, transparent);
+}
+
+/* Horizontal rows that scroll under the screen gutter without a visible scrollbar. */
+@utility scroll-row {
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  & > * {
+    scroll-snap-align: start;
+  }
+}
+
+/*
+ * Looping ambient motion (motion.ambient): skeleton pulse, live dot, loading dots. All stop under reduced motion.
+ * Tailwind's default --animate-* values are reset in theme.css, so these are the only loops available.
+ */
+@keyframes gv-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes gv-ping {
+  0% { transform: scale(1); opacity: 0.6; }
+  75%, 100% { transform: scale(2); opacity: 0; }
+}
+
+@keyframes gv-dot {
+  0%, 80%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+
+@utility skeleton-pulse {
+  animation: gv-pulse var(--gv-motion-ambient-duration) var(--gv-motion-base-easing) infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@utility live-ping {
+  animation: gv-ping var(--gv-motion-ambient-duration) var(--gv-motion-fast-easing) infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+@utility loading-dot {
+  animation: gv-dot var(--gv-motion-ambient-duration) var(--gv-motion-fast-easing) infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    opacity: 0.6;
+  }
+}

@@ -56,6 +56,7 @@
   --gv-layout-gutter-mobile: 16px;
   --gv-layout-gutter-tablet: 24px;
   --gv-layout-gutter-desktop: 32px;
+  --gv-layout-touch-target: 44px;
 
   --gv-radius-sm: 8px;
   --gv-radius-md: 14px;
@@ -74,6 +75,7 @@
   --gv-motion-slow-spring-damping: 26;
   --gv-motion-celebrate-duration-min: 900ms;
   --gv-motion-celebrate-duration-max: 1600ms;
+  --gv-motion-ambient-duration: 1400ms;
   --gv-motion-press-scale: 0.96;
 }
 
