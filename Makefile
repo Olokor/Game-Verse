@@ -1,5 +1,5 @@
 # GameVerse developer commands. Works from Git Bash and PowerShell (GNU make).
-# Recipes only call dotnet, docker and node, so there are no shell-specific commands (cp, copy, rm) to diverge.
+# Recipes only call dotnet, docker, node and pnpm, so there are no shell-specific commands (cp, copy, rm) to diverge.
 
 SLN := backend/GameVerse.slnx
 API := backend/src/GameVerse.Api/GameVerse.Api.csproj
@@ -10,11 +10,12 @@ SHARED_LIBS := shared/GameVerse.Rules/GameVerse.Rules.csproj shared/GameVerse.Co
 REQUIRE_ENV = $(if $(wildcard .env),,$(error .env not found. Copy .env.example to .env first))
 
 .DEFAULT_GOAL := help
-.PHONY: help build test rules up down logs migrate schema tokens tokens-check
+.PHONY: help build test rules up down logs migrate schema tokens tokens-check install web web-test e2e
 
 help: ## List targets
 	@echo make build    - build the solution - backend and shared
-	@echo make test     - run all .NET and design-token tests, integration tests need Docker
+	@echo make install  - install the pnpm workspace: web, admin, packages
+	@echo make test     - run design-token, web and .NET tests, integration tests need Docker
 	@echo make rules    - build GameVerse.Rules + Contracts in Release and copy DLLs into Unity
 	@echo make up       - build images and start postgres, redis, api, worker and wait until healthy
 	@echo make down     - stop the stack, data volumes are kept
@@ -23,11 +24,14 @@ help: ## List targets
 	@echo make schema   - export the OpenAPI document to packages/api-schema/openapi.json
 	@echo make tokens   - regenerate CSS, USS and C# design tokens from packages/design-tokens/tokens.json
 	@echo make tokens-check - fail if any token output is missing a token or out of date
+	@echo make web      - start the web dev server on localhost:5173
+	@echo make web-test - typecheck and Vitest for the web app
+	@echo make e2e      - Playwright smoke and screenshots at 360x800 and 1440x900
 
 build: ## Build the whole solution
 	dotnet build $(SLN)
 
-test: tokens-check ## dotnet test for backend + shared, plus design-token tests
+test: tokens-check web-test ## design tokens, web, then dotnet test for backend + shared
 	node --test $(TOKENS)
 	dotnet test --solution $(SLN)
 
@@ -50,11 +54,24 @@ migrate: ## Apply migrations (the same one-shot container `make up` runs)
 
 schema: ## Export OpenAPI at build time (no database needed)
 	dotnet build $(API) -p:OpenApiGenerateDocuments=true
-	@echo Wrote packages/api-schema/openapi.json
-	@echo TODO gameverse: TypeScript client generation lands with the pnpm workspace in Prompt 0.5
+	pnpm --filter @gameverse/api-schema generate
+	@echo Wrote packages/api-schema/openapi.json and schema.d.ts
 
 tokens: ## Regenerate design token outputs (web, admin, Unity USS and C#)
 	node $(TOKENS)/build.mjs
 
 tokens-check: ## Fail if a token output is missing a token or is stale
 	node $(TOKENS)/build.mjs --check
+
+install: ## Install the pnpm workspace
+	pnpm install
+
+web: ## Web dev server
+	pnpm --filter @gameverse/web dev
+
+web-test: ## Typecheck and unit tests for the web app
+	pnpm --filter @gameverse/web typecheck
+	pnpm --filter @gameverse/web test
+
+e2e: ## Playwright smoke + screenshots (first run: pnpm --filter @gameverse/web exec playwright install chromium)
+	pnpm --filter @gameverse/web e2e

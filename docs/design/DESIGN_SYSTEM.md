@@ -27,7 +27,7 @@ All values here live in `packages/design-tokens/tokens.json`. Components read to
 | `border.strong` | `#343A4F` | Focus-adjacent, active outlines |
 | `text.primary` | `#F2F3F7` | Headings, body |
 | `text.secondary` | `#9AA0B4` | Supporting text |
-| `text.muted` | `#5E6478` | Hints, disabled |
+| `text.muted` | `#5E6478` | Disabled and decorative only (3.1:1 on surface, below 4.5:1). Never for information. |
 | `brand.volt` | `#C8FF3D` | THE brand color. Primary buttons, active tab, XP. Use sparingly. |
 | `brand.voltInk` | `#0A0B10` | Text on volt |
 | `accent.flare` | `#FF5A36` | Live, hot, urgency, tournaments |
@@ -51,18 +51,18 @@ Light theme: not in MVP. Tokens are structured so it can be added.
 
 | Role | Font | Notes |
 |------|------|-------|
-| Display | **Clash Display** (Fontshare, free commercial use) | Game titles, big numbers, rank-ups. Semibold/Bold. |
-| UI / body | **Satoshi** (Fontshare) | Everything else. |
-| Numeric | Satoshi with tabular figures | Scores, timers, currency, so digits don't jitter. |
+| Display | **Bricolage Grotesque** (SIL OFL 1.1) | Game titles, big numbers, rank-ups. Semibold/Bold. |
+| UI / body | **Manrope** (SIL OFL 1.1) | Everything else. |
+| Numeric | Manrope with tabular figures | Scores, timers, currency, so digits don't jitter. |
 
-Confirm both licenses before shipping. Fallback: `Space Grotesk` + `Inter`.
+Both fonts are open source and self-hosted, with no font CDN. Chosen over the earlier Clash Display + Satoshi (Fontshare, not open source); see [ADR-0003](../architecture/adr-0003-open-source-fonts.md).
 
 Scale (px, mobile): 12 caption, 14 body-sm, 16 body, 18 title-sm, 22 title, 28 headline, 36 display, 56 hero-number.
 Line height 1.4 for body, 1.1 for display. Letter spacing -0.02em on display sizes. Uppercase only for tiny labels (11–12px, +0.08em tracking).
 
 ## 4. Space, radius, elevation
 
-- Spacing: 4pt grid. Tokens: 4, 8, 12, 16, 20, 24, 32, 40, 56, 72.
+- Spacing: 4pt grid. Tokens: 4, 8, 12, 16, 20, 24, 32, 40, 56, 72. Minimum touch target 44 (`layout.touch-target`, section 10).
 - Screen gutter: 16 mobile, 24 tablet, 32+ desktop.
 - Radius: `sm 8`, `md 14`, `lg 20`, `xl 28`, `pill 999`. Game cards use `lg`. Buttons use `md` or `pill`.
 - Elevation is expressed with surface color steps and a 1px border, not heavy shadows. Exception: one soft colored glow on the focused or featured game card.
@@ -76,6 +76,7 @@ Line height 1.4 for body, 1.1 for display. Letter spacing -0.02em on display siz
 | `motion.base` | 240ms | same | Screen transitions, sheets |
 | `motion.slow` | 380ms | spring (stiffness 300, damping 26) | Hero card expansion, results |
 | `motion.celebrate` | 900–1600ms | choreographed (Rive) | Win, level up, rank up, chest |
+| `motion.ambient` | 1400ms per cycle | base easing, looping | Skeleton pulse, live dot, loading dots. Static under reduced motion. |
 
 Rules:
 - Every pressable scales to 0.96 on press, with a light haptic on mobile.

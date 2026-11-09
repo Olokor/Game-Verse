@@ -22,6 +22,9 @@ All outputs are generated and committed. Never edit them by hand.
 | `apps/admin/src/styles/tokens.css` | same | every token |
 | `apps/mobile/Assets/GameVerse/UI/Tokens.uss` | USS variables on `:root` | every token USS can express; the rest are listed in a comment at the end |
 | `apps/mobile/Assets/GameVerse/UI/Tokens.g.cs` | C# 9, `GameVerse.UI.GameVerseTokens` | every token, for code tweens, fonts and runtime styling |
+| `apps/web/src/styles/theme.css`, `apps/admin/src/styles/theme.css` | Tailwind v4 `@theme inline` | every token with a Tailwind namespace (colors, fonts, sizes, leading, tracking, spacing, radius, easing); the rest are listed in a comment |
+
+**Tailwind mapping.** Utilities read the token variables: `color.bg.surface` becomes `bg-bg-surface`, `space.16` becomes `p-16` (16px, not 4 × 16), `layout.touch-target` becomes `h-touch-target`, `radius.md` becomes `rounded-md`, and `font.size.title` becomes `text-title`. Tailwind's default palette, spacing scale, radii, shadows and easings are reset, so `bg-red-500`, `p-5` or `rounded-2xl` produce nothing. Durations have no Tailwind namespace; use `duration-(--gv-motion-fast-duration)`.
 
 USS has no `line-height`, no numeric font weight and no `cubic-bezier()`, takes only px lengths, and loads fonts as assets rather than family names. Those tokens reach Unity through `Tokens.g.cs` instead. The rule lives in `ussSupports()` in `build.mjs`.
 
@@ -44,7 +47,7 @@ Each leaf token has a `$type`, a `$value` and an optional `$description`. Keys a
 | `number` | `1.4` |
 | `duration` | `"160ms"` |
 | `cubicBezier` | `[0.2, 0.8, 0.2, 1]` or `"ease-out"` |
-| `fontFamily` | `["Satoshi", "Inter"]` (primary first, then fallbacks) |
+| `fontFamily` | `["Manrope"]` (primary first, then any fallbacks) |
 | `fontWeight` | `600` |
 | `string` | `"tabular-nums"` (a CSS keyword) |
 

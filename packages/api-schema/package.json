@@ -1,0 +1,21 @@
+{
+  "name": "@gameverse/api-schema",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Exported OpenAPI document of GameVerse.Api and the TypeScript types generated from it. Regenerate with `make schema`.",
+  "type": "module",
+  "types": "./schema.d.ts",
+  "exports": {
+    ".": {
+      "types": "./schema.d.ts"
+    },
+    "./openapi.json": "./openapi.json"
+  },
+  "scripts": {
+    "generate": "openapi-typescript openapi.json -o schema.d.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.13.0",
+    "typescript": "^5.9.3"
+  }
+}

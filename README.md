@@ -3,11 +3,11 @@ GameVerse – A cross-platform gaming platform bringing together board, puzzle, 
 
 ## Status
 
-Phase 0 (foundation). Shared rules and contracts libraries (`shared/`) the backend skeleton (`backend/`) and design tokens (`packages/design-tokens/`) are in place; web and Unity are next. Stack: C# end to end (.NET 10 backend, Unity 6 client, shared `GameVerse.Rules` library), see [ADR-0001](docs/architecture/adr-0001-core-technology-stack.md).
+Phase 0 (foundation). Shared rules and contracts libraries (`shared/`) the backend skeleton (`backend/`) design tokens (`packages/design-tokens/`) and the web shell (`apps/web/`) are in place; Unity is next. Stack: C# end to end (.NET 10 backend, Unity 6 client, shared `GameVerse.Rules` library), see [ADR-0001](docs/architecture/adr-0001-core-technology-stack.md).
 
 ## Build and test
 
-Prerequisites: .NET 10 SDK, Node 22+, Docker Desktop (WSL2 backend), GNU make (works from Git Bash or PowerShell).
+Prerequisites: .NET 10 SDK, Node 22+ with pnpm 12 (`npm install -g --allow-scripts=pnpm pnpm@12`), Docker Desktop (WSL2 backend), GNU make (works from Git Bash or PowerShell).
 
 ```
 make build    # build backend + shared
@@ -16,6 +16,17 @@ make rules    # build the shared libraries and copy them into the Unity project
 make schema   # export the OpenAPI document to packages/api-schema/openapi.json
 make tokens   # regenerate design tokens (CSS, USS, C#) from packages/design-tokens/tokens.json
 ```
+
+## Web app
+
+```
+make install   # once: pnpm install for the workspace
+make web       # dev server at http://localhost:5173 ; component gallery at /dev/components
+make web-test  # typecheck + Vitest
+make e2e       # Playwright smoke + screenshots at 360x800 and 1440x900 (first run: pnpm --filter @gameverse/web exec playwright install chromium)
+```
+
+React 19, TypeScript, Vite, Tailwind v4 on the generated design tokens, Radix, Motion, TanStack Query, Zustand and React Router. Home runs on mock data until the API exists; every mock is marked `TODO(gameverse)`.
 
 ## Run the local stack
 

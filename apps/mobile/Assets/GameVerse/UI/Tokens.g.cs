@@ -157,11 +157,11 @@ namespace GameVerse.UI
 
             public static class Family
             {
-                /// <summary>Game titles, big numbers, rank-ups. Fallback Space Grotesk. (Clash Display, Space Grotesk)</summary>
-                public static readonly IReadOnlyList<string> Display = Array.AsReadOnly(new[] { "Clash Display", "Space Grotesk" }); // token: font.family.display
+                /// <summary>Game titles, big numbers, rank-ups. SIL OFL 1.1, see ADR-0003. (Bricolage Grotesque)</summary>
+                public static readonly IReadOnlyList<string> Display = Array.AsReadOnly(new[] { "Bricolage Grotesque" }); // token: font.family.display
 
-                /// <summary>Everything else. Fallback Inter. (Satoshi, Inter)</summary>
-                public static readonly IReadOnlyList<string> Body = Array.AsReadOnly(new[] { "Satoshi", "Inter" }); // token: font.family.body
+                /// <summary>Everything else, including tabular numbers. SIL OFL 1.1, see ADR-0003. (Manrope)</summary>
+                public static readonly IReadOnlyList<string> Body = Array.AsReadOnly(new[] { "Manrope" }); // token: font.family.body
             }
 
             public static class Weight
@@ -257,6 +257,9 @@ namespace GameVerse.UI
 
         public static class Layout
         {
+            /// <summary>Minimum touch target, DESIGN_SYSTEM.md section 10 (44px)</summary>
+            public const float TouchTarget = 44.0f; // token: layout.touch-target
+
             public static class Gutter
             {
                 /// <summary>Screen gutter, mobile (16px)</summary>
@@ -345,6 +348,12 @@ namespace GameVerse.UI
 
                 /// <summary>Win, level up, rank up, chest. Choreographed in Rive. (1600ms, in seconds for DOTween/LitMotion)</summary>
                 public const float DurationMax = 1.6f; // token: motion.celebrate.duration-max
+            }
+
+            public static class Ambient
+            {
+                /// <summary>One cycle of looping ambient motion: skeleton pulse, live dot, loading dots (1400ms, in seconds for DOTween/LitMotion)</summary>
+                public const float Duration = 1.4f; // token: motion.ambient.duration
             }
         }
     }

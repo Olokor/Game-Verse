@@ -104,6 +104,7 @@ Unity is C#. With a C# backend, every game's rules, AI helpers and deterministic
 - `apps/web/src/styles/tokens.css` (CSS variables consumed by Tailwind)
 - `apps/admin/src/styles/tokens.css`
 - `apps/mobile/Assets/GameVerse/UI/Tokens.uss` (USS variables, for every token USS can express)
+- `apps/web/src/styles/theme.css` and `apps/admin/src/styles/theme.css` (Tailwind v4 `@theme` mapping utilities onto the variables; it resets Tailwind's default palette, spacing and radius so only token values exist, e.g. `bg-bg-surface`, `p-16`, `rounded-md`)
 - `apps/mobile/Assets/GameVerse/UI/Tokens.g.cs` (`GameVerse.UI.GameVerseTokens` C# constants, every token: easings, springs, fonts and durations for code tweens)
 
 `make tokens-check` (part of `make test`) fails if any output is stale or missing a token. Variables are named `--gv-<path>`, e.g. `--gv-color-brand-volt`. See `packages/design-tokens/README.md`.
@@ -319,13 +320,17 @@ The economy and tournament models must still be designed so real-money features 
 Fill this in as tooling lands. Keep it accurate.
 ```
 make build         # dotnet build backend/GameVerse.slnx (backend + shared)
-make test          # token check + token tests + dotnet test for backend + shared
+make test          # token check, token tests, web typecheck + Vitest, dotnet test for backend + shared
 make rules         # build GameVerse.Rules + Contracts (Release) and copy DLLs into Unity
 make up            # start postgres, redis, migrate, api, worker (docker compose, needs .env); waits until healthy
 make down          # stop the stack (volumes kept)
 make logs          # follow api + worker logs
 make migrate       # apply EF Core migrations (one-shot container)
-make schema        # export OpenAPI to packages/api-schema/openapi.json (TS client: Prompt 0.5)
+make schema        # export OpenAPI to packages/api-schema/openapi.json and generate schema.d.ts
+make install       # pnpm install for the workspace (apps/web, apps/admin, packages/*)
+make web           # web dev server, http://localhost:5173 (component gallery at /dev/components)
+make web-test      # web typecheck + Vitest (includes the no-hardcoded-design-values scan)
+make e2e           # Playwright smoke + screenshots at 360x800 and 1440x900
 make tokens        # regenerate design tokens (CSS, USS, C#) from packages/design-tokens/tokens.json
 make tokens-check  # fail if a token output is stale or missing a token
 ```
