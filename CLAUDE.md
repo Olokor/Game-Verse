@@ -103,7 +103,10 @@ Unity is C#. With a C# backend, every game's rules, AI helpers and deterministic
 `packages/design-tokens/tokens.json` is the single source for color, type, spacing, radius, motion. A Node script (`packages/design-tokens/build.mjs`) generates:
 - `apps/web/src/styles/tokens.css` (CSS variables consumed by Tailwind)
 - `apps/admin/src/styles/tokens.css`
-- `apps/mobile/Assets/GameVerse/UI/Tokens.uss` (USS variables)
+- `apps/mobile/Assets/GameVerse/UI/Tokens.uss` (USS variables, for every token USS can express)
+- `apps/mobile/Assets/GameVerse/UI/Tokens.g.cs` (`GameVerse.UI.GameVerseTokens` C# constants, every token: easings, springs, fonts and durations for code tweens)
+
+`make tokens-check` (part of `make test`) fails if any output is stale or missing a token. Variables are named `--gv-<path>`, e.g. `--gv-color-brand-volt`. See `packages/design-tokens/README.md`.
 
 Never hardcode a color, font size, radius or duration in components. If a token is missing, add it to `tokens.json`.
 
@@ -316,12 +319,13 @@ The economy and tournament models must still be designed so real-money features 
 Fill this in as tooling lands. Keep it accurate.
 ```
 make build         # dotnet build backend/GameVerse.slnx (backend + shared)
-make test          # dotnet test for backend + shared
+make test          # token check + token tests + dotnet test for backend + shared
 make rules         # build GameVerse.Rules + Contracts (Release) and copy DLLs into Unity
 make up            # start postgres, redis, migrate, api, worker (docker compose, needs .env); waits until healthy
 make down          # stop the stack (volumes kept)
 make logs          # follow api + worker logs
 make migrate       # apply EF Core migrations (one-shot container)
 make schema        # export OpenAPI to packages/api-schema/openapi.json (TS client: Prompt 0.5)
-make tokens        # (Prompt 0.4) regenerate design tokens
+make tokens        # regenerate design tokens (CSS, USS, C#) from packages/design-tokens/tokens.json
+make tokens-check  # fail if a token output is stale or missing a token
 ```
