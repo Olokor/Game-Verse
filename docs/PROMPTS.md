@@ -12,8 +12,8 @@ How to use this file: copy one prompt at a time into Claude Code. Do not move to
    - `docs/design/DESIGN_SYSTEM.md`
    - `docs/PROMPTS.md` (this file)
 2. Install on your workstation:
-   - .NET 10 SDK (`sudo dnf install dotnet-sdk-10.0` on Fedora)
-   - Docker, Node 22 LTS
+   - .NET 10 SDK (`winget install Microsoft.DotNet.SDK.10` on Windows)
+   - Docker Desktop, Node LTS, pnpm (`winget install pnpm.pnpm`)
    - Unity Hub + Unity 6 LTS with Android Build Support (OpenJDK, SDK, NDK). Unity Hub officially targets Ubuntu on Linux; on Fedora it generally works but expect occasional friction. iOS builds will need a Mac later.
    - An editor with C# support: JetBrains Rider (free for non-commercial use, best Unity integration) or VS Code with the C# Dev Kit.
 3. Optional but very useful: a Unity MCP bridge so Claude Code can drive the Unity Editor (create GameObjects, run tests, read console). Search for the current maintained "unity-mcp" project and check it supports Unity 6 before installing.
@@ -84,7 +84,7 @@ Acceptance: dotnet test passes, including tests proving the PRNG gives identical
 ### Prompt 0.3: Backend skeleton
 ```
 Plan mode. Create the .NET backend per CLAUDE.md 4.1:
-- backend/GameVerse.sln with Directory.Build.props (nullable, warnings as errors, analyzers) and Directory.Packages.props (central versions)
+- backend/GameVerse.slnx (including the shared/ projects) with Directory.Build.props (nullable, warnings as errors, analyzers) and Directory.Packages.props (central versions)
 - GameVerse.Api, GameVerse.Platform (empty module folders with a README each), GameVerse.Infrastructure, and the three test projects
 - Serilog JSON logging, OpenAPI + Scalar in Development, health checks for Postgres and Redis at /health
 - A WebSocket echo endpoint at /ws/echo

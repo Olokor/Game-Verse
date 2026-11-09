@@ -44,6 +44,7 @@ You are the senior engineer and tech lead. The owner (Moses) reviews and decides
 7. Every session ends with: what changed, files touched, how to run it, how to test it, open TODOs.
 8. Keep `README.md` and `docs/` current in the same commit as the change.
 9. Conventional commits (`feat(ludo): ...`, `fix(matchmaking): ...`).
+10. One branch per phase of `docs/PROMPTS.md`, created from `main`: `phase-0-foundation`, `phase-1-ludo-slice`, `phase-2-progression-social`, `phase-3-turn-based-games`, `phase-4-arcade`, `phase-5-physics`, `phase-6-action`, `phase-7-retention`. Commit on the phase branch after every passing prompt. Merge into `main` only when the phase's acceptance checks pass and the owner approves. Never commit directly to `main`. Check the current branch at the start of every session.
 
 ## 3. Locked technical decisions
 
@@ -60,6 +61,8 @@ Unity is C#. With a C# backend, every game's rules, AI helpers and deterministic
 - **No dependencies** in `GameVerse.Rules`: no ASP.NET, no Unity, no EF Core, no logging framework, no `System.Text.Json`. Pure logic and plain data in, plain data out. `GameVerse.Contracts` may carry serializer attributes only if both Newtonsoft (Unity) and System.Text.Json (server) are handled, so prefer plain POCOs with explicit converters on each side.
 - **Determinism rules** for anything replayed or verified (Pool physics, Twin Lanes, Downhill, Wahala verification): no `float`/`double` in simulation state, use the fixed-point type in `GameVerse.Rules.Math`. No `Dictionary` iteration order dependence, no `DateTime.Now`, no `System.Random` (use the project's seeded PRNG). The server runs on CoreCLR and Unity Android ships IL2CPP, so floating-point results can differ between them.
 - Delivery to Unity: `make rules` builds both libraries in Release and copies the DLLs and XML docs into `apps/mobile/Assets/GameVerse/Plugins/Shared/`. Add a `link.xml` so IL2CPP stripping keeps them intact. The copied DLLs are build output; never edit them in Unity.
+- Fixed-point type: **Q32.32 stored in a `long`** (32 integer bits, 32 fraction bits). Multiplication and division go through 128-bit intermediates so they never overflow silently. Enough range and precision for Pool, Downhill and Twin Lanes. Change only with an ADR, because it changes every replay.
+- One solution: `backend/GameVerse.slnx` includes the shared projects, so a single `dotnet build` / `dotnet test` covers backend and shared code. Shared projects still never reference backend projects.
 
 ### Backend (C# / .NET)
 - **.NET 10 (LTS)**, ASP.NET Core, Minimal APIs grouped by module.
@@ -104,6 +107,8 @@ Unity is C#. With a C# backend, every game's rules, AI helpers and deterministic
 Never hardcode a color, font size, radius or duration in components. If a token is missing, add it to `tokens.json`.
 
 ### Infrastructure
+- Dev machine: Windows 11 + Docker Desktop (WSL2 backend). `make` targets must work from Git Bash and PowerShell.
+- Tooling: .NET 10 SDK, Node LTS with a `pnpm` workspace for `apps/web`, `apps/admin` and `packages/*`, GitHub Actions for CI, Git LFS for binary assets, LF line endings via `.gitattributes`.
 - Docker Compose for local dev: `postgres`, `redis`, `api` (ASP.NET Core), `worker` (same image, Hangfire server role), `web`, `admin`.
 - Images: multi-stage builds, runtime on `mcr.microsoft.com/dotnet/aspnet:10.0` (chiseled variant in production), non-root user.
 - Production: containers behind Traefik with Cloudflare in front. Sticky sessions are not required because realtime state lives in Redis, but WebSocket idle timeouts must be raised at both Traefik and Cloudflare. Environment-based config via `appsettings.json` + environment variables (`GameVerse__Section__Key`); `.env` never committed, `.env.example` always current.
@@ -114,7 +119,7 @@ Never hardcode a color, font size, radius or duration in components. If a token 
 ### 4.1 Backend solution layout
 ```
 backend/
-  GameVerse.sln
+  GameVerse.slnx                solution file (.NET 10 XML format), includes shared/ projects
   Directory.Build.props        nullable, warnings as errors, analyzers, shared versions
   Directory.Packages.props     central package management
   src/
@@ -290,6 +295,8 @@ Read `docs/design/DESIGN_SYSTEM.md` before writing any UI. The short version:
 - Paid loot boxes or any randomized reward bought with real money.
 - Microservices.
 - iOS native builds (web covers iPhone users first).
+
+Ads are in scope. Ad placements follow the player-respect rules in `GAME_BRIEFS.md` section 13: no ads after death, no ads between turns in multiplayer, no ads that delay play. Rewarded ads are opt-in. The ad network and SDK need an ADR and owner approval before integration.
 
 The economy and tournament models must still be designed so real-money features could be added later behind a jurisdiction-gated feature flag after legal review.
 
