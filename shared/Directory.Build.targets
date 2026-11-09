@@ -1,0 +1,25 @@
+<Project>
+  <!--
+    Guard rails for the shared libraries. Targets live in .targets (not .props) so they
+    see the project's final property values, including any override inside the .csproj.
+  -->
+  <Target Name="GameVerseSharedLibraryGuard" BeforeTargets="CoreCompile" Condition="'$(IsSharedLibrary)' == 'true'">
+    <Error Condition="'$(LangVersion)' != '9.0'"
+           Text="$(MSBuildProjectName): LangVersion must be 9.0 (Unity 6 compiles C# 9). Found '$(LangVersion)'. See CLAUDE.md section 3." />
+    <Error Condition="'$(TargetFramework)' != 'netstandard2.1'"
+           Text="$(MSBuildProjectName): TargetFramework must be netstandard2.1 so Unity 6 can load it. Found '$(TargetFramework)'." />
+    <Error Condition="'$(MSBuildProjectName)' == 'GameVerse.Rules' And '@(PackageReference)' != ''"
+           Text="GameVerse.Rules must have zero dependencies. Remove PackageReference: @(PackageReference)" />
+    <Error Condition="'$(MSBuildProjectName)' == 'GameVerse.Rules' And '@(ProjectReference)' != ''"
+           Text="GameVerse.Rules must have zero dependencies. Remove ProjectReference: @(ProjectReference)" />
+  </Target>
+
+  <!-- `make rules` passes -p:CopyToUnity=true to deliver the DLLs to the Unity project. -->
+  <Target Name="GameVerseCopyToUnity" AfterTargets="Build" Condition="'$(IsSharedLibrary)' == 'true' And '$(CopyToUnity)' == 'true'">
+    <Error Condition="'$(Configuration)' != 'Release'" Text="CopyToUnity requires -c Release." />
+    <MakeDir Directories="$(UnityPluginDir)" />
+    <Copy SourceFiles="@(IntermediateAssembly->'$(OutDir)%(Filename)%(Extension)');$(OutDir)$(TargetName).xml"
+          DestinationFolder="$(UnityPluginDir)" SkipUnchangedFiles="false" />
+    <Message Importance="high" Text="$(MSBuildProjectName) -> $(UnityPluginDir)" />
+  </Target>
+</Project>

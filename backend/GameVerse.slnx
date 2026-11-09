@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/shared/">
+    <Project Path="../shared/GameVerse.Contracts/GameVerse.Contracts.csproj" />
+    <Project Path="../shared/GameVerse.Rules/GameVerse.Rules.csproj" />
+    <Project Path="../shared/GameVerse.Rules.Tests/GameVerse.Rules.Tests.csproj" />
+  </Folder>
+</Solution>

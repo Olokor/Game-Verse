@@ -1,0 +1,11 @@
+<Project>
+  <!--
+    Central package versions (like Maven dependencyManagement).
+    Projects list <PackageReference Include="X" /> without a version.
+  -->
+  <ItemGroup>
+    <PackageVersion Include="xunit.v3" Version="4.0.3" />
+    <PackageVersion Include="Shouldly" Version="4.3.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.12.0" />
+  </ItemGroup>
+</Project>

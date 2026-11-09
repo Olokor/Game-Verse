@@ -1,0 +1,16 @@
+{
+  "game": "_selftest",
+  "name": "Fixture can start from a mid-game state; no moves after the game ends",
+  "config": { "pile": 9, "maxTake": 3 },
+  "seats": [
+    { "seat": 0, "playerId": "p0" },
+    { "seat": 1, "playerId": "p1" }
+  ],
+  "seed": 1,
+  "initialState": { "pile": 2, "maxTake": 3, "toMove": 1, "winner": null },
+  "steps": [
+    { "seat": 1, "action": { "take": 2 }, "expect": { "legalActions": [{ "take": 1 }, { "take": 2 }], "state": { "pile": 0, "winner": 1 } } },
+    { "seat": 0, "action": { "take": 1 }, "expect": { "ok": false, "error": "game_over", "legalActions": [] } }
+  ],
+  "outcome": { "kind": "win", "winningSeats": [1], "reason": "took_last" }
+}

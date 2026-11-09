@@ -62,6 +62,7 @@ Unity is C#. With a C# backend, every game's rules, AI helpers and deterministic
 - **Determinism rules** for anything replayed or verified (Pool physics, Twin Lanes, Downhill, Wahala verification): no `float`/`double` in simulation state, use the fixed-point type in `GameVerse.Rules.Math`. No `Dictionary` iteration order dependence, no `DateTime.Now`, no `System.Random` (use the project's seeded PRNG). The server runs on CoreCLR and Unity Android ships IL2CPP, so floating-point results can differ between them.
 - Delivery to Unity: `make rules` builds both libraries in Release and copies the DLLs and XML docs into `apps/mobile/Assets/GameVerse/Plugins/Shared/`. Add a `link.xml` so IL2CPP stripping keeps them intact. The copied DLLs are build output; never edit them in Unity.
 - Fixed-point type: **Q32.32 stored in a `long`** (32 integer bits, 32 fraction bits). Multiplication and division go through 128-bit intermediates so they never overflow silently. Enough range and precision for Pool, Downhill and Twin Lanes. Change only with an ADR, because it changes every replay.
+- No C# `record` types or `init` setters in shared code (they need an `IsExternalInit` shim on netstandard2.1 and are fragile across the Unity DLL boundary). Use classes with constructors and get-only properties in Rules, plain `get; set;` POCOs in Contracts. See `shared/README.md`.
 - One solution: `backend/GameVerse.slnx` includes the shared projects, so a single `dotnet build` / `dotnet test` covers backend and shared code. Shared projects still never reference backend projects.
 
 ### Backend (C# / .NET)
@@ -74,7 +75,7 @@ Unity is C#. With a C# backend, every game's rules, AI helpers and deterministic
 - Rate limiting: built-in `Microsoft.AspNetCore.RateLimiting`.
 - Validation: FluentValidation on request models.
 - Logging and tracing: Serilog (JSON to stdout), OpenTelemetry, Sentry (env-gated).
-- Tests: **xUnit**, **Shouldly** for assertions, **Testcontainers** for real Postgres and Redis in integration tests, `WebApplicationFactory` for API tests. Rules library needs near-total branch coverage.
+- Tests: **xUnit v3** on Microsoft.Testing.Platform (opted in via `global.json`; coverage via `dotnet test --coverage`), **Shouldly** for assertions, **Testcontainers** for real Postgres and Redis in integration tests, `WebApplicationFactory` for API tests. Rules library needs near-total branch coverage.
 - Code quality: `<Nullable>enable</Nullable>`, `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`, .NET analyzers on, `dotnet format` in CI. Module boundaries enforced with NetArchTest tests.
 
 ### Admin console
@@ -118,10 +119,11 @@ Never hardcode a color, font size, radius or duration in components. If a token 
 
 ### 4.1 Backend solution layout
 ```
+Directory.Build.props          (repo root) nullable, warnings as errors, analyzers; applies to backend/ and shared/
+Directory.Packages.props       (repo root) central package versions for backend/ and shared/
+global.json                    SDK version, opts dotnet test into Microsoft.Testing.Platform
 backend/
-  GameVerse.slnx                solution file (.NET 10 XML format), includes shared/ projects
-  Directory.Build.props        nullable, warnings as errors, analyzers, shared versions
-  Directory.Packages.props     central package management
+  GameVerse.slnx               solution file (.NET 10 XML format), includes shared/ projects
   src/
     GameVerse.Api/             host: Program.cs, endpoint wiring, WebSocket endpoint, auth, DI
     GameVerse.Platform/        modules, one folder each, internal by default:
@@ -145,6 +147,7 @@ backend/
     GameVerse.Api.IntegrationTests/
     GameVerse.Architecture.Tests/   NetArchTest module boundary rules
 shared/
+  Directory.Build.props/.targets  netstandard2.1 + C# 9 + zero-dependency build guard
   GameVerse.Rules/              netstandard2.1, C# 9, zero dependencies
   GameVerse.Contracts/          netstandard2.1, C# 9
   GameVerse.Rules.Tests/        net10.0, xUnit, loads golden fixtures
@@ -312,10 +315,11 @@ The economy and tournament models must still be designed so real-money features 
 ## 10. Commands
 Fill this in as tooling lands. Keep it accurate.
 ```
-make up            # start the stack (docker compose)
+make build         # dotnet build backend/GameVerse.slnx (backend + shared)
 make test          # dotnet test for backend + shared
-make rules         # build GameVerse.Rules + Contracts and copy DLLs into Unity
-make migrate       # apply EF Core migrations
-make tokens        # regenerate design tokens
-make schema        # export OpenAPI + regenerate TS client
+make rules         # build GameVerse.Rules + Contracts (Release) and copy DLLs into Unity
+make up            # (Prompt 0.3) start the stack (docker compose)
+make migrate       # (Prompt 0.3) apply EF Core migrations
+make tokens        # (Prompt 0.4) regenerate design tokens
+make schema        # (Prompt 1.1) export OpenAPI + regenerate TS client
 ```
