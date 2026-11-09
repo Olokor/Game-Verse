@@ -44,6 +44,7 @@ You are the senior engineer and tech lead. The owner (Moses) reviews and decides
 7. Every session ends with: what changed, files touched, how to run it, how to test it, open TODOs.
 8. Keep `README.md` and `docs/` current in the same commit as the change.
 9. Conventional commits (`feat(ludo): ...`, `fix(matchmaking): ...`).
+10. One branch per phase of `docs/PROMPTS.md`, created from `main`: `phase-0-foundation`, `phase-1-ludo-slice`, `phase-2-progression-social`, `phase-3-turn-based-games`, `phase-4-arcade`, `phase-5-physics`, `phase-6-action`, `phase-7-retention`. Commit on the phase branch after every passing prompt. Merge into `main` only when the phase's acceptance checks pass and the owner approves. Never commit directly to `main`. Check the current branch at the start of every session.
 
 ## 3. Locked technical decisions
 
