@@ -89,13 +89,15 @@ These alternatives were considered before the decisions were locked in `CLAUDE.m
 **Negative and risks**
 
 - **Every turn-based game's rules live in two languages** (Python canonical, C# mirror). Fixture discipline is mandatory. A rules change isn't done until both suites pass.
-- **Unity Web builds are heavy, especially on iOS Safari and low-end Android.** Which game types ship on web is decided by the Phase 0 performance spike (ADR-0002).
+- **Unity Web builds are heavy, especially on iOS Safari and low-end Android.** Which game types ship on web is decided by the Phase 0 performance spike (ADR-0003).
 - **Django Channels isn't suited to twitch-action real-time play.** That needs a separate server later, as planned.
 - **Pool needs deterministic fixed-point physics written twice** (C# and Python). This is the highest technical risk, and is scheduled to be built and tested before any visuals.
 
 ## Sub-choices left open
 
-These were left open in `CLAUDE.md` and will be settled in later ADRs, or in the session that first needs them:
+> **Update 2026-11-09:** all five were resolved in [ADR-0002](adr-0002-dev-environment-and-tooling.md): Uvicorn, LitMotion, UniTask, NSwag, and the newest Unity 6 LTS pinned at project creation.
+
+These were left open in `CLAUDE.md` when this ADR was written:
 
 1. Code-tween library: DOTween or LitMotion.
 2. C# client generator: NSwag or a custom script.

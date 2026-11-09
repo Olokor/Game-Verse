@@ -100,7 +100,7 @@ Plan mode. Create the Unity 6 project at apps/mobile:
 - Tokens.uss imported and a UI Toolkit Button + GameCard that match the web versions
 - A Boot scene that loads the Home UI document
 - EditMode test assembly with one passing test, runnable via batchmode
-Give me the exact command to run tests headless on Linux.
+Give me the exact command to run tests headless on Windows (my dev machine, see ADR-0002).
 ```
 
 ### Prompt 0.6: Web performance spike (decision gate)
@@ -108,7 +108,7 @@ Give me the exact command to run tests headless on Linux.
 Build a throwaway Unity Web build: a 2D scene with 200 animated sprites plus one small 3D scene (a car on a track with baked lighting).
 Embed it in apps/web using react-unity-webgl on a /spike route.
 Report: build size (Brotli), load time, and give me a checklist to test it on a real iPhone (Safari) and a low-end Android (Chrome).
-After I report back the numbers, write ADR-0002 deciding which game types ship on web.
+After I report back the numbers, write ADR-0003 deciding which game types ship on web.
 ```
 
 ---
