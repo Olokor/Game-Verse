@@ -33,7 +33,7 @@ Never use third-party trademarks in names, assets, store text or code identifier
 
 ## 2. Your role and working rules
 
-You are the senior engineer and tech lead. The owner (Moses) reviews and decides product questions. He writes Python first, Java second, and is comfortable with Linux, Docker and Traefik.
+You are the senior engineer and tech lead. The owner (Moses) reviews and decides product questions. His strongest languages are Python and Java, and he is comfortable with Linux, Docker and Traefik. C# is the project language, so when you introduce a .NET pattern that has no obvious Java or Python equivalent, explain it in one or two lines.
 
 1. Inspect before you change. Read the relevant files and existing patterns first.
 2. Use plan mode for anything touching more than ~3 files. Present the plan, wait for approval.
@@ -44,33 +44,48 @@ You are the senior engineer and tech lead. The owner (Moses) reviews and decides
 7. Every session ends with: what changed, files touched, how to run it, how to test it, open TODOs.
 8. Keep `README.md` and `docs/` current in the same commit as the change.
 9. Conventional commits (`feat(ludo): ...`, `fix(matchmaking): ...`).
-10. One branch per phase of `docs/PROMPTS.md`, created from `main`: `phase-0-foundation`, `phase-1-ludo-slice`, `phase-2-progression-social`, `phase-3-turn-based-games`, `phase-4-arcade`, `phase-5-physics`, `phase-6-action`, `phase-7-retention`. Commit on the phase branch after every passing prompt. Merge into `main` only when the phase's acceptance checks pass and the owner approves. Never commit directly to `main`. Check the current branch at the start of every session.
 
 ## 3. Locked technical decisions
 
 Change any of these only with explicit approval.
 
-### Backend (Python)
-- Django 5.x, Django REST Framework, Django Channels (WebSockets), channels-redis
-- PostgreSQL 16, Redis 7
-- Celery + Redis for scheduled work (tournaments, daily quests, season resets)
-- Auth: JWT via `djangorestframework-simplejwt` (access 15 min, rotating refresh). Guest accounts allowed and upgradable to full accounts.
-- `drf-spectacular` for OpenAPI. Clients are generated from the schema, never hand-written:
-  - TypeScript: `openapi-typescript` + `openapi-fetch`
-  - C#: NSwag, run from a script, output committed to the Unity project
-- Tests: `pytest`, `pytest-django`, `factory_boy`. Rules engines need near-total branch coverage.
-- Lint/format: `ruff`, `mypy` on rules engines and services.
-- Observability: structured JSON logging, Sentry (env-gated).
+### Why C# end to end
+Unity is C#. With a C# backend, every game's rules, AI helpers and deterministic physics live in **one shared library** used by both the server and the Unity client. The server validates with exactly the code the client predicts with. There is no second implementation to keep in sync. This is the main reason for the stack; protect it.
+
+### Shared libraries (the heart of the project)
+- `shared/GameVerse.Rules` holds pure game logic: rules engines, move generation, AI, deterministic physics, seeded RNG, replay verifiers.
+- `shared/GameVerse.Contracts` holds wire types: SessionManifest, realtime envelopes, GameEvents, action and state DTOs.
+- Both target **`netstandard2.1`** so Unity 6 can load them.
+- Both are capped at **C# 9** (`<LangVersion>9.0</LangVersion>`), because that is what Unity 6 compiles. No file-scoped namespaces, no `record struct`, no `required` members, no primary constructors on classes, no collection expressions. CI fails if the lang version is raised.
+- **No dependencies** in `GameVerse.Rules`: no ASP.NET, no Unity, no EF Core, no logging framework, no `System.Text.Json`. Pure logic and plain data in, plain data out. `GameVerse.Contracts` may carry serializer attributes only if both Newtonsoft (Unity) and System.Text.Json (server) are handled, so prefer plain POCOs with explicit converters on each side.
+- **Determinism rules** for anything replayed or verified (Pool physics, Twin Lanes, Downhill, Wahala verification): no `float`/`double` in simulation state, use the fixed-point type in `GameVerse.Rules.Math`. No `Dictionary` iteration order dependence, no `DateTime.Now`, no `System.Random` (use the project's seeded PRNG). The server runs on CoreCLR and Unity Android ships IL2CPP, so floating-point results can differ between them.
+- Delivery to Unity: `make rules` builds both libraries in Release and copies the DLLs and XML docs into `apps/mobile/Assets/GameVerse/Plugins/Shared/`. Add a `link.xml` so IL2CPP stripping keeps them intact. The copied DLLs are build output; never edit them in Unity.
+
+### Backend (C# / .NET)
+- **.NET 10 (LTS)**, ASP.NET Core, Minimal APIs grouped by module.
+- **Realtime: raw ASP.NET Core WebSockets** with our own JSON envelope protocol (section 4.5), not SignalR for game traffic. Reason: Unity Web builds cannot use the .NET SignalR client, while `NativeWebSocket` works on Android and Web alike. One protocol for every client.
+- PostgreSQL 16 via **EF Core** + Npgsql. Migrations committed. Redis 7 via `StackExchange.Redis`.
+- Background and scheduled work (tournaments, daily quest rotation, season resets, turn timers backup): **Hangfire** with PostgreSQL storage. Turn timers themselves use in-process timers plus Redis key expiry as the safety net.
+- Auth: ASP.NET Core Identity for users, JWT bearer access tokens (15 min) and rotating refresh tokens stored hashed. Guest accounts allowed and upgradable to full accounts.
+- OpenAPI via `Microsoft.AspNetCore.OpenApi`, browsed with Scalar in development. TypeScript client generated with `openapi-typescript` + `openapi-fetch`. Unity uses the DTOs from `GameVerse.Contracts` directly, so no generated C# client is needed.
+- Rate limiting: built-in `Microsoft.AspNetCore.RateLimiting`.
+- Validation: FluentValidation on request models.
+- Logging and tracing: Serilog (JSON to stdout), OpenTelemetry, Sentry (env-gated).
+- Tests: **xUnit**, **Shouldly** for assertions, **Testcontainers** for real Postgres and Redis in integration tests, `WebApplicationFactory` for API tests. Rules library needs near-total branch coverage.
+- Code quality: `<Nullable>enable</Nullable>`, `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`, .NET analyzers on, `dotnet format` in CI. Module boundaries enforced with NetArchTest tests.
+
+### Admin console
+.NET has no built-in admin panel, so we build our own. `apps/admin` is a small React app (same stack and tokens as web) for support and live-ops: find player, view match history and move logs, ban/mute, grant or reverse currency (through the ledger, with a reason), edit quests and tournaments, feature flags. Admin endpoints live under `/admin-api`, require the `admin` role, and every write is audit-logged.
 
 ### Mobile (Unity)
 - Unity 6 LTS, C#, URP. 2D Renderer for 2D games, Forward+ for 3D games.
 - One Unity project. The platform shell and every game live in it. Games are separate assemblies (`.asmdef`) and Addressables groups so they can be downloaded on demand.
+- Game rules come from the shared `GameVerse.Rules` DLL. Unity code handles presentation, input and networking only. Never reimplement a rule inside Unity.
 - Platform UI is built with **UI Toolkit** (UXML + USS), not uGUI. These are text files, which keeps them reviewable and generatable. Use uGUI only inside a game where world-space UI demands it.
-- Animation: LitMotion for code tweens, **Rive** for designed motion (shared with web).
-- Async: UniTask.
-- Networking to backend: REST via generated client, realtime via `NativeWebSocket`.
+- Animation: DOTween or LitMotion for code tweens, **Rive** for designed motion (shared with web).
+- Networking: REST via a thin `UnityWebRequest` wrapper using Contracts DTOs, realtime via `NativeWebSocket`, async via UniTask. JSON via `com.unity.nuget.newtonsoft-json`.
 - Input System package, Unity Localization package, Addressables, Cinemachine for 3D games.
-- Tests: Unity Test Framework (EditMode for rules/logic, PlayMode for flows). Run headless with `-batchmode -runTests`.
+- Tests: Unity Test Framework (EditMode for presentation logic, PlayMode for flows). Rules are tested in the .NET test project, not in Unity. Run headless with `-batchmode -runTests`.
 - Scenes stay minimal. Prefer prefabs and code-driven setup, created through editor scripts where possible, so changes are diffable.
 
 ### Web
@@ -81,44 +96,61 @@ Change any of these only with explicit approval.
 - Tests: Vitest + Testing Library, Playwright for end-to-end flows.
 
 ### Shared design tokens
-`packages/design-tokens/tokens.json` is the single source for color, type, spacing, radius, motion. A build script generates:
+`packages/design-tokens/tokens.json` is the single source for color, type, spacing, radius, motion. A Node script (`packages/design-tokens/build.mjs`) generates:
 - `apps/web/src/styles/tokens.css` (CSS variables consumed by Tailwind)
+- `apps/admin/src/styles/tokens.css`
 - `apps/mobile/Assets/GameVerse/UI/Tokens.uss` (USS variables)
 
 Never hardcode a color, font size, radius or duration in components. If a token is missing, add it to `tokens.json`.
 
 ### Infrastructure
-- Docker Compose for local dev: `postgres`, `redis`, `api` (Django ASGI via Uvicorn), `worker` (Celery), `beat`, `web`.
-- Dev machine: Windows 11 + Docker Desktop (WSL2 backend). `make` targets must work from Git Bash and PowerShell.
-- Tooling: `uv` for Python, `pnpm` workspace for Node, GitHub Actions for CI, Git LFS for binary assets, LF line endings via `.gitattributes`. See ADR-0002.
-- Production: containers behind Traefik with Cloudflare in front. Environment-based config via `.env` files that are never committed. `.env.example` is always current.
-- Modular monolith. No microservices. The one planned exception is a dedicated real-time game server for twitch-action PvP (fighting, live racing), which is a later phase and needs approval.
+- Docker Compose for local dev: `postgres`, `redis`, `api` (ASP.NET Core), `worker` (same image, Hangfire server role), `web`, `admin`.
+- Images: multi-stage builds, runtime on `mcr.microsoft.com/dotnet/aspnet:10.0` (chiseled variant in production), non-root user.
+- Production: containers behind Traefik with Cloudflare in front. Sticky sessions are not required because realtime state lives in Redis, but WebSocket idle timeouts must be raised at both Traefik and Cloudflare. Environment-based config via `appsettings.json` + environment variables (`GameVerse__Section__Key`); `.env` never committed, `.env.example` always current.
+- Modular monolith. No microservices. The one planned exception is a dedicated real-time game server for twitch-action PvP (fighting, live racing), which is a later phase and needs approval. Being on .NET keeps that option open, since the same shared rules library can run inside it.
 
 ## 4. Architecture
 
-### 4.1 Backend apps
+### 4.1 Backend solution layout
 ```
 backend/
-  config/            settings (base/dev/prod), asgi, urls, routing
-  accounts/          users, guest accounts, auth
-  profiles/          avatars, frames, titles, stats
-  catalog/           game registry: id, category, modes, versions, feature flags
-  sessions/          game sessions, match records, move logs, replays
-  engines/           pure Python rules engines, one package per game, NO Django imports
-  matchmaking/       queues, rating bands, private rooms, room codes
-  realtime/          Channels consumers, protocol, presence
-  social/            friends, invites, clubs
-  progression/       XP, levels, mastery, achievements, quests, season pass
-  economy/           soft currency ledger, cosmetics inventory, store catalog
-  tournaments/       brackets, schedules, prizes (non-monetary for MVP)
-  leaderboards/      Redis sorted sets + periodic Postgres snapshots
-  notifications/     in-app + push (FCM)
-  moderation/        reports, chat filter, bans
+  GameVerse.sln
+  Directory.Build.props        nullable, warnings as errors, analyzers, shared versions
+  Directory.Packages.props     central package management
+  src/
+    GameVerse.Api/             host: Program.cs, endpoint wiring, WebSocket endpoint, auth, DI
+    GameVerse.Platform/        modules, one folder each, internal by default:
+      Accounts/                users, guest accounts, auth tokens
+      Profiles/                avatars, frames, titles, stats
+      Catalog/                 game registry: id, category, modes, versions, feature flags
+      Sessions/                game sessions, match records, move logs, replays
+      Matchmaking/             queues, rating bands, private rooms, room codes
+      Realtime/                connection manager, protocol, presence, game hosts
+      Social/                  friends, invites, clubs
+      Progression/             XP, levels, mastery, achievements, quests, season pass
+      Economy/                 soft currency ledger, cosmetics inventory, store catalog
+      Tournaments/             brackets, schedules, prizes (non-monetary for MVP)
+      Leaderboards/            Redis sorted sets + periodic Postgres snapshots
+      Notifications/           in-app + push (FCM)
+      Moderation/              reports, chat filter, bans
+      Admin/                   admin-api endpoints, audit log
+    GameVerse.Infrastructure/  EF Core DbContext, migrations, Redis, Hangfire, FCM, Stockfish adapter
+  tests/
+    GameVerse.Platform.Tests/
+    GameVerse.Api.IntegrationTests/
+    GameVerse.Architecture.Tests/   NetArchTest module boundary rules
+shared/
+  GameVerse.Rules/              netstandard2.1, C# 9, zero dependencies
+  GameVerse.Contracts/          netstandard2.1, C# 9
+  GameVerse.Rules.Tests/        net10.0, xUnit, loads golden fixtures
+  rules-fixtures/<game>/*.json  golden vectors
 ```
+
+Module rules: a module exposes a small public interface (e.g. `IProgressionService`) and keeps its entities and EF configuration internal. Modules talk through those interfaces or in-process domain events, never by reading another module's tables.
 
 ### 4.2 Game Integration Contract
 
-A game never handles auth, matchmaking, rewards or leaderboards itself. It receives a **SessionManifest** and emits **GameEvents**.
+A game never handles auth, matchmaking, rewards or leaderboards itself. It receives a **SessionManifest** and emits **GameEvents**. Both are defined once in `GameVerse.Contracts`.
 
 SessionManifest (platform to game):
 ```json
@@ -137,7 +169,7 @@ SessionManifest (platform to game):
 
 GameEvents (game to platform): `ready`, `action_submitted`, `state_applied`, `match_ended`, `player_left`, `error`, plus `telemetry` for analytics. In Unity these go through an `IGameHost` interface. On web they cross the Unity/React bridge as JSON messages with the same schema.
 
-Every game implements `IGameModule` in C#:
+Every game implements `IGameModule` in Unity:
 ```csharp
 public interface IGameModule {
     string GameId { get; }
@@ -147,41 +179,56 @@ public interface IGameModule {
 }
 ```
 
+Every turn-based game implements `IGameEngine` in `GameVerse.Rules`, used identically by server and client:
+```csharp
+public interface IGameEngine<TState, TAction, TConfig> {
+    TState NewGame(TConfig config, IReadOnlyList<SeatInfo> seats, ulong seed);
+    IReadOnlyList<TAction> LegalActions(TState state, int seat);
+    ApplyResult<TState> Apply(TState state, int seat, TAction action);
+    GameOutcome? Outcome(TState state);
+    TState ViewFor(TState state, int seat);   // hides other seats' private info
+}
+```
+State is immutable from the caller's view: `Apply` returns a new state or a rejection reason.
+
 ### 4.3 Authority model
 
 | Kind | Who decides | How |
 |------|-------------|-----|
-| Turn-based (Ludo, Whot, Draughts, Chess) | Server | Client sends intent (`move`, `play_card`). Server engine validates, applies, broadcasts new state. Client never mutates authoritative state. |
-| Randomness (dice, shuffles) | Server | Server RNG only. Ludo uses commit-reveal so players can verify dice fairness after the match. |
-| Hidden information (Whot hands) | Server | Each player receives a per-seat view. Never send another player's hand to a client. |
-| Shot physics (Pool) | Server-verified | Shooter sends shot parameters. Shared deterministic physics (fixed-point, fixed timestep) runs on client for display and in Python on server for the official result. |
-| Score-attack (Twin Lanes, Wahala, Downhill, Super Race solo) | Client plays, server checks | Client submits score + seed + input log. Server replays or plausibility-checks before the score hits a leaderboard. Unverified scores never reach ranked boards. |
-| Real-time PvP (fighting, live racing) | Later phase | Dedicated game server or rollback netcode. Not built on Django Channels. |
+| Turn-based (Ludo, Whot, Draughts, Chess) | Server | Client sends intent (`move`, `play_card`). Server runs the shared engine, applies, broadcasts new state. Client uses the same engine only for highlighting legal moves and offline play. |
+| Randomness (dice, shuffles) | Server | Server seeds the shared PRNG. Ludo uses commit-reveal so players can verify dice fairness after the match. |
+| Hidden information (Whot hands) | Server | Each player receives `ViewFor(seat)`. Never send another player's hand to a client. |
+| Shot physics (Pool) | Server-verified | Shooter sends shot parameters. The shared fixed-point simulation runs on the client for display and on the server for the official result. Same code, same result. |
+| Score-attack (Twin Lanes, Wahala, Downhill, Super Race solo) | Client plays, server checks | Client submits score + seed + input log. Server replays with the shared verifier or plausibility-checks before the score hits a leaderboard. Unverified scores never reach ranked boards. |
+| Real-time PvP (fighting, live racing) | Later phase | Dedicated .NET game server or rollback netcode, reusing `GameVerse.Rules`. |
 
-### 4.4 Rules engines: one truth, two languages
+### 4.4 Rules engines: one truth, one language
 
-Turn-based rules live in `backend/engines/<game>/` as pure Python (no Django, no I/O). This is the canonical implementation.
+All rules live in `shared/GameVerse.Rules/<Game>/`. The server and Unity load the same compiled library.
 
-The Unity client needs the same rules for move highlighting, offline play and AI. That mirror lives in `apps/mobile/Assets/GameVerse/Games/<Game>/Rules/`.
-
-To stop the two drifting apart:
-- `shared/rules-fixtures/<game>/*.json` holds golden test vectors: a starting state, a sequence of actions, and the expected resulting states, legal moves and outcome.
-- Both the pytest suite and the Unity EditMode suite load the same fixtures. A rules change is not done until both pass.
+Golden fixtures still matter, now as a regression and documentation tool:
+- `shared/rules-fixtures/<game>/*.json` holds starting state, a sequence of actions, and the expected states, legal moves and outcome.
+- `GameVerse.Rules.Tests` runs every fixture. A rules change is not done until they pass.
+- Fixtures are readable by the owner, so they double as the agreed rulebook. When a rule is disputed, the fixture decides.
+- Chess also uses standard perft counts to verify move generation.
 
 ### 4.5 Realtime protocol
 
-One WebSocket per player session: `/ws/play/<sessionId>/?ticket=...`. Messages are JSON envelopes:
+One WebSocket per player session: `/ws/play/{sessionId}?ticket=...`. Messages are JSON envelopes defined in `GameVerse.Contracts`:
 ```json
 { "t": "action", "seq": 42, "sessionId": "...", "payload": { ... } }
 ```
 - Server assigns a monotonically increasing `stateVersion`. Clients drop stale updates.
+- Each live match is owned by one `MatchHost` actor (a single-reader `System.Threading.Channels` queue) so actions are applied strictly in order with no locks around game state.
+- Match state is snapshotted to Redis after every applied action, so a restarted or different API instance can resume the match. Redis pub/sub fans out messages when more than one API instance runs.
 - Reconnect: client sends last known `stateVersion`, server replies with a full snapshot.
-- Turn timers run on the server (Celery or Redis key expiry). On timeout: auto-play for Ludo/Whot, flag fall for Chess.
+- Turn timers run on the server. On timeout: auto-play for Ludo/Whot, flag fall for Chess.
 - Disconnect grace window 60s for casual, 30s for ranked, then forfeit.
+- Heartbeat ping every 15s; idle connections are closed after 45s without a pong.
 
 ### 4.6 Matchmaking
-- Redis-backed queues keyed by `gameId:mode:ratingBand`.
-- Ratings: Glicko-2 per game.
+- Redis-backed queues keyed by `gameId:mode:ratingBand`, processed by a hosted background service.
+- Ratings: Glicko-2 per game, implemented in `GameVerse.Platform/Matchmaking` with tests against published reference values.
 - Private rooms: 6-character room codes (no ambiguous characters like O/0, I/1), share links `gameverse.app/r/ABC123`, best-of-three and rematch built into the room, not the game.
 
 ## 5. Repository layout
@@ -190,18 +237,18 @@ One WebSocket per player session: `/ws/play/<sessionId>/?ticket=...`. Messages a
 gameverse/
   CLAUDE.md
   README.md
+  Makefile
   docker-compose.yml
   .env.example
   apps/
     mobile/              Unity project
-    web/                 React app
-  backend/               Django project (apps listed in 4.1)
+    web/                 React app (players)
+    admin/               React app (live-ops)
+  backend/               .NET solution (section 4.1)
+  shared/                GameVerse.Rules, GameVerse.Contracts, fixtures (section 4.1)
   packages/
-    design-tokens/       tokens.json + generator
-    api-schema/          exported OpenAPI + generated clients
-  shared/
-    rules-fixtures/      golden vectors per game
-    protocol/            JSON schemas for SessionManifest, envelopes, events
+    design-tokens/       tokens.json + build.mjs
+    api-schema/          exported OpenAPI + generated TS client
   infrastructure/
     docker/
     deploy/
@@ -231,15 +278,16 @@ Read `docs/design/DESIGN_SYSTEM.md` before writing any UI. The short version:
 - Server never trusts client game outcomes. See 4.3.
 - Rate limit auth, room creation, chat and score submission.
 - Room codes and invite links expire.
-- WebSocket tickets are single-use and short-lived, not the JWT itself.
+- WebSocket tickets are single-use and short-lived (30s), not the JWT itself.
+- Validate WebSocket message size and rate per connection; drop and log malformed envelopes.
 - Chat: off by default for under-18 accounts, quick-chat presets for everyone, profanity filter on free text.
-- Secrets only through environment variables. Run a secret scan in CI.
-- Soft currency is a ledger (append-only transactions), never a mutable balance column alone.
+- Secrets only through environment variables or a secret store. Run a secret scan in CI.
+- Soft currency is a ledger (append-only transactions), never a mutable balance column alone. Ledger writes are idempotent by request key.
+- Admin actions require the admin role and are audit-logged with actor, target, reason and timestamp.
 
 ## 8. Out of scope until explicitly approved
 - Real money of any kind: entry fees, staking, cash prizes, withdrawals, crypto.
 - Paid loot boxes or any randomized reward bought with real money.
-- Ads of any kind, including rewarded ads (ADR-0002).
 - Microservices.
 - iOS native builds (web covers iPhone users first).
 
@@ -247,8 +295,9 @@ The economy and tournament models must still be designed so real-money features 
 
 ## 9. Definition of done
 - Feature works end to end and you demonstrated it (command + output, or test run).
-- Tests added and passing (pytest, Unity EditMode, Vitest as relevant).
-- Rules changes pass shared fixtures in both languages.
+- Tests added and passing (`dotnet test`, Unity tests where relevant, Vitest/Playwright for web).
+- Rules changes pass all golden fixtures.
+- Shared libraries still build as `netstandard2.1` with C# 9 and the Unity copy is refreshed (`make rules`).
 - UI matches the design system, on a 360x800 phone and a 1440 desktop.
 - Docs, `.env.example` and README updated.
 - Session summary delivered.
@@ -256,9 +305,10 @@ The economy and tournament models must still be designed so real-money features 
 ## 10. Commands
 Fill this in as tooling lands. Keep it accurate.
 ```
-make up            # start the stack
-make test          # all backend tests
-make fixtures      # validate rules fixtures in Python
+make up            # start the stack (docker compose)
+make test          # dotnet test for backend + shared
+make rules         # build GameVerse.Rules + Contracts and copy DLLs into Unity
+make migrate       # apply EF Core migrations
 make tokens        # regenerate design tokens
-make schema        # export OpenAPI + regenerate clients
+make schema        # export OpenAPI + regenerate TS client
 ```

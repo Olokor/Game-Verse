@@ -81,7 +81,7 @@ Shared across every game:
 
 **Modes:** Bullet 1+0, Blitz 3+2, Rapid 10+0, vs AI, private room, daily puzzle.
 
-**Authority:** Server validates with `python-chess`. Server owns the clocks. Draw by repetition, 50-move rule, insufficient material, stalemate, resign, draw offer.
+**Authority:** Server validates with our own move generator in `GameVerse.Rules/Chess` (bitboards, verified against standard perft counts). Server owns the clocks. Draw by repetition, 50-move rule, insufficient material, stalemate, resign, draw offer.
 
 **AI:** Stockfish for higher levels, run server-side as a separate process or container (Stockfish is GPL; do not bundle it into the client app without owner sign-off on licensing). Lower levels use a small client-side engine.
 
@@ -137,7 +137,7 @@ Shared across every game:
 
 **Modes:** vs AI (practice), 1v1 online, private room, trick shot challenges (daily).
 
-**Physics:** Custom 2D deterministic physics, not Unity's PhysX (not deterministic across devices). Fixed-point math, fixed timestep. Handles ball-ball collision, cushions, pockets, rolling/sliding friction, top/back/side spin approximation. The same simulation is ported to Python and kept identical through shared fixtures (`shared/rules-fixtures/pool/`).
+**Physics:** Custom 2D deterministic physics, not Unity's PhysX (not deterministic across devices). Fixed-point math, fixed timestep. Handles ball-ball collision, cushions, pockets, rolling/sliding friction, top/back/side spin approximation. The simulation lives once in `GameVerse.Rules/Pool` and runs identically on server and client. Fixtures in `shared/rules-fixtures/pool/` lock expected final positions for known shots so any change that alters results is caught.
 
 **Authority:** Shooter submits angle, power, spin offset. Server simulates the official result and broadcasts the outcome. Clients animate from the same parameters and reconcile to server final positions.
 
