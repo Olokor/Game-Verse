@@ -2,7 +2,7 @@
 
 The goal: GameVerse should feel like a console dashboard that happens to live on a phone. Calm, dark, confident shell. Loud, colorful games. The shell is the frame, the games are the art.
 
-All values here live in `packages/design-tokens/tokens.json`. Components read tokens, never raw values.
+All values here live in `packages/design-tokens/tokens.json`. Components read tokens, never raw values. `make tokens` generates them as CSS variables (`--gv-color-bg-base`, `--gv-motion-fast-duration`, ...), USS variables, and the C# class `GameVerseTokens`. See `packages/design-tokens/README.md` for names and units.
 
 ---
 

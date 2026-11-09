@@ -3,17 +3,18 @@ GameVerse – A cross-platform gaming platform bringing together board, puzzle, 
 
 ## Status
 
-Phase 0 (foundation). Shared rules and contracts libraries (`shared/`) and the backend skeleton (`backend/`) are in place; design tokens, web and Unity are next. Stack: C# end to end (.NET 10 backend, Unity 6 client, shared `GameVerse.Rules` library), see [ADR-0001](docs/architecture/adr-0001-core-technology-stack.md).
+Phase 0 (foundation). Shared rules and contracts libraries (`shared/`) the backend skeleton (`backend/`) and design tokens (`packages/design-tokens/`) are in place; web and Unity are next. Stack: C# end to end (.NET 10 backend, Unity 6 client, shared `GameVerse.Rules` library), see [ADR-0001](docs/architecture/adr-0001-core-technology-stack.md).
 
 ## Build and test
 
-Prerequisites: .NET 10 SDK, Docker Desktop (WSL2 backend), GNU make (works from Git Bash or PowerShell).
+Prerequisites: .NET 10 SDK, Node 22+, Docker Desktop (WSL2 backend), GNU make (works from Git Bash or PowerShell).
 
 ```
 make build    # build backend + shared
-make test     # run all .NET tests (integration tests start Postgres and Redis with Testcontainers, so Docker must be running)
+make test     # token check, token tests and all .NET tests (integration tests start Postgres and Redis with Testcontainers, so Docker must be running)
 make rules    # build the shared libraries and copy them into the Unity project
 make schema   # export the OpenAPI document to packages/api-schema/openapi.json
+make tokens   # regenerate design tokens (CSS, USS, C#) from packages/design-tokens/tokens.json
 ```
 
 ## Run the local stack
