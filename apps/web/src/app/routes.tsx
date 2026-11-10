@@ -7,6 +7,8 @@ import { ComingSoon } from '../features/placeholder/ComingSoon';
 /** The component gallery ships in dev builds, and in builds made with VITE_DEV_ROUTES=true (Playwright screenshots). */
 export const devRoutesEnabled = import.meta.env.DEV || import.meta.env.VITE_DEV_ROUTES === 'true';
 
+export const spikeEnabled = import.meta.env.VITE_SPIKE === 'true';
+
 export const routes: RouteObject[] = [
   {
     element: <AppShell />,
@@ -37,6 +39,8 @@ export const routes: RouteObject[] = [
       ...(devRoutesEnabled
         ? [{ path: 'dev/components', lazy: async () => ({ Component: (await import('../features/dev/ComponentsPage')).ComponentsPage }) }]
         : []),
+      // Prompt 0.7 web performance spike (throwaway, removed with ADR-0002). Only in builds made with VITE_SPIKE=true.
+      ...(spikeEnabled ? [{ path: 'spike', lazy: async () => ({ Component: (await import('../features/spike/SpikePage')).SpikePage }) }] : []),
       {
         path: '*',
         element: <ComingSoon icon={Compass} title="Page not found" body="That link doesn't lead anywhere. Let's get you back to the games." label="Error 404" />,
