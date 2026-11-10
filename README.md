@@ -28,6 +28,18 @@ make e2e       # Playwright smoke + screenshots at 360x800 and 1440x900 (first r
 
 React 19, TypeScript, Vite, Tailwind v4 on the generated design tokens, Radix, Motion, TanStack Query, Zustand and React Router. Home runs on mock data until the API exists; every mock is marked `TODO(gameverse)`.
 
+**Web performance spike (Prompt 0.7, throwaway until ADR-0002):**
+
+```
+make web-spike                                    # Unity Web builds of the 2D and 3D test scenes
+cd apps/web
+VITE_SPIKE=true pnpm build
+VITE_SPIKE=true pnpm preview --host               # then open http://localhost:4173/spike
+node scripts/spike-measure.mjs desktop            # this PC's Chrome; `android <adb>` measures the USB phone
+```
+
+The phone checklist is in [docs/spikes/web-perf-checklist.md](docs/spikes/web-perf-checklist.md).
+
 ## Unity app
 
 Unity 6000.6.8f1 with Android Build Support (see [apps/mobile/README.md](apps/mobile/README.md) and [ADR-0004](docs/architecture/adr-0004-unity-editor-version.md)).

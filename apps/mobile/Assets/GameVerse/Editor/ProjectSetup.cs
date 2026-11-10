@@ -23,6 +23,8 @@ namespace GameVerse.Editor
         public const string RenderingDir = Root + "/Rendering";
         public const string UrpAssetPath = RenderingDir + "/GameVerse-URP.asset";
         public const string Renderer2DPath = RenderingDir + "/GameVerse-Renderer2D.asset";
+        public const string ForwardPlusRendererPath = RenderingDir + "/GameVerse-ForwardPlus.asset";
+        public const int ForwardPlusRendererIndex = 1;
         public const string PanelSettingsPath = Root + "/UI/GameVersePanelSettings.asset";
         public const string ThemePath = Root + "/UI/Theme/GameVerse.tss";
         public const string HomeDocumentPath = Root + "/UI/Home/Home.uxml";
@@ -54,6 +56,20 @@ namespace GameVerse.Editor
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
 
+            // Web defaults, chosen for download size (Prompt 0.7 spike; ADR-0002 confirms or changes them). Per platform,
+            // so Android is unaffected. Brotli without decompression fallback means the server must send
+            // Content-Encoding: br for *.br (see apps/web/vite-plugin-unity-brotli.ts).
+            var web = NamedBuildTarget.WebGL;
+            PlayerSettings.SetManagedStrippingLevel(web, ManagedStrippingLevel.High);
+            PlayerSettings.SetIl2CppCodeGeneration(web, Il2CppCodeGeneration.OptimizeSize);
+            PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Brotli;
+            PlayerSettings.WebGL.decompressionFallback = false;
+            PlayerSettings.WebGL.dataCaching = true;
+            PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.ExplicitlyThrownExceptionsOnly;
+            PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.WebGL, false);
+            PlayerSettings.SetGraphicsAPIs(BuildTarget.WebGL, new[] { GraphicsDeviceType.OpenGLES3 }); // WebGL 2 only
+            UnityEditor.WebGL.UserBuildSettings.codeOptimization = UnityEditor.WebGL.WasmCodeOptimization.DiskSizeLTO;
+
             // Active input handling = Input System package only (1). No public API, so set the serialized field.
             var projectSettings = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/ProjectSettings.asset");
             if (projectSettings.Length > 0)
@@ -81,12 +97,44 @@ namespace GameVerse.Editor
                 AssetDatabase.CreateAsset(urp, UrpAssetPath);
             }
 
+            EnsureForwardPlusRenderer(urp);
             GraphicsSettings.defaultRenderPipeline = urp;
             for (var i = 0; i < QualitySettings.names.Length; i++)
             {
                 QualitySettings.SetQualityLevel(i, false);
                 QualitySettings.renderPipeline = urp;
             }
+        }
+
+        /// <summary>
+        /// Renderer 1 on the URP asset: Universal Renderer in Forward+ mode for 3D games (CLAUDE.md section 3). Renderer 0
+        /// stays the 2D Renderer used by the shell and 2D games. A 3D scene's camera selects renderer 1.
+        /// </summary>
+        private static void EnsureForwardPlusRenderer(UniversalRenderPipelineAsset urp)
+        {
+            var forwardPlus = AssetDatabase.LoadAssetAtPath<UniversalRendererData>(ForwardPlusRendererPath);
+            if (forwardPlus == null)
+            {
+                forwardPlus = ScriptableObject.CreateInstance<UniversalRendererData>();
+                forwardPlus.renderingMode = RenderingMode.ForwardPlus;
+                AssetDatabase.CreateAsset(forwardPlus, ForwardPlusRendererPath);
+            }
+
+            // The renderer list has no public setter, so edit the serialized field.
+            var so = new SerializedObject(urp);
+            var list = so.FindProperty("m_RendererDataList");
+            for (var i = 0; i < list.arraySize; i++)
+            {
+                if (list.GetArrayElementAtIndex(i).objectReferenceValue == forwardPlus)
+                {
+                    return;
+                }
+            }
+
+            list.arraySize++;
+            list.GetArrayElementAtIndex(list.arraySize - 1).objectReferenceValue = forwardPlus;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(urp);
         }
 
         private static PanelSettings EnsurePanelSettings()
