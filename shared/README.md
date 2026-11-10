@@ -16,7 +16,7 @@ make test     # dotnet test backend/GameVerse.slnx (covers these projects)
 make rules    # Release build, copies DLL + XML docs into apps/mobile/Assets/GameVerse/Plugins/Shared/
 ```
 
-The DLLs in the Unity folder are build output and are gitignored. Run `make rules` after any change here. `link.xml` in the same folder stops IL2CPP from stripping them.
+The DLLs in the Unity folder are build output and are gitignored. `make rules` also copies `rules-fixtures/prng` and `rules-fixtures/contracts` into `apps/mobile/Assets/GameVerse/Resources/Fixtures/`, so Unity's tests and the on-device self-check verify against the same files as `dotnet test`. Run `make rules` after any change here. `link.xml` in the same folder stops IL2CPP from stripping them.
 
 ## What's already here
 

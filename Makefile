@@ -2,6 +2,10 @@
 # Recipes only call dotnet, docker, node and pnpm, so there are no shell-specific commands (cp, copy, rm) to diverge.
 
 SLN := backend/GameVerse.slnx
+# Unity 6000.6.8f1 (ADR-0004). Override with UNITY=/path/to/Unity on other machines or CI.
+UNITY ?= C:/Program Files/Unity/Hub/Editor/6000.6.8f1/Editor/Unity.exe
+UNITY_PROJECT := apps/mobile
+ADB ?= C:/Program Files/Unity/Hub/Editor/6000.6.8f1/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb.exe
 API := backend/src/GameVerse.Api/GameVerse.Api.csproj
 TOKENS := packages/design-tokens
 SHARED_LIBS := shared/GameVerse.Rules/GameVerse.Rules.csproj shared/GameVerse.Contracts/GameVerse.Contracts.csproj
@@ -10,7 +14,7 @@ SHARED_LIBS := shared/GameVerse.Rules/GameVerse.Rules.csproj shared/GameVerse.Co
 REQUIRE_ENV = $(if $(wildcard .env),,$(error .env not found. Copy .env.example to .env first))
 
 .DEFAULT_GOAL := help
-.PHONY: help build test rules up down logs migrate schema tokens tokens-check install web web-test e2e
+.PHONY: help build test rules up down logs migrate schema tokens tokens-check install web web-test e2e unity-setup unity-test android device-check
 
 help: ## List targets
 	@echo make build    - build the solution - backend and shared
@@ -27,6 +31,10 @@ help: ## List targets
 	@echo make web      - start the web dev server on localhost:5173
 	@echo make web-test - typecheck and Vitest for the web app
 	@echo make e2e      - Playwright smoke and screenshots at 360x800 and 1440x900
+	@echo make unity-setup - apply Unity project settings and generated assets
+	@echo make unity-test  - Unity EditMode tests, headless, results in apps/mobile/TestResults
+	@echo make android     - IL2CPP ARM64 development APK in apps/mobile/Build/Android
+	@echo make device-check - install the APK on the connected phone and print the rules self-check
 
 build: ## Build the whole solution
 	dotnet build $(SLN)
@@ -75,3 +83,15 @@ web-test: ## Typecheck and unit tests for the web app
 
 e2e: ## Playwright smoke + screenshots (first run: pnpm --filter @gameverse/web exec playwright install chromium)
 	pnpm --filter @gameverse/web e2e
+
+unity-setup: rules ## Apply Unity project settings (ProjectSetup.Apply)
+	node infrastructure/scripts/unity-batch.mjs $(UNITY_PROJECT)/Logs/setup.log "GV_SETUP" "ok" -- "$(UNITY)" -batchmode -nographics -quit -projectPath $(UNITY_PROJECT) -executeMethod GameVerse.Editor.ProjectSetup.Apply
+
+unity-test: rules ## Unity EditMode tests (headless)
+	"$(UNITY)" -batchmode -nographics -projectPath $(UNITY_PROJECT) -runTests -testPlatform EditMode -testResults TestResults/editmode.xml -logFile $(UNITY_PROJECT)/Logs/editmode.log
+
+android: rules ## IL2CPP Android development build
+	node infrastructure/scripts/unity-batch.mjs $(UNITY_PROJECT)/Logs/android.log "GV_BUILD android" "result=Succeeded" -- "$(UNITY)" -batchmode -nographics -quit -projectPath $(UNITY_PROJECT) -buildTarget Android -executeMethod GameVerse.Editor.BuildScript.BuildAndroid
+
+device-check: ## Install the APK on the USB-connected phone, launch it and print the GV_SELFCHECK line
+	node infrastructure/scripts/device-check.mjs "$(ADB)" $(UNITY_PROJECT)/Build/Android/GameVerse.apk

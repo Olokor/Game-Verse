@@ -60,7 +60,7 @@ Unity is C#. With a C# backend, every game's rules, AI helpers and deterministic
 - Both are capped at **C# 9** (`<LangVersion>9.0</LangVersion>`), because that is what Unity 6 compiles. No file-scoped namespaces, no `record struct`, no `required` members, no primary constructors on classes, no collection expressions. CI fails if the lang version is raised.
 - **No dependencies** in `GameVerse.Rules`: no ASP.NET, no Unity, no EF Core, no logging framework, no `System.Text.Json`. Pure logic and plain data in, plain data out. `GameVerse.Contracts` may carry serializer attributes only if both Newtonsoft (Unity) and System.Text.Json (server) are handled, so prefer plain POCOs with explicit converters on each side.
 - **Determinism rules** for anything replayed or verified (Pool physics, Twin Lanes, Downhill, Wahala verification): no `float`/`double` in simulation state, use the fixed-point type in `GameVerse.Rules.Math`. No `Dictionary` iteration order dependence, no `DateTime.Now`, no `System.Random` (use the project's seeded PRNG). The server runs on CoreCLR and Unity Android ships IL2CPP, so floating-point results can differ between them.
-- Delivery to Unity: `make rules` builds both libraries in Release and copies the DLLs and XML docs into `apps/mobile/Assets/GameVerse/Plugins/Shared/`. Add a `link.xml` so IL2CPP stripping keeps them intact. The copied DLLs are build output; never edit them in Unity.
+- Delivery to Unity: `make rules` builds both libraries in Release and copies the DLLs and XML docs into `apps/mobile/Assets/GameVerse/Plugins/Shared/`, plus the PRNG and contracts golden fixtures into `Assets/GameVerse/Resources/Fixtures/` (Unity tests and the on-device self-check read the same files as `dotnet test`). Add a `link.xml` so IL2CPP stripping keeps them intact. The copied DLLs are build output; never edit them in Unity.
 - Fixed-point type: **Q32.32 stored in a `long`** (32 integer bits, 32 fraction bits). Multiplication and division go through 128-bit intermediates so they never overflow silently. Enough range and precision for Pool, Downhill and Twin Lanes. Change only with an ADR, because it changes every replay.
 - No C# `record` types or `init` setters in shared code (they need an `IsExternalInit` shim on netstandard2.1 and are fragile across the Unity DLL boundary). Use classes with constructors and get-only properties in Rules, plain `get; set;` POCOs in Contracts. See `shared/README.md`.
 - One solution: `backend/GameVerse.slnx` includes the shared projects, so a single `dotnet build` / `dotnet test` covers backend and shared code. Shared projects still never reference backend projects.
@@ -82,7 +82,8 @@ Unity is C#. With a C# backend, every game's rules, AI helpers and deterministic
 .NET has no built-in admin panel, so we build our own. `apps/admin` is a small React app (same stack and tokens as web) for support and live-ops: find player, view match history and move logs, ban/mute, grant or reverse currency (through the ledger, with a reason), edit quests and tournaments, feature flags. Admin endpoints live under `/admin-api`, require the `admin` role, and every write is audit-logged.
 
 ### Mobile (Unity)
-- Unity 6 LTS, C#, URP. 2D Renderer for 2D games, Forward+ for 3D games.
+- Unity 6, C#, URP. 2D Renderer for 2D games, Forward+ for 3D games. Pinned to 6000.6.8f1 (6.6, a Supported release) until Unity 6.7 LTS ships, then upgrade; see ADR-0004.
+- Project settings and generated assets come from `Assets/GameVerse/Editor/ProjectSetup.cs` (`make unity-setup`), never from editor clicks. All JSON goes through `GameVerse.Net.GameVerseJson.Settings`, which matches the server's System.Text.Json output (checked against `shared/rules-fixtures/contracts`).
 - One Unity project. The platform shell and every game live in it. Games are separate assemblies (`.asmdef`) and Addressables groups so they can be downloaded on demand.
 - Game rules come from the shared `GameVerse.Rules` DLL. Unity code handles presentation, input and networking only. Never reimplement a rule inside Unity.
 - Platform UI is built with **UI Toolkit** (UXML + USS), not uGUI. These are text files, which keeps them reviewable and generatable. Use uGUI only inside a game where world-space UI demands it.
@@ -331,6 +332,11 @@ make install       # pnpm install for the workspace (apps/web, apps/admin, packa
 make web           # web dev server, http://localhost:5173 (component gallery at /dev/components)
 make web-test      # web typecheck + Vitest (includes the no-hardcoded-design-values scan)
 make e2e           # Playwright smoke + screenshots at 360x800 and 1440x900
+make unity-setup   # apply Unity project settings and generated assets (ProjectSetup.Apply)
+make unity-test    # Unity EditMode tests headless (UNITY=path overrides the editor)
+make android       # IL2CPP ARM64 development APK -> apps/mobile/Build/Android/GameVerse.apk
+make device-check  # install on the USB phone, launch, require "GV_SELFCHECK prng ok"
+# Linux/CI Unity tests: unity-editor -batchmode -nographics -projectPath apps/mobile -runTests -testPlatform EditMode -testResults TestResults/editmode.xml -logFile -
 make tokens        # regenerate design tokens (CSS, USS, C#) from packages/design-tokens/tokens.json
 make tokens-check  # fail if a token output is stale or missing a token
 ```

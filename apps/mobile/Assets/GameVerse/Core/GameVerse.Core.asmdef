@@ -1,0 +1,19 @@
+{
+    "rootNamespace": "GameVerse.Core",
+    "references": [
+        "UniTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "GameVerse.Rules.dll",
+        "GameVerse.Contracts.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false,
+    "name": "GameVerse.Core"
+}

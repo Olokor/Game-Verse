@@ -11,5 +11,6 @@
     <LangVersion>9.0</LangVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <UnityPluginDir>$(RepoRoot)apps/mobile/Assets/GameVerse/Plugins/Shared/</UnityPluginDir>
+    <UnityFixtureDir>$(RepoRoot)apps/mobile/Assets/GameVerse/Resources/Fixtures/</UnityFixtureDir>
   </PropertyGroup>
 </Project>

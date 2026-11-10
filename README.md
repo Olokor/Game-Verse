@@ -3,7 +3,7 @@ GameVerse – A cross-platform gaming platform bringing together board, puzzle, 
 
 ## Status
 
-Phase 0 (foundation). Shared rules and contracts libraries (`shared/`) the backend skeleton (`backend/`) design tokens (`packages/design-tokens/`) and the web shell (`apps/web/`) are in place; Unity is next. Stack: C# end to end (.NET 10 backend, Unity 6 client, shared `GameVerse.Rules` library), see [ADR-0001](docs/architecture/adr-0001-core-technology-stack.md).
+Phase 0 (foundation). Shared rules and contracts libraries (`shared/`), the backend skeleton (`backend/`), design tokens (`packages/design-tokens/`), the web shell (`apps/web/`) and the Unity project (`apps/mobile/`) are in place. Stack: C# end to end (.NET 10 backend, Unity 6 client, shared `GameVerse.Rules` library), see [ADR-0001](docs/architecture/adr-0001-core-technology-stack.md).
 
 ## Build and test
 
@@ -27,6 +27,16 @@ make e2e       # Playwright smoke + screenshots at 360x800 and 1440x900 (first r
 ```
 
 React 19, TypeScript, Vite, Tailwind v4 on the generated design tokens, Radix, Motion, TanStack Query, Zustand and React Router. Home runs on mock data until the API exists; every mock is marked `TODO(gameverse)`.
+
+## Unity app
+
+Unity 6000.6.8f1 with Android Build Support (see [apps/mobile/README.md](apps/mobile/README.md) and [ADR-0004](docs/architecture/adr-0004-unity-editor-version.md)).
+
+```
+make unity-test     # EditMode tests headless (PRNG parity with dotnet test, wire format round trip)
+make android        # IL2CPP ARM64 development APK
+make device-check   # install on a USB-connected phone and print the on-device rules self-check
+```
 
 ## Run the local stack
 
