@@ -22,4 +22,19 @@
           DestinationFolder="$(UnityPluginDir)" SkipUnchangedFiles="false" />
     <Message Importance="high" Text="$(MSBuildProjectName) -> $(UnityPluginDir)" />
   </Target>
+
+  <!--
+    Golden fixtures Unity tests and the on-device self-check read (Resources/Fixtures, as TextAssets).
+    Same files `dotnet test` reads, so parity is checked against one source. Delivered with GameVerse.Rules.
+  -->
+  <Target Name="GameVerseCopyFixturesToUnity" AfterTargets="Build"
+          Condition="'$(MSBuildProjectName)' == 'GameVerse.Rules' And '$(CopyToUnity)' == 'true'">
+    <ItemGroup>
+      <UnityFixture Include="$(RepoRoot)shared/rules-fixtures/prng/*.json;$(RepoRoot)shared/rules-fixtures/contracts/*.json" />
+    </ItemGroup>
+    <Copy SourceFiles="@(UnityFixture)"
+          DestinationFiles="@(UnityFixture->'$(UnityFixtureDir)$([System.IO.Path]::GetFileName($([System.IO.Path]::GetDirectoryName('%(FullPath)'))))/%(Filename)%(Extension)')"
+          SkipUnchangedFiles="false" />
+    <Message Importance="high" Text="Fixtures -> $(UnityFixtureDir)" />
+  </Target>
 </Project>

@@ -1,0 +1,30 @@
+{
+    "rootNamespace": "GameVerse.Tests",
+    "references": [
+        "GameVerse.Core",
+        "GameVerse.Net",
+        "GameVerse.UI",
+        "GameVerse.Platform",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "GameVerse.Rules.dll",
+        "GameVerse.Contracts.dll",
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false,
+    "name": "GameVerse.Tests.EditMode"
+}

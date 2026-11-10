@@ -1,0 +1,37 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:gv="GameVerse.UI">
+    <!--
+        Home (DESIGN_SYSTEM.md section 7), mirroring apps/web Home: top bar, greeting, featured hero card, Continue playing.
+        TODO(gameverse): static mock content until the catalog and profile APIs exist (Prompts 1.1, 1.2); bottom tab bar
+        and the remaining sections arrive with the Unity platform shell (Prompt 1.6).
+    -->
+    <ui:VisualElement name="root" class="gv-root">
+        <ui:VisualElement name="topbar" class="gv-topbar">
+            <ui:Label text="G" class="gv-logo" />
+            <ui:Label text="GameVerse" class="gv-wordmark" />
+            <ui:VisualElement class="gv-pill">
+                <ui:VisualElement class="gv-coin" />
+                <ui:Label name="coins" text="12,500" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:ScrollView name="scroll" mode="Vertical" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" class="gv-screen">
+            <ui:Label name="greeting" text="Welcome back, Moses" class="gv-greeting" />
+            <gv:GameCard name="featured" variant="hero" title="Ludo" subtitle="Roll, race, capture. 2 to 4 players." category="board" badge="event" live-players="12840" />
+            <ui:VisualElement class="gv-section">
+                <ui:Label text="Continue playing" class="gv-section-title" />
+                <ui:ScrollView mode="Horizontal" horizontal-scroller-visibility="Hidden">
+                    <ui:VisualElement class="gv-row">
+                        <gv:GameCard variant="standard" title="Whot" subtitle="vs Tobi" category="cards" badge="new" />
+                        <gv:GameCard variant="standard" title="Chess" subtitle="Rated, 5+0, move 23" category="brain" />
+                        <gv:GameCard variant="standard" title="Twin Lanes" subtitle="Best 148, beat it" category="arcade" />
+                    </ui:VisualElement>
+                </ui:ScrollView>
+            </ui:VisualElement>
+            <ui:VisualElement class="gv-section">
+                <ui:Label text="Buttons" class="gv-section-title" />
+                <ui:Button name="primary" text="Play" class="gv-button gv-button--primary gv-button--md" />
+                <ui:Button name="secondary" text="Invite" class="gv-button gv-button--secondary gv-button--sm gv-button--pill" />
+                <gv:GameCard variant="compact" title="Downhill" subtitle="Race your own ghost to the bottom." category="racing" />
+            </ui:VisualElement>
+        </ui:ScrollView>
+    </ui:VisualElement>
+</ui:UXML>

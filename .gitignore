@@ -22,6 +22,9 @@ coverage.cobertura.xml
 apps/mobile/Assets/GameVerse/Plugins/Shared/*.dll
 apps/mobile/Assets/GameVerse/Plugins/Shared/*.pdb
 apps/mobile/Assets/GameVerse/Plugins/Shared/GameVerse.*.xml
+apps/mobile/Assets/GameVerse/Plugins/Shared/*.dll.meta
+apps/mobile/Assets/GameVerse/Plugins/Shared/*.pdb.meta
+apps/mobile/Assets/GameVerse/Plugins/Shared/GameVerse.*.xml.meta
 
 # --- Node / web ---
 node_modules/
