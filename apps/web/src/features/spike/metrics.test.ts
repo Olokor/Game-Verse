@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { downloadStats, fpsStats, formatResult } from './metrics';
+import { downloadStats, fpsStats, formatResult, unityFps } from './metrics';
 
 describe('fpsStats', () => {
   it('reports a steady 60 fps', () => {
@@ -50,6 +50,7 @@ describe('formatResult', () => {
       loadedAt: 4000,
       startup: 1500,
       fps: { average: 59.8, low1: 41.2, longFrames: 1, frames: 600 },
+      unityFps: 30,
       devicePixelRatio: 2,
       canvas: '720x1280',
       gpu: 'Mali-G72',
@@ -57,6 +58,18 @@ describe('formatResult', () => {
     });
     expect(text).toContain('build download: 5.00 MB (4 files; on the wire this load: 0.00 MB)');
     expect(text).toContain('startup (CPU, after download): 1.50 s');
-    expect(text).toContain('avg 59.8, 1% low 41.2');
+    expect(text).toContain('unity fps: 30');
+    expect(text).toContain('browser fps over 600 frames: avg 59.8, 1% low 41.2');
+  });
+});
+
+describe('unityFps', () => {
+  it('divides rendered frames by elapsed time', () => {
+    expect(unityFps(100, 400, 10000)).toBe(30);
+  });
+
+  it('is undefined when Unity did not report frames', () => {
+    expect(unityFps(undefined, 400, 10000)).toBeUndefined();
+    expect(unityFps(1, 2, 0)).toBeUndefined();
   });
 });

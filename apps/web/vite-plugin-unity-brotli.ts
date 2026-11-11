@@ -30,6 +30,9 @@ function serveBrotli(root: () => string): Connect.NextHandleFunction {
     res.setHeader('Content-Encoding', 'br');
     res.setHeader('Content-Type', TYPES[ext] ?? 'application/octet-stream');
     res.setHeader('Content-Length', statSync(file).size);
+    // Measured through a Cloudflare quick tunnel: the edge re-encodes this Brotli body as gzip (6.2 MB wasm -> 8.7 MB on
+    // the wire), and with `no-transform` it sends it uncompressed (23.9 MB). Brotli pass-through must be configured and
+    // verified on the production Cloudflare zone (ADR-0002).
     res.setHeader('Cache-Control', 'public, max-age=3600');
     res.setHeader('Vary', 'Accept-Encoding');
     createReadStream(file).pipe(res);

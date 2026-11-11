@@ -48,6 +48,10 @@ namespace GameVerse.Editor
             PlayerSettings.productName = "GameVerse";
             PlayerSettings.colorSpace = ColorSpace.Linear;
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
+            // No Unity splash (allowed on every licence since Unity 6): the Boot screen carries our own branding and the
+            // player sees the game sooner. (Size effect measured in Prompt 0.7: about 0.06 MB, so not a size lever.)
+            PlayerSettings.SplashScreen.show = false;
+            PlayerSettings.SplashScreen.showUnityLogo = false;
 
             var android = NamedBuildTarget.Android;
             PlayerSettings.SetApplicationIdentifier(android, ApplicationId);

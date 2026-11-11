@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router';
 import { Unity, useUnityContext } from 'react-unity-webgl';
 import { Button, buttonClasses } from '../../components/ui/Button';
 import { cn } from '../../lib/cn';
-import { downloadStats, fpsStats, formatResult, gpuName, type SpikeResult } from './metrics';
+import { downloadStats, fpsStats, formatResult, gpuName, unityFps, type SpikeResult } from './metrics';
 
 /**
  * /spike: Prompt 0.7 web performance spike (throwaway, deleted with ADR-0002). Only registered when the app is built
@@ -13,6 +13,8 @@ import { downloadStats, fpsStats, formatResult, gpuName, type SpikeResult } from
 const SCENES = {
   '2d': { build: 'spike-2d', label: '2D: 200 sprites' },
   '3d': { build: 'spike-3d', label: '3D: car, baked light' },
+  'lean-2d': { build: 'lean-2d', label: 'Lean 2D' },
+  'lean-3d': { build: 'lean-3d', label: 'Lean 3D' },
 } as const;
 type SceneId = keyof typeof SCENES;
 
@@ -23,14 +25,17 @@ const SAMPLE_MS = 10000;
 
 declare global {
   interface Window {
-    /** Read by infrastructure/scripts/web-spike-measure.mjs. */
+    /** Read by apps/web/scripts/spike-measure.mjs. */
     __spikeResult?: SpikeResult;
+    /** Unity's Time.frameCount, set every frame by the spike's SpikeFrames.jslib. */
+    __unityFrames?: number;
   }
 }
 
 export function SpikePage() {
   const [params] = useSearchParams();
-  const sceneId: SceneId = params.get('scene') === '3d' ? '3d' : '2d';
+  const requested = params.get('scene') ?? '2d';
+  const sceneId: SceneId = requested in SCENES ? (requested as SceneId) : '2d';
   return <SpikeRun key={sceneId} sceneId={sceneId} />;
 }
 
@@ -73,13 +78,23 @@ function SpikeRun({ sceneId }: { sceneId: SceneId }) {
 
     // Frame rate after a short warm-up (shader compile, first allocations), from rAF timestamps.
     const stamps: number[] = [];
+    let startFrames: number | undefined;
     let frame = 0;
     const tick = (t: number) => {
-      if (t - loadedAt >= WARMUP_MS) stamps.push(t);
+      if (t - loadedAt >= WARMUP_MS) {
+        if (stamps.length === 0) startFrames = window.__unityFrames;
+        stamps.push(t);
+      }
       if (t - loadedAt < WARMUP_MS + SAMPLE_MS) {
         frame = requestAnimationFrame(tick);
       } else {
-        const done = { ...base, canvas: el ? `${el.width}x${el.height}` : base.canvas, fps: fpsStats(stamps) };
+        const elapsed = (stamps[stamps.length - 1] ?? 0) - (stamps[0] ?? 0);
+        const done: SpikeResult = {
+          ...base,
+          canvas: el ? `${el.width}x${el.height}` : base.canvas,
+          fps: fpsStats(stamps),
+          unityFps: unityFps(startFrames, window.__unityFrames, elapsed),
+        };
         window.__spikeResult = done;
         console.info('GV_SPIKE_RESULT ' + JSON.stringify(done));
         setResult(done);
@@ -104,7 +119,7 @@ function SpikeRun({ sceneId }: { sceneId: SceneId }) {
       <header className="flex flex-col gap-8">
         <span className="type-label text-brand-volt">Spike · Prompt 0.7</span>
         <h1 className="type-display text-headline font-bold">Web performance</h1>
-        <nav className="flex gap-8" aria-label="Scene">
+        <nav className="flex flex-wrap gap-8" aria-label="Scene">
           {(Object.keys(SCENES) as SceneId[]).map((id) => (
             <Link
               key={id}

@@ -62,7 +62,10 @@ export interface SpikeResult {
   loadedAt: number;
   /** loadedAt minus download.finishedAt: decompression, wasm compile and engine start, i.e. device CPU, not network. */
   startup: number;
+  /** Browser frame stats (requestAnimationFrame): the display rate, a ceiling for the game. */
   fps?: FpsStats;
+  /** Frames Unity actually rendered per second over the same window (window.__unityFrames); undefined if not reported. */
+  unityFps?: number;
   devicePixelRatio: number;
   canvas: string;
   /** WebGL renderer string, e.g. "Apple GPU" or "Mali-G52"; "SwiftShader" means software rendering (FPS not meaningful). */
@@ -79,9 +82,10 @@ export function formatResult(r: SpikeResult): string {
     `downloads finished: ${s(r.download.finishedAt)} s`,
     `startup (CPU, after download): ${s(r.startup)} s`,
     `playable: ${s(r.loadedAt)} s after navigation`,
-    r.fps
-      ? `fps over ${r.fps.frames} frames: avg ${r.fps.average}, 1% low ${r.fps.low1}, hitches >50ms: ${r.fps.longFrames}`
-      : 'fps: measuring...',
+    r.fps ? `unity fps: ${r.unityFps ?? 'not reported'}` : 'fps: measuring...',
+    ...(r.fps
+      ? [`browser fps over ${r.fps.frames} frames: avg ${r.fps.average}, 1% low ${r.fps.low1}, hitches >50ms: ${r.fps.longFrames}`]
+      : []),
     `canvas: ${r.canvas} at dpr ${r.devicePixelRatio}`,
     `gpu: ${r.gpu}`,
     `ua: ${r.userAgent}`,
@@ -98,6 +102,12 @@ export function gpuName(): string {
   } catch {
     return 'unknown';
   }
+}
+
+/** Unity frames per second from two readings of its frame counter. */
+export function unityFps(startFrame: number | undefined, endFrame: number | undefined, elapsedMs: number): number | undefined {
+  if (startFrame === undefined || endFrame === undefined || elapsedMs <= 0) return undefined;
+  return round1(((endFrame - startFrame) * 1000) / elapsedMs);
 }
 
 const round1 = (n: number) => Math.round(n * 10) / 10;

@@ -101,6 +101,7 @@ namespace GameVerse.Editor
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = GameVerse.UI.GameVerseTokens.Color.Bg.Base;
             camera.transform.position = new Vector3(0f, 0f, -10f);
+            camera.gameObject.AddComponent<SpikeFrameReporter>();
 
             var light = new GameObject("Global Light 2D").AddComponent<Light2D>();
             light.lightType = Light2D.LightType.Global;
@@ -240,6 +241,7 @@ namespace GameVerse.Editor
             camera.farClipPlane = 200f;
             cameraGo.transform.position = new Vector3(RadiusX, 5f, -10f);
             cameraGo.AddComponent<UniversalAdditionalCameraData>().SetRenderer(ProjectSetup.ForwardPlusRendererIndex);
+            cameraGo.AddComponent<SpikeFrameReporter>();
 
             var drive = car.AddComponent<CarOnTrack>();
             var so = new SerializedObject(drive);
