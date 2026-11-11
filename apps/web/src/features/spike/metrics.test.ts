@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { downloadStats, fpsStats, formatResult, unityFps } from './metrics';
+import { STALL_MS, downloadStats, fpsStats, formatResult, isStalled, unityFps } from './metrics';
 
 describe('fpsStats', () => {
   it('reports a steady 60 fps', () => {
@@ -71,5 +71,16 @@ describe('unityFps', () => {
   it('is undefined when Unity did not report frames', () => {
     expect(unityFps(undefined, 400, 10000)).toBeUndefined();
     expect(unityFps(1, 2, 0)).toBeUndefined();
+  });
+});
+
+describe('isStalled', () => {
+  it('is false while progress is recent', () => {
+    expect(isStalled(1000, 1000 + STALL_MS - 1)).toBe(false);
+  });
+
+  it('is true once loading has been silent for the limit', () => {
+    expect(isStalled(1000, 1000 + STALL_MS)).toBe(true);
+    expect(isStalled(0, 500, 500)).toBe(true);
   });
 });
