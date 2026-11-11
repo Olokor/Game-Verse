@@ -77,6 +77,25 @@ New migration: `dotnet tool restore`, then `dotnet ef migrations add <Name> --pr
 
 See [shared/README.md](shared/README.md) for what the shared libraries contain and the rules for writing code there.
 
+## Error reporting
+
+Errors from the API, the web app and Unity go to a self-hosted [GlitchTip](https://glitchtip.com) through the official Sentry SDKs ([ADR-0005](docs/architecture/adr-0005-error-reporting-glitchtip.md)). Reporting is off unless a DSN is set, and events carry no personal data (no IPs, headers, cookies, query strings or names).
+
+```
+make errors-up      # GlitchTip at http://127.0.0.1:8000 (compose profile "errors")
+make errors-setup   # admin user, "gameverse" org, api/web/unity projects; prints DSNs + an API token for .env
+```
+
+Then set `GAMEVERSE_ERROR_DSN_API`, `VITE_ERROR_DSN`, `UNITY_ERROR_DSN` and `GLITCHTIP_API_TOKEN` in `.env`. Log in with `GLITCHTIP_ADMIN_EMAIL` / `GLITCHTIP_ADMIN_PASSWORD`.
+
+**Manual fallback, if `errors-setup` fails after a GlitchTip upgrade:**
+1. Run `docker compose exec glitchtip ./manage.py createsuperuser`.
+2. Log in at http://127.0.0.1:8000.
+3. Create the organization `gameverse` and the projects `api`, `web` and `unity`.
+4. Copy each project's DSN from Settings → Client Keys. For the API container, swap the host for `glitchtip:8000`.
+
+To check the API against a running GlitchTip: set `GAMEVERSE_E2E_GLITCHTIP_DSN` (api DSN with `127.0.0.1:8000`) and `GLITCHTIP_API_TOKEN`, then run `dotnet test --project backend/tests/GameVerse.Api.IntegrationTests`. Without them that test is skipped.
+
 ## Project docs
 
 | Doc | What it covers |

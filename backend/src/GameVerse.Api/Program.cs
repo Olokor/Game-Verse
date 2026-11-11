@@ -5,6 +5,7 @@ using GameVerse.Infrastructure;
 using Hangfire;
 using Scalar.AspNetCore;
 using Serilog;
+using Serilog.Events;
 using Serilog.Formatting.Compact;
 
 // Commands (same image for every role):
@@ -41,12 +42,26 @@ builder.Services.AddSerilog((services, logger) =>
     {
         logger.WriteTo.Console(new RenderedCompactJsonFormatter());
     }
+
+    if (options.ErrorReporting.IsEnabled)
+    {
+        ErrorReporting.AddSerilogSink(logger);
+    }
 });
+
+// Error reporting to self-hosted GlitchTip (ADR-0005). Off unless GameVerse:ErrorReporting:Dsn is set.
+if (options.ErrorReporting.IsEnabled)
+{
+    builder.WebHost.UseSentry(sentry => ErrorReporting.ConfigureSdk(sentry, options.ErrorReporting));
+}
+
+// Unhandled exceptions become RFC 7807 problem+json with a traceId; the body never carries exception details.
+builder.Services.AddProblemDetails();
 
 builder.Services.AddGameVerseInfrastructure(options.ConnectionStrings, runJobServer: options.IsWorker);
 builder.Services.AddOpenApi();
 
-// TODO(gameverse): Sentry and OpenTelemetry (CLAUDE.md section 3) once there is real traffic (Phase 1).
+// TODO(gameverse): OpenTelemetry tracing (CLAUDE.md section 3) once there is real traffic (Phase 1). Errors: ADR-0005.
 var app = builder.Build();
 
 if (args.Length > 0 && args[0] == "migrate")
@@ -57,7 +72,15 @@ if (args.Length > 0 && args[0] == "migrate")
     return 0;
 }
 
-app.UseSerilogRequestLogging();
+app.UseSerilogRequestLogging(requestLog =>
+{
+    // A 500's exception is already logged (and reported) at Error by the exception handler; logging the access line at
+    // Error too would report every failure twice. Access lines: Warning for 5xx, Information otherwise.
+    requestLog.GetLevel = (http, _, exception) =>
+        exception is not null || http.Response.StatusCode >= 500 ? LogEventLevel.Warning : LogEventLevel.Information;
+});
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 app.MapGameVerseHealth();
 
 if (!options.IsWorker)
