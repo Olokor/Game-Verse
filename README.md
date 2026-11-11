@@ -86,7 +86,7 @@ make errors-up      # GlitchTip at http://127.0.0.1:8000 (compose profile "error
 make errors-setup   # admin user, "gameverse" org, api/web/unity projects; prints DSNs + an API token for .env
 ```
 
-Then set `GAMEVERSE_ERROR_DSN_API`, `VITE_ERROR_DSN`, `UNITY_ERROR_DSN` and `GLITCHTIP_API_TOKEN` in `.env`. Log in with `GLITCHTIP_ADMIN_EMAIL` / `GLITCHTIP_ADMIN_PASSWORD`.
+Then set `GAMEVERSE_ERROR_DSN_API`, `VITE_ERROR_DSN`, `UNITY_ERROR_DSN` and `GLITCHTIP_API_TOKEN` in `.env`. The web app reads the repo-root `.env` (`envDir`). Open `/dev/crash` in a dev build to see the error screen and send a test error. Log in with `GLITCHTIP_ADMIN_EMAIL` / `GLITCHTIP_ADMIN_PASSWORD`.
 
 **Manual fallback, if `errors-setup` fails after a GlitchTip upgrade:**
 1. Run `docker compose exec glitchtip ./manage.py createsuperuser`.

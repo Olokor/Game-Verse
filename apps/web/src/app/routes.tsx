@@ -3,6 +3,7 @@ import { Compass, Gamepad2, Play, User, Users } from 'lucide-react';
 import { AppShell } from '../components/shell/AppShell';
 import { HomeScreen } from '../features/home/HomeScreen';
 import { ComingSoon } from '../features/placeholder/ComingSoon';
+import { RouteErrorScreen } from '../features/errors/RouteErrorScreen';
 
 /** The component gallery ships in dev builds, and in builds made with VITE_DEV_ROUTES=true (Playwright screenshots). */
 export const devRoutesEnabled = import.meta.env.DEV || import.meta.env.VITE_DEV_ROUTES === 'true';
@@ -12,6 +13,7 @@ export const spikeEnabled = import.meta.env.VITE_SPIKE === 'true';
 export const routes: RouteObject[] = [
   {
     element: <AppShell />,
+    errorElement: <RouteErrorScreen />,
     children: [
       { index: true, element: <HomeScreen /> },
       // TODO(gameverse): real screens. games: catalog (Prompt 1.2); games/:gameId: lobby (1.7); play: matchmaking (1.5);
@@ -37,7 +39,11 @@ export const routes: RouteObject[] = [
         element: <ComingSoon icon={User} title="Profile" body="Your level, ranks per game, stats and showcase." />,
       },
       ...(devRoutesEnabled
-        ? [{ path: 'dev/components', lazy: async () => ({ Component: (await import('../features/dev/ComponentsPage')).ComponentsPage }) }]
+        ? [
+            { path: 'dev/components', lazy: async () => ({ Component: (await import('../features/dev/ComponentsPage')).ComponentsPage }) },
+            // Throws on render: shows the error screen and exercises reporting end to end (ADR-0005).
+            { path: 'dev/crash', lazy: async () => ({ Component: (await import('../features/dev/CrashPage')).CrashPage }) },
+          ]
         : []),
       // Prompt 0.7 web performance spike (throwaway, removed with ADR-0002). Only in builds made with VITE_SPIKE=true.
       ...(spikeEnabled ? [{ path: 'spike', lazy: async () => ({ Component: (await import('../features/spike/SpikePage')).SpikePage }) }] : []),
