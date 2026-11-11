@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router';
 import { Unity, useUnityContext } from 'react-unity-webgl';
 import { Button, buttonClasses } from '../../components/ui/Button';
 import { cn } from '../../lib/cn';
-import { downloadStats, fpsStats, formatResult, gpuName, unityFps, type SpikeResult } from './metrics';
+import { downloadStats, fpsStats, formatResult, gpuName, isStalled, unityFps, type SpikeResult } from './metrics';
 
 /**
  * /spike: Prompt 0.7 web performance spike (throwaway, deleted with ADR-0002). Only registered when the app is built
@@ -57,6 +57,23 @@ function SpikeRun({ sceneId }: { sceneId: SceneId }) {
   const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
   const [result, setResult] = useState<SpikeResult>();
   const [copied, setCopied] = useState(false);
+  const [stalled, setStalled] = useState(false);
+  const lastProgressAt = useRef(performance.now());
+
+  // A dropped connection leaves Unity's loader waiting forever without an error; detect the silence instead.
+  useEffect(() => {
+    lastProgressAt.current = performance.now();
+  }, [loadingProgression]);
+  useEffect(() => {
+    if (isLoaded || initialisationError) return;
+    const timer = window.setInterval(() => {
+      if (isStalled(lastProgressAt.current, performance.now())) {
+        setStalled(true);
+        console.error(`GV_SPIKE_STALLED scene=${sceneId} progress=${Math.round(loadingProgression * 100)}%`);
+      }
+    }, 2000);
+    return () => window.clearInterval(timer);
+  }, [isLoaded, initialisationError, loadingProgression, sceneId]);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -142,13 +159,24 @@ function SpikeRun({ sceneId }: { sceneId: SceneId }) {
           className="h-full w-full"
           tabIndex={-1}
         />
-        {!isLoaded && !initialisationError && (
+        {!isLoaded && !initialisationError && !stalled && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-12 p-24">
             <span className="text-body-sm text-text-secondary">Loading {label}</span>
             <div className="h-8 w-full max-w-xs overflow-hidden rounded-pill bg-bg-elevated" role="progressbar" aria-valuenow={Math.round(loadingProgression * 100)}>
               <div className="h-full rounded-pill bg-brand-volt" style={{ width: `${Math.round(loadingProgression * 100)}%` }} />
             </div>
             <span className="text-caption text-text-muted">{Math.round(loadingProgression * 100)}%</span>
+          </div>
+        )}
+        {stalled && !initialisationError && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-12 p-24 text-center" role="alert">
+            <span className="type-label text-state-danger">Download stalled</span>
+            <p className="text-body-sm text-text-secondary">
+              Nothing arrived for a while at {Math.round(loadingProgression * 100)}%. The connection probably dropped.
+            </p>
+            <Button size="sm" pill onClick={() => window.location.reload()}>
+              Retry
+            </Button>
           </div>
         )}
         {initialisationError && (

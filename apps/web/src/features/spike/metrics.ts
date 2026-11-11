@@ -104,6 +104,17 @@ export function gpuName(): string {
   }
 }
 
+/** How long loading may sit without progress before the page treats the download as failed. */
+export const STALL_MS = 45000;
+
+/**
+ * True when loading has made no progress for `limitMs`. Unity's loader reports progress as bytes arrive, so a long
+ * silence means the connection dropped mid-download (the loader itself never rejects in that case).
+ */
+export function isStalled(lastProgressAt: number, now: number, limitMs: number = STALL_MS): boolean {
+  return now - lastProgressAt >= limitMs;
+}
+
 /** Unity frames per second from two readings of its frame counter. */
 export function unityFps(startFrame: number | undefined, endFrame: number | undefined, elapsedMs: number): number | undefined {
   if (startFrame === undefined || endFrame === undefined || elapsedMs <= 0) return undefined;
