@@ -47,3 +47,18 @@ test('placeholder screen', async ({ page }, info) => {
   await expect(page.getByRole('heading', { level: 1, name: 'Play' })).toBeVisible();
   await page.screenshot({ path: info.outputPath('play.png') });
 });
+
+test('error screen (ADR-0005)', async ({ page }, info) => {
+  const errors: string[] = [];
+  page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+  await page.goto('/dev/crash');
+  await expect(page.getByRole('heading', { level: 1, name: 'Something went wrong' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Reload' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Back to Home' })).toBeVisible();
+  // Without a DSN the error is not lost: reportError logs it to the console.
+  expect(errors.some((e) => e.includes('GV_DEV_CRASH'))).toBe(true);
+  await page.evaluate(() => document.fonts.ready);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow).toBe(0);
+  await page.screenshot({ path: info.outputPath('error-screen.png') });
+});

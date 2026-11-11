@@ -15,6 +15,7 @@ export default defineConfig({
     url: 'http://localhost:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
-    env: { VITE_DEV_ROUTES: 'true' },
+    // Reporting off: e2e runs must not file real issues in GlitchTip (environment beats .env in Vite).
+    env: { VITE_DEV_ROUTES: 'true', VITE_ERROR_DSN: '' },
   },
 });
