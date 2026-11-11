@@ -17,7 +17,8 @@ The results panel shows:
 | downloads finished | When the last build file arrived (depends on the network) |
 | startup | Time from "downloaded" to "playable": decompression, compile, engine start. **This is the phone's CPU, not the network** |
 | playable | Total time from opening the link to a running game |
-| fps avg / 1% low / hitches | Frame rate over 10 s after a 2 s warm-up. 1% low and hitches (frames over 50 ms) show stutter |
+| unity fps | Frames the game actually rendered per second, over 10 s after a 2 s warm-up. **The main smoothness number** |
+| browser fps avg / 1% low / hitches | The browser's own frame rate in the same window: the ceiling for the game. 1% low and hitches (frames over 50 ms) show stutter. A flat 30 here usually means iOS Low Power Mode or "Limit Frame Rate" is on |
 | gpu | The phone's GPU as the browser reports it |
 
 ## Before you start
@@ -27,7 +28,7 @@ The results panel shows:
    - It only exists while I'm running it.
    - Download times include the PC's upload speed, which is why **startup** is reported separately.
 2. Charge both phones above 50% and close other apps.
-3. Turn off Low Power Mode (iPhone) or battery saver (Android). They throttle the CPU.
+3. Turn off Low Power Mode (iPhone) or battery saver (Android). They throttle the CPU, and on iPhone they cap the browser at 30 fps. On iPhone also check Settings → Accessibility → Motion → Limit Frame Rate is off.
 
 ## For each phone (iPhone with Safari, low-end Android with Chrome)
 

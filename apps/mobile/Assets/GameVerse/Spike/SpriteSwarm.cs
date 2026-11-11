@@ -15,7 +15,6 @@ namespace GameVerse.Spike
 
         private void Awake()
         {
-            Application.targetFrameRate = 60;
             var frameWidth = sheet.width / frameCount;
             var frames = new Sprite[frameCount];
             for (var i = 0; i < frameCount; i++)

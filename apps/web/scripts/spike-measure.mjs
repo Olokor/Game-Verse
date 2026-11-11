@@ -12,7 +12,7 @@ import { execFileSync } from 'node:child_process';
 import { chromium } from '@playwright/test';
 
 const [mode = 'desktop', arg] = process.argv.slice(2);
-const SCENES = ['2d', '3d'];
+const SCENES = (process.env.SPIKE_SCENES ?? '2d,3d,lean-2d,lean-3d').split(',');
 const TIMEOUT = 240_000;
 const FAST_4G = { offline: false, latency: 60, downloadThroughput: (9 * 1024 * 1024) / 8, uploadThroughput: (1.5 * 1024 * 1024) / 8 };
 
@@ -36,9 +36,9 @@ async function measure(page, base, scene, attempt = 1) {
 function record(profile, load, r) {
   rows.push({ profile, load, ...r });
   console.log(
-    `${profile.padEnd(22)} ${r.scene}  ${load.padEnd(4)}  build ${mb(r.download.bodyBytes)} MB  wire ${mb(r.download.transferBytes)} MB  ` +
+    `${profile.padEnd(22)} ${r.scene.padEnd(7)}  ${load.padEnd(4)}  build ${mb(r.download.bodyBytes)} MB  wire ${mb(r.download.transferBytes)} MB  ` +
       `downloaded ${s(r.download.finishedAt)} s  startup ${s(r.startup)} s  playable ${s(r.loadedAt)} s  ` +
-      `fps ${r.fps.average} (1% low ${r.fps.low1}, hitches ${r.fps.longFrames})  ${r.canvas}@${r.devicePixelRatio}  gpu ${r.gpu}`,
+      `unity fps ${r.unityFps ?? 'n/a'}  browser fps ${r.fps.average} (1% low ${r.fps.low1}, hitches ${r.fps.longFrames})  ${r.canvas}@${r.devicePixelRatio}  gpu ${r.gpu}`,
   );
 }
 

@@ -17,11 +17,6 @@ namespace GameVerse.Spike
 
         private float angle;
 
-        private void Awake()
-        {
-            Application.targetFrameRate = 60;
-        }
-
         private void Update()
         {
             // Advance by arc length so the speed is roughly constant around the ellipse.
