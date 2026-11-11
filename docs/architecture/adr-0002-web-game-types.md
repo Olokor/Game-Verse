@@ -63,14 +63,15 @@ Measured with the `/spike` page, which reports:
 | Desktop Chrome, Intel UHD 620 | Lean 2D / 3D | 1.18 / 1.19 s | 0.59 / 0.62 s | 0.87 / 0.95 s | 60 / 60 | 58.8 / 58.8 |
 | Desktop at 4x CPU throttle + Fast 4G (9 Mbps, 60 ms) | Full 2D / 3D | 14.96 / 16.52 s | 4.35 / 5.36 s | 4.78 / 4.44 s | 57.5 / 45.4 | 29.9 / 20 |
 | Desktop at 4x CPU throttle + Fast 4G (9 Mbps, 60 ms) | Lean 2D / 3D | 13.22 / 13.21 s | 4.78 / 4.35 s | 4.02 / 4.09 s | 57.8 / 46.7 | 29.9 / 29.7 |
-| Samsung Note 9 (Adreno 630), Chrome, over USB | Full 2D / 3D | 3.28 / 2.96 s | 1.58 / 1.93 s | 1.65 / 2.11 s | 59 / 59.9 | 58.8 / 59.5 |
-| Samsung Note 9 (Adreno 630), Chrome, over USB | Lean 2D / 3D | **PENDING** | | | | |
+| Samsung Note 9 (Adreno 630), Chrome, over USB | Full 2D / 3D | 3.59 / 3.66 s | 2.08 / 2.57 s | 2.33 / 2.39 s | 59.9 / 60 | 59.5 / 59.5 |
+| Samsung Note 9 (Adreno 630), Chrome, over USB | Lean 2D / 3D | 2.84 / 3.12 s | 1.85 / 2.12 s | 1.74 / 2.14 s | 59.9 / 60 | 59.5 / 59.5 |
 | iPhone, iOS 26.5, Chrome (WebKit), Low Power Mode **on** | Full 2D / 3D | n/a (tunnel) | 0.42 / 0.52 s | – | capped at 30 | – |
 | iPhone, Low Power Mode off | All four | **PENDING** | | | | |
 | Low-end Android (owner's) | All four | **PENDING** | | | | |
 
 Notes on these numbers:
-- The Note 9's FPS was measured before the Unity frame counter existed. On every later run, Unity fps and browser fps matched exactly, so the Note 9 figures stand.
+- Unity fps and browser fps matched on every run (desktop and Note 9), so Unity kept pace with the display everywhere measured.
+- On the Note 9, the lean builds start 0.2 to 0.5 s sooner (less code to compile), and frame rate is identical.
 - iOS Low Power Mode caps every browser at 30 fps, so that run says nothing about the iPhone's frame rate. Its startup (about 0.5 s) is still the fastest of any device.
 - Phone downloads over USB or the tunnel are not network-realistic. The **startup** column is the device's own cost.
 
