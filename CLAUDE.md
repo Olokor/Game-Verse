@@ -74,7 +74,7 @@ Unity is C#. With a C# backend, every game's rules, AI helpers and deterministic
 - OpenAPI via `Microsoft.AspNetCore.OpenApi`, browsed with Scalar in development. TypeScript client generated with `openapi-typescript` + `openapi-fetch`. Unity uses the DTOs from `GameVerse.Contracts` directly, so no generated C# client is needed.
 - Rate limiting: built-in `Microsoft.AspNetCore.RateLimiting`.
 - Validation: FluentValidation on request models.
-- Logging and tracing: Serilog (JSON to stdout), OpenTelemetry, Sentry (env-gated).
+- Logging and tracing: Serilog (JSON to stdout), OpenTelemetry. Error reporting: Sentry SDKs (API, web, Unity) sending to self-hosted GlitchTip, off unless a DSN is set, no PII; see ADR-0005.
 - Tests: **xUnit v3** on Microsoft.Testing.Platform (opted in via `global.json`; coverage via `dotnet test --coverage`), **Shouldly** for assertions, **Testcontainers** for real Postgres and Redis in integration tests, `WebApplicationFactory` for API tests. Rules library needs near-total branch coverage.
 - Code quality: `<Nullable>enable</Nullable>`, `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`, .NET analyzers on, `dotnet format` in CI. Module boundaries enforced with NetArchTest tests.
 
@@ -340,4 +340,7 @@ make web-spike     # Prompt 0.7 spike (throwaway): release Web builds of the 2D/
 # Linux/CI Unity tests: unity-editor -batchmode -nographics -projectPath apps/mobile -runTests -testPlatform EditMode -testResults TestResults/editmode.xml -logFile -
 make tokens        # regenerate design tokens (CSS, USS, C#) from packages/design-tokens/tokens.json
 make tokens-check  # fail if a token output is stale or missing a token
+make errors-up     # start self-hosted GlitchTip (error reporting, ADR-0005) on 127.0.0.1:8000
+make errors-setup  # create the GlitchTip admin, org and api/web/unity projects; print the DSNs for .env
+make errors-down   # stop GlitchTip (data kept)
 ```

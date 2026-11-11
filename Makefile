@@ -14,7 +14,7 @@ SHARED_LIBS := shared/GameVerse.Rules/GameVerse.Rules.csproj shared/GameVerse.Co
 REQUIRE_ENV = $(if $(wildcard .env),,$(error .env not found. Copy .env.example to .env first))
 
 .DEFAULT_GOAL := help
-.PHONY: help build test rules up down logs migrate schema tokens tokens-check install web web-test e2e unity-setup unity-test android device-check web-spike web-spike-sizes
+.PHONY: help build test rules up down logs migrate schema tokens tokens-check install web web-test e2e unity-setup unity-test android device-check web-spike web-spike-sizes errors-up errors-down errors-setup
 
 help: ## List targets
 	@echo make build    - build the solution - backend and shared
@@ -37,6 +37,9 @@ help: ## List targets
 	@echo make device-check - install the APK on the connected phone and print the rules self-check
 	@echo make web-spike  - Prompt 0.7 spike: release Web builds of the 2D and 3D test scenes into apps/web/public/unity
 	@echo make web-spike-sizes - print Brotli and raw sizes of the spike Web builds
+	@echo make errors-up    - start self-hosted GlitchTip error reporting on localhost:8000
+	@echo make errors-setup - create the GlitchTip admin, org and projects and print the DSNs
+	@echo make errors-down  - stop GlitchTip, data kept
 
 build: ## Build the whole solution
 	dotnet build $(SLN)
@@ -54,6 +57,15 @@ up: ## Start the local stack (migrations run automatically before api and worker
 
 down: ## Stop the local stack
 	docker compose down
+
+errors-up: ## Start self-hosted GlitchTip (error reporting, ADR-0005) on localhost:8000
+	docker compose --profile errors up -d --wait glitchtip
+
+errors-down: ## Stop GlitchTip (data kept)
+	docker compose --profile errors stop glitchtip glitchtip-postgres
+
+errors-setup: ## Create the GlitchTip admin, org and api/web/unity projects; print the DSNs for .env
+	node infrastructure/scripts/glitchtip-setup.mjs
 
 logs: ## Follow api and worker logs
 	docker compose logs -f api worker

@@ -139,6 +139,15 @@ Report: build size (Brotli), load time, and give me a checklist to test it on a 
 After I report back the numbers, write ADR-0002 deciding which game types ship on web.
 ```
 
+
+### Prompt 0.8: Error-reporting baseline (owner-approved addition, 2026-11-11)
+```
+Add error reporting before Phase 1 so every feature starts with it. Sentry SDKs everywhere, sending to self-hosted GlitchTip
+(docker compose profile, `make errors-up` / `make errors-setup`). API: global ProblemDetails exception handling (no exception
+detail in responses), env-gated Sentry + Serilog sink, no PII. Web: designed error screen, error boundary + router errorElement,
+reporting module. Unity: Sentry Unity SDK configured from ProjectSetup, on-device check. Tests for each, plus an end-to-end check
+that events arrive in GlitchTip. Record the decision as ADR-0005.
+```
 ---
 
 ## Phase 1: Platform core + Ludo vertical slice (week 3 to 7)

@@ -7,7 +7,10 @@ namespace GameVerse.Api.IntegrationTests;
 /// Hosts the real API in-process against the Testcontainers stack. Settings are passed with UseSetting,
 /// which the API reads through its normal configuration (same keys as the GameVerse__ environment variables).
 /// </summary>
-public sealed class GameVerseApiFactory(StackFixture stack, IReadOnlyDictionary<string, string?>? overrides = null)
+public sealed class GameVerseApiFactory(
+    StackFixture stack,
+    IReadOnlyDictionary<string, string?>? overrides = null,
+    Action<IWebHostBuilder>? configure = null)
     : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -21,5 +24,7 @@ public sealed class GameVerseApiFactory(StackFixture stack, IReadOnlyDictionary<
         {
             builder.UseSetting(key, value);
         }
+
+        configure?.Invoke(builder);
     }
 }
