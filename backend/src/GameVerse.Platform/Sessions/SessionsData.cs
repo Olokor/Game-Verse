@@ -23,8 +23,14 @@ internal sealed class GameSession
     /// <summary>Variant, house rules and AI level as JSON (jsonb).</summary>
     public string ConfigJson { get; set; } = "{}";
 
-    /// <summary>Hash of the dice seed, published at creation for commit-reveal (filled by Ludo in Prompt 1.3).</summary>
+    /// <summary>SHA-256 (hex) of <see cref="SeedSecret"/>, published at creation for commit-reveal (ADR-0008).</summary>
     public string? SeedCommitment { get; set; }
+
+    /// <summary>
+    /// 32 random bytes the dice seed is derived from. Server-only: never sent to a client until the session has ended
+    /// (GET /sessions/{id}/fairness). Null for games without server randomness.
+    /// </summary>
+    public byte[]? SeedSecret { get; set; }
 
     public Guid CreatedBy { get; set; }
 
@@ -113,6 +119,7 @@ internal sealed class GameSessionConfiguration : IEntityTypeConfiguration<GameSe
         builder.Property(s => s.Status).HasMaxLength(20).IsRequired();
         builder.Property(s => s.ConfigJson).HasColumnType("jsonb").IsRequired();
         builder.Property(s => s.SeedCommitment).HasMaxLength(128);
+        builder.Property(s => s.SeedSecret).HasMaxLength(32);
         builder.HasIndex(s => new { s.CreatedBy, s.Status });
         builder.HasMany(s => s.Players).WithOne().HasForeignKey(p => p.SessionId).OnDelete(DeleteBehavior.Cascade);
     }

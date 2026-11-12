@@ -35,7 +35,16 @@ public class SessionsTests(StackFixture stack)
         m.GetProperty("localPlayerId").GetString().ShouldBe(guest.UserId);
         m.GetProperty("config").GetProperty("aiLevel").GetInt32().ShouldBe(2);
         m.GetProperty("realtime").ValueKind.ShouldBe(JsonValueKind.Null);
-        m.GetProperty("initialState").ValueKind.ShouldBe(JsonValueKind.Null);
+
+        // The initial state is seat 0's view of a fresh game: board and rules, never the dice PRNG.
+        var state = m.GetProperty("initialState");
+        state.GetProperty("colors").EnumerateArray().Select(c => c.GetInt32()).ShouldBe([0, 1, 2, 3]);
+        state.GetProperty("tokens").EnumerateArray().ShouldAllBe(seat => seat.EnumerateArray().All(t => t.GetInt32() == -1));
+        state.GetProperty("currentSeat").GetInt32().ShouldBe(0);
+        state.GetProperty("phase").GetString().ShouldBe("roll");
+        state.GetProperty("rules").GetProperty("sixToLeaveBase").GetBoolean().ShouldBeTrue();
+        state.GetProperty("rules").GetProperty("placings").GetInt32().ShouldBe(1);
+        state.EnumerateObject().Select(p => p.Name).ShouldNotContain(n => n.Contains("rng", StringComparison.OrdinalIgnoreCase) || n.Contains("seed", StringComparison.OrdinalIgnoreCase));
 
         var players = m.GetProperty("players").EnumerateArray().ToList();
         players.Count.ShouldBe(4);

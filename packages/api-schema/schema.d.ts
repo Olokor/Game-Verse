@@ -852,6 +852,53 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/sessions/{sessionId}/fairness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Dice commit-reveal: the seed commitment always, the secret and seed once the session has ended (participants only) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    sessionId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionFairness"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/sessions/me": {
         parameters: {
             query?: never;
@@ -954,7 +1001,7 @@ export interface components {
             variant?: null | string;
             /**
              * @description Gets or sets house-rule toggles as strings (e.g. "sixToLeaveBase": "true"). Each game's engine parses and
-             *     validates its own (Ludo: Prompt 1.3).
+             *     validates its own; Ludo's keys are in `GameVerse.Contracts.Ludo.LudoHouseRules`.
              */
             houseRules: {
                 [key: string]: string;
@@ -1120,6 +1167,23 @@ export interface components {
              * @description Gets or sets the AI difficulty for vs AI modes.
              */
             aiLevel?: null | number | string;
+        };
+        /**
+         * @description Dice fairness by commit-reveal (ADR-0008). The commitment (SHA-256 of a 32-byte server secret) is published when the
+         *     session is created; the secret and the seed derived from it are revealed only once the session has ended, so anyone
+         *     can check the commitment and replay every roll with GameVerse.Rules.
+         */
+        SessionFairness: {
+            /** @description Gets or sets the session id. */
+            sessionId: string;
+            /** @description Gets or sets the commitment as lowercase hex, or null for games without server randomness. */
+            commitment?: null | string;
+            /** @description Gets or sets a value indicating whether the secret is revealed (the session has ended). */
+            revealed: boolean;
+            /** @description Gets or sets the secret as lowercase hex, once revealed. */
+            secret?: null | string;
+            /** @description Gets or sets the PRNG seed derived from the secret, as a decimal string (it exceeds JSON's safe integers). */
+            seed?: null | string;
         };
         /** @description The full manifest a game module reads, with its own config and state types. */
         SessionManifestOfSessionConfigOfDictionaryOfstringAndstringAndObject: {

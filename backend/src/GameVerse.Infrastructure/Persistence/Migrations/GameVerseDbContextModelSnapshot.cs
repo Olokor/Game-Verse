@@ -436,6 +436,11 @@ namespace GameVerse.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("seed_commitment");
 
+                    b.Property<byte[]>("SeedSecret")
+                        .HasMaxLength(32)
+                        .HasColumnType("bytea")
+                        .HasColumnName("seed_secret");
+
                     b.Property<DateTimeOffset?>("StartedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("started_at");

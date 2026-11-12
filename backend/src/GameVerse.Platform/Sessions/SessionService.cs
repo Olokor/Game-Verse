@@ -1,9 +1,11 @@
 using System.Globalization;
+using System.Security.Cryptography;
 using System.Text.Json;
 using GameVerse.Contracts.Catalog;
 using GameVerse.Contracts.Session;
 using GameVerse.Platform.Catalog;
 using GameVerse.Platform.Profiles;
+using GameVerse.Rules.Random;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameVerse.Platform.Sessions;
@@ -18,6 +20,7 @@ public enum CreateSessionError
     NotPlayable,
     UnknownMode,
     BadPlayerCount,
+    BadHouseRules,
 }
 
 public enum AppendMoveResult
@@ -48,6 +51,15 @@ public interface ISessionService
 
     /// <summary>The manifest for a participant, or null when the session is unknown or the user is not seated in it.</summary>
     Task<SessionManifest<SessionConfig<Dictionary<string, string>>, JsonElement?>?> GetManifestAsync(Guid sessionId, Guid localUserId, CancellationToken ct = default);
+
+    /// <summary>
+    /// The dice seed used by the server's engine (the authority, e.g. the Realtime match host). Null when the session is
+    /// unknown or the game has no server randomness. Never expose this to a client before the session ends.
+    /// </summary>
+    Task<ulong?> GetSeedAsync(Guid sessionId, CancellationToken ct = default);
+
+    /// <summary>Commit-reveal data for a participant (secret only after the end), or null for non-participants.</summary>
+    Task<SessionFairness?> GetFairnessAsync(Guid sessionId, Guid userId, CancellationToken ct = default);
 }
 
 internal sealed class SessionService(DbContext db, ICatalog catalog, IProfileService profiles, TimeProvider time) : ISessionService
@@ -79,6 +91,14 @@ internal sealed class SessionService(DbContext db, ICatalog catalog, IProfileSer
             return (null, CreateSessionError.BadPlayerCount);
         }
 
+        if (GameSetups.HouseRulesError(game.Id, config.HouseRules, seats.Count) is not null)
+        {
+            return (null, CreateSessionError.BadHouseRules);
+        }
+
+        // Commit-reveal (ADR-0008): the secret stays on the server until the end; only its hash is published now.
+        var secret = GameSetups.UsesServerRandomness(game.Id) ? RandomNumberGenerator.GetBytes(SeedCommitment.SecretLength) : null;
+
         var now = time.GetUtcNow();
         var online = mode.Kind is ModeKinds.OnlineRanked or ModeKinds.OnlinePrivate;
         var session = new GameSession
@@ -93,6 +113,8 @@ internal sealed class SessionService(DbContext db, ICatalog catalog, IProfileSer
             CreatedBy = createdBy,
             CreatedAt = now,
             StartedAt = online ? null : now,
+            SeedSecret = secret,
+            SeedCommitment = secret is null ? null : SeedCommitment.Commit(secret),
         };
 
         for (var seat = 0; seat < seats.Count; seat++)
@@ -200,6 +222,12 @@ internal sealed class SessionService(DbContext db, ICatalog catalog, IProfileSer
             return null;
         }
 
+        var config = JsonSerializer.Deserialize<SessionConfig<Dictionary<string, string>>>(session.ConfigJson, Json)!;
+        var localSeat = session.Players.First(p => p.UserId == localUserId).Seat;
+        var initialState = session.SeedSecret is { } secret
+            ? GameSetups.InitialState(session.GameId, config.HouseRules, session.Players.Count, SeedCommitment.DeriveSeed(secret), localSeat)
+            : null;
+
         return new SessionManifest<SessionConfig<Dictionary<string, string>>, JsonElement?>
         {
             GameId = session.GameId,
@@ -216,9 +244,37 @@ internal sealed class SessionService(DbContext db, ICatalog catalog, IProfileSer
                 // TODO(gameverse): equipped cosmetics from the Economy inventory (Prompt 2.2).
                 Cosmetics = [],
             }).ToList(),
-            Config = JsonSerializer.Deserialize<SessionConfig<Dictionary<string, string>>>(session.ConfigJson, Json)!,
-            InitialState = null, // the game engine builds it (Ludo: Prompt 1.3)
+            Config = config,
+            InitialState = initialState, // the local seat's view: never the dice PRNG
             Realtime = null, // online sessions get the socket URL and ticket in Prompt 1.4
+        };
+    }
+
+    public async Task<ulong?> GetSeedAsync(Guid sessionId, CancellationToken ct = default)
+    {
+        var secret = await db.Set<GameSession>().Where(s => s.Id == sessionId).Select(s => s.SeedSecret).SingleOrDefaultAsync(ct).ConfigureAwait(false);
+        return secret is null ? null : SeedCommitment.DeriveSeed(secret);
+    }
+
+    public async Task<SessionFairness?> GetFairnessAsync(Guid sessionId, Guid userId, CancellationToken ct = default)
+    {
+        var session = await db.Set<GameSession>().AsNoTracking()
+            .Where(s => s.Id == sessionId && s.Players.Any(p => p.UserId == userId))
+            .Select(s => new { s.Status, s.SeedCommitment, s.SeedSecret })
+            .SingleOrDefaultAsync(ct).ConfigureAwait(false);
+        if (session is null)
+        {
+            return null;
+        }
+
+        var revealed = session.SeedSecret is not null && session.Status is SessionStatuses.Finished or SessionStatuses.Abandoned;
+        return new SessionFairness
+        {
+            SessionId = sessionId.ToString(),
+            Commitment = session.SeedCommitment,
+            Revealed = revealed,
+            Secret = revealed ? SeedCommitment.ToHex(session.SeedSecret!) : null,
+            Seed = revealed ? SeedCommitment.DeriveSeed(session.SeedSecret!).ToString(CultureInfo.InvariantCulture) : null,
         };
     }
 
