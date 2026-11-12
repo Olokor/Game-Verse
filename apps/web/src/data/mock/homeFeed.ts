@@ -1,57 +1,48 @@
-// TODO(gameverse): static mock data until the API exists. Catalog arrives in Prompt 1.2, quests and
-// progression in 2.1, friends in 2.3. Replace getHomeFeed() in src/data/api.ts; screens need no change.
-import type { CategorySummary, GameSummary, HomeFeed } from '../types';
+// TODO(gameverse): mock data. Games now come from the catalog API (src/data/catalog.ts); these mocks remain for the
+// component gallery (/dev/components) and for the Home sections without an API yet: quests (Prompt 2.1) and friends
+// (2.3). They mention only playable games, so the screen never contradicts the catalog.
+import type { Friend, GameSummary, HomeFeed, Quest } from '../types';
 
+/** Gallery examples covering every card state (playable, coming soon, badges, live count). */
 export const mockGames: Record<string, GameSummary> = {
-  ludo: { id: 'ludo', title: 'Ludo', category: 'board', tagline: 'Roll, race, capture. 2 to 4 players.', livePlayers: 12840, badge: 'event' },
-  whot: { id: 'whot', title: 'Whot', category: 'cards', tagline: 'The Naija card classic. Hold on, pick two.', livePlayers: 8420, badge: 'new' },
-  draughts: { id: 'draughts', title: 'Draughts', category: 'board', tagline: 'Jump, crown, clear the board.', livePlayers: 3150 },
-  chess: { id: 'chess', title: 'Chess', category: 'brain', tagline: 'Rated games with clocks.', livePlayers: 5210 },
-  'twin-lanes': { id: 'twin-lanes', title: 'Twin Lanes', category: 'arcade', tagline: 'Two cars, one brain.', livePlayers: 2290 },
-  wahala: { id: 'wahala', title: 'Wahala', category: 'adventure', tagline: 'Every level lies to you.', livePlayers: 940 },
-  downhill: { id: 'downhill', title: 'Downhill', category: 'racing', tagline: 'Race your own ghost to the bottom.', livePlayers: 610 },
-  'stickman-combat': { id: 'stickman-combat', title: 'Stickman Combat', category: 'fight', tagline: 'Combo through the campaign.', livePlayers: 1330 },
+  ludo: { id: 'ludo', title: 'Ludo', category: 'board', tagline: 'Roll, race, capture. 2 to 4 players.', playable: true, livePlayers: 12840, badge: 'event' },
+  whot: { id: 'whot', title: 'Whot', category: 'cards', tagline: 'The Naija card classic. Hold on, pick two.', playable: true, badge: 'new' },
+  draughts: { id: 'draughts', title: 'Draughts', category: 'board', tagline: 'Jump, crown, clear the board.', playable: false },
+  chess: { id: 'chess', title: 'Chess', category: 'brain', tagline: 'Rated games with clocks.', playable: false },
+  'twin-lanes': { id: 'twin-lanes', title: 'Twin Lanes', category: 'arcade', tagline: 'Two cars, one brain.', playable: false },
+  wahala: { id: 'wahala', title: 'Wahala', category: 'adventure', tagline: 'Every level lies to you.', playable: false },
+  downhill: { id: 'downhill', title: 'Downhill', category: 'racing', tagline: 'Race your own ghost to the bottom.', playable: false },
+  'stickman-combat': { id: 'stickman-combat', title: 'Stickman Combat', category: 'fight', tagline: 'Combo through the campaign.', playable: false },
 };
 
-const g = (id: string): GameSummary => {
-  const game = mockGames[id];
-  if (!game) throw new Error(`mock game ${id} missing`);
-  return game;
-};
-
-export const mockCategories: CategorySummary[] = [
-  { category: 'board', label: 'Board', gameCount: 2 },
-  { category: 'cards', label: 'Cards', gameCount: 1 },
-  { category: 'brain', label: 'Brain', gameCount: 1 },
-  { category: 'arcade', label: 'Arcade', gameCount: 1 },
-  { category: 'racing', label: 'Racing', gameCount: 1 },
-  { category: 'fight', label: 'Fight', gameCount: 1 },
-  { category: 'adventure', label: 'Adventure', gameCount: 1 },
+export const mockQuests: Quest[] = [
+  { id: 'q1', title: 'Win 2 games of Ludo', progress: 1, goal: 2, reward: { kind: 'coin', amount: 150 }, claimed: false },
+  { id: 'q2', title: 'Play Ludo against the AI', progress: 1, goal: 1, reward: { kind: 'xp', amount: 200 }, claimed: false },
+  { id: 'q3', title: 'Capture 5 tokens', progress: 5, goal: 5, reward: { kind: 'coin', amount: 100 }, claimed: true },
 ];
 
+export const mockQuestsResetInMinutes = 372;
+
+export const mockFriends: Friend[] = [
+  { id: 'f1', displayName: 'Tobi', rank: 'gold', presence: 'in-game', activity: 'Ludo' },
+  { id: 'f2', displayName: 'Adaeze', rank: 'diamond', presence: 'online' },
+  { id: 'f3', displayName: 'Kunle', rank: 'silver', presence: 'online' },
+  { id: 'f4', displayName: 'Halima', rank: 'platinum', presence: 'in-game', activity: 'Ludo' },
+  { id: 'f5', displayName: 'Emeka', rank: 'bronze', presence: 'offline' },
+];
+
+/** A complete feed for the gallery and tests that need one without the API. */
 export const mockHomeFeed: HomeFeed = {
-  featured: g('ludo'),
-  continuePlaying: [
-    { game: g('whot'), status: 'vs Tobi', yourTurn: true },
-    { game: g('chess'), status: 'Rated, 5+0, move 23' },
-    { game: g('twin-lanes'), status: 'Best 148, beat it' },
-    { game: g('draughts'), status: 'vs AI, level 3' },
-    { game: g('wahala'), status: 'Level 7 of 30' },
+  featured: mockGames.ludo,
+  comingSoon: [mockGames.draughts!, mockGames.chess!],
+  continuePlaying: [{ game: mockGames.ludo!, status: 'vs AI, level 2', yourTurn: true }],
+  quests: mockQuests,
+  questsResetInMinutes: mockQuestsResetInMinutes,
+  categories: [
+    { category: 'board', label: 'Board', gameCount: 2 },
+    { category: 'brain', label: 'Brain', gameCount: 1 },
   ],
-  quests: [
-    { id: 'q1', title: 'Win 2 games of Ludo', progress: 1, goal: 2, reward: { kind: 'coin', amount: 150 }, claimed: false },
-    { id: 'q2', title: 'Play a Whot match with a friend', progress: 1, goal: 1, reward: { kind: 'xp', amount: 200 }, claimed: false },
-    { id: 'q3', title: 'Score 100 in Twin Lanes', progress: 100, goal: 100, reward: { kind: 'coin', amount: 100 }, claimed: true },
-  ],
-  questsResetInMinutes: 372,
-  categories: mockCategories,
-  friends: [
-    { id: 'f1', displayName: 'Tobi', rank: 'gold', presence: 'in-game', activity: 'Whot' },
-    { id: 'f2', displayName: 'Adaeze', rank: 'diamond', presence: 'online' },
-    { id: 'f3', displayName: 'Kunle', rank: 'silver', presence: 'online' },
-    { id: 'f4', displayName: 'Halima', rank: 'platinum', presence: 'in-game', activity: 'Chess' },
-    { id: 'f5', displayName: 'Emeka', rank: 'bronze', presence: 'offline' },
-  ],
+  friends: mockFriends,
 };
 
 /** Mock local player for the shell header. TODO(gameverse): replace with the profile endpoint (Prompt 1.1/2.1). */

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Button } from './Button';
 import { CurrencyPill } from './CurrencyPill';
@@ -143,9 +143,25 @@ describe('GameCard', () => {
     renderUi(<GameCard game={whot} variant="hero" />);
     const link = await screen.findByRole('link', { name: 'Play Whot' });
     expect(link).toHaveAccessibleDescription(whot.tagline);
-    expect(link).toHaveTextContent('8.4K playing');
     expect(link).toHaveTextContent('Play now');
     expect(link.querySelector('button')).toBeNull();
+  });
+
+  it('shows a live player count only when there is real data', async () => {
+    renderUi(<GameCard game={whot} variant="hero" />);
+    expect(await screen.findByRole('link', { name: 'Play Whot' })).not.toHaveTextContent('playing');
+    cleanup();
+    renderUi(<GameCard game={mockGames.ludo!} variant="hero" />);
+    expect(await screen.findByRole('link', { name: 'Play Ludo' })).toHaveTextContent('12.8K playing');
+  });
+
+  it.each(['standard', 'compact'] as const)('%s coming-soon card is not a link and says so', async (variant) => {
+    const chess = mockGames.chess!;
+    renderUi(<GameCard game={chess} variant={variant} />);
+    const card = await screen.findByLabelText('Chess, coming soon');
+    expect(card.tagName).not.toBe('A');
+    expect(card).toHaveTextContent('Coming soon');
+    expect(screen.queryByRole('link')).toBeNull();
   });
 
   it('marks "your turn" with a chip, not only text', async () => {

@@ -73,6 +73,12 @@ Every game shares one registry (the catalog), one way to describe a play session
 - `POST /sessions` creates **offline sessions only** (`local`, `vs_ai`, `solo`) for an enabled game and an allowed player count. The caller takes seat 0.
 - Online sessions are created through `ISessionService` by private rooms and matchmaking.
 
+## Decisions: clients
+
+- **Web Home reads the catalog.** The first playable game is featured. A "More games coming" row and the `/games` list show coming-soon games as **non-interactive cards** (not links), with a "Coming soon" chip and muted art.
+- **No live player counts** until presence data exists (Realtime). Showing invented numbers would break CLAUDE.md's "never fake it".
+- **The OpenAPI document marks every non-nullable property as required** (`OpenApiRequiredProperties`), so the generated TypeScript types match what the API actually guarantees.
+
 ## Consequences
 
 - Turning a game on is a data change, not a deploy.

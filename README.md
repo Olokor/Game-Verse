@@ -3,7 +3,7 @@ GameVerse – A cross-platform gaming platform bringing together board, puzzle, 
 
 ## Status
 
-Phase 1 in progress (Ludo vertical slice): accounts and auth are done (Prompt 1.1, [ADR-0006](docs/architecture/adr-0006-accounts-and-auth.md)). Phase 0 (foundation) is complete: shared rules and contracts libraries (`shared/`), the backend skeleton (`backend/`), design tokens (`packages/design-tokens/`), the web shell (`apps/web/`) and the Unity project (`apps/mobile/`) are in place. Stack: C# end to end (.NET 10 backend, Unity 6 client, shared `GameVerse.Rules` library), see [ADR-0001](docs/architecture/adr-0001-core-technology-stack.md).
+Phase 1 in progress (Ludo vertical slice): accounts and auth (Prompt 1.1, [ADR-0006](docs/architecture/adr-0006-accounts-and-auth.md)) and the game catalog and sessions (Prompt 1.2, [ADR-0007](docs/architecture/adr-0007-catalog-and-sessions.md)) are done. Phase 0 (foundation) is complete: shared rules and contracts libraries (`shared/`), the backend skeleton (`backend/`), design tokens (`packages/design-tokens/`), the web shell (`apps/web/`) and the Unity project (`apps/mobile/`) are in place. Stack: C# end to end (.NET 10 backend, Unity 6 client, shared `GameVerse.Rules` library), see [ADR-0001](docs/architecture/adr-0001-core-technology-stack.md).
 
 ## Build and test
 
@@ -26,7 +26,7 @@ make web-test  # typecheck + Vitest
 make e2e       # Playwright smoke + screenshots at 360x800 and 1440x900 (first run: pnpm --filter @gameverse/web exec playwright install chromium)
 ```
 
-React 19, TypeScript, Vite, Tailwind v4 on the generated design tokens, Radix, Motion, TanStack Query, Zustand and React Router. Home runs on mock data until the API exists; every mock is marked `TODO(gameverse)`.
+React 19, TypeScript, Vite, Tailwind v4 on the generated design tokens, Radix, Motion, TanStack Query, Zustand and React Router. Home and `/games` read the game catalog from the API (`GET /catalog/games` through the typed client in `src/lib/api.ts`; run `make up` first, or set `VITE_API_URL`). Quests, friends and Continue playing are still mock until their prompts; every mock is marked `TODO(gameverse)`. Tests stub the API with `src/test/catalogFixture.ts`.
 
 ## Unity app
 

@@ -96,7 +96,7 @@ builder.Services.AddRateLimiter(limiter =>
     };
     AccountsModule.AddRateLimitPolicies(limiter, accountsOptions.RateLimits);
 });
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(openApi => openApi.AddSchemaTransformer<OpenApiRequiredProperties>());
 
 // TODO(gameverse): OpenTelemetry tracing (CLAUDE.md section 3) once there is real traffic (Phase 1). Errors: ADR-0005.
 var app = builder.Build();

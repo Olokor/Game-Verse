@@ -897,20 +897,20 @@ export interface components {
         /** @description The signed-in account. */
         AccountResponse: {
             /** @description Gets or sets the account id (UUID). */
-            userId?: string;
+            userId: string;
             /** @description Gets or sets a value indicating whether the account is a guest. */
-            isGuest?: boolean;
+            isGuest: boolean;
             /** @description Gets or sets the email, or null for guests. */
             email?: null | string;
             /** @description Gets or sets a value indicating whether the email has been verified. */
-            emailVerified?: boolean;
+            emailVerified: boolean;
             /**
              * @description Gets or sets a value indicating whether the player counts as under 18 (guests always do, CLAUDE.md
              *     section 7: chat is off for minors).
              */
-            isMinor?: boolean;
+            isMinor: boolean;
             /** @description Gets or sets when the account was created (ISO 8601, UTC). */
-            createdAt?: string;
+            createdAt: string;
         };
         /**
          * @description Tokens returned by every sign-in style call (ADR-0006). The access token is a short-lived JWT for the
@@ -919,17 +919,17 @@ export interface components {
          */
         AuthTokensResponse: {
             /** @description Gets or sets the account id (UUID). */
-            userId?: string;
+            userId: string;
             /** @description Gets or sets a value indicating whether the account is a guest (device-bound, no email). */
-            isGuest?: boolean;
+            isGuest: boolean;
             /** @description Gets or sets the access token (JWT, about 15 minutes). */
-            accessToken?: string;
+            accessToken: string;
             /** @description Gets or sets when the access token expires (ISO 8601, UTC). */
-            accessTokenExpiresAt?: string;
+            accessTokenExpiresAt: string;
             /** @description Gets or sets the refresh token, or null when it was set as a cookie (web). */
             refreshToken?: null | string;
             /** @description Gets or sets when the refresh token expires (ISO 8601, UTC). */
-            refreshTokenExpiresAt?: string;
+            refreshTokenExpiresAt: string;
         };
         /**
          * @description Starts an offline session (local pass-and-play, vs AI, solo) for the signed-in player, who takes seat 0. Online
@@ -937,14 +937,14 @@ export interface components {
          */
         CreateSessionRequest: {
             /** @description Gets or sets the catalog game id, e.g. "ludo". */
-            gameId?: string;
+            gameId: string;
             /** @description Gets or sets the catalog mode key, e.g. "vs-ai". */
-            mode?: string;
+            mode: string;
             /**
              * Format: int32
              * @description Gets or sets the number of seats (humans and AI), one of the mode's player counts.
              */
-            playerCount?: number | string;
+            playerCount: number | string;
             /**
              * Format: int32
              * @description Gets or sets the AI level 1 to 3 for vs AI modes (default 1).
@@ -956,7 +956,7 @@ export interface components {
              * @description Gets or sets house-rule toggles as strings (e.g. "sixToLeaveBase": "true"). Each game's engine parses and
              *     validates its own (Ludo: Prompt 1.3).
              */
-            houseRules?: {
+            houseRules: {
                 [key: string]: string;
             };
         };
@@ -968,40 +968,40 @@ export interface components {
         /** @description Asks for a password-reset code. Always accepted (202), whether or not the email has an account. */
         ForgotPasswordRequest: {
             /** @description Gets or sets the email address. */
-            email?: string;
+            email: string;
         };
         /** @description A game in the catalog (Prompt 1.2, ADR-0007). Shared by the web and Unity game lists. */
         GameInfo: {
             /** @description Gets or sets the game id (slug), e.g. "ludo". Also the SessionManifest gameId. */
-            id?: string;
+            id: string;
             /** @description Gets or sets the display title. */
-            title?: string;
+            title: string;
             /** @description Gets or sets the one-line pitch shown on cards. */
-            tagline?: string;
+            tagline: string;
             /** @description Gets or sets the category: board, cards, brain, arcade, adventure, racing or fight. */
-            category?: string;
+            category: string;
             /**
              * @description Gets or sets the accent as a design-token path (e.g. "color.category.board"), never a color value: each
              *     client resolves it with its own generated tokens.
              */
-            accentToken?: string;
+            accentToken: string;
             /** @description Gets or sets the current game version (SessionManifest gameVersion). */
-            version?: string;
+            version: string;
             /** @description Gets or sets the availability, one of GameStatuses. */
-            status?: string;
+            status: string;
             /** @description Gets or sets the ways to play, in display order. */
-            modes?: components["schemas"]["GameModeInfo"][];
+            modes: components["schemas"]["GameModeInfo"][];
         };
         /** @description One way to play a game. */
         GameModeInfo: {
             /** @description Gets or sets the mode key, unique within the game (e.g. "blitz-3-2"). */
-            key?: string;
+            key: string;
             /** @description Gets or sets the kind: local, vs_ai, online_ranked, online_private or solo (CLAUDE.md 4.2). */
-            kind?: string;
+            kind: string;
             /** @description Gets or sets the display label, e.g. "Quick match". */
-            label?: string;
+            label: string;
             /** @description Gets or sets the allowed player counts, humans and AI together (e.g. 2 and 4 for Ludo quick match). */
-            playerCounts?: (number | string)[];
+            playerCounts: (number | string)[];
         };
         /**
          * @description Response to creating a guest. string GuestCreatedResponse.DeviceSecret is shown exactly once; the client stores it in secure
@@ -1009,26 +1009,26 @@ export interface components {
          */
         GuestCreatedResponse: {
             /** @description Gets or sets the device secret. Never sent again. */
-            deviceSecret?: string;
+            deviceSecret: string;
             /** @description Gets or sets the account id (UUID). */
-            userId?: string;
+            userId: string;
             /** @description Gets or sets a value indicating whether the account is a guest (device-bound, no email). */
-            isGuest?: boolean;
+            isGuest: boolean;
             /** @description Gets or sets the access token (JWT, about 15 minutes). */
-            accessToken?: string;
+            accessToken: string;
             /** @description Gets or sets when the access token expires (ISO 8601, UTC). */
-            accessTokenExpiresAt?: string;
+            accessTokenExpiresAt: string;
             /** @description Gets or sets the refresh token, or null when it was set as a cookie (web). */
             refreshToken?: null | string;
             /** @description Gets or sets when the refresh token expires (ISO 8601, UTC). */
-            refreshTokenExpiresAt?: string;
+            refreshTokenExpiresAt: string;
         };
         /** @description Signs a guest back in on the device that created it. */
         GuestLoginRequest: {
             /** @description Gets or sets the guest's account id. */
-            guestId?: string;
+            guestId: string;
             /** @description Gets or sets the device secret returned when the guest was created. */
-            deviceSecret?: string;
+            deviceSecret: string;
         };
         HttpValidationProblemDetails: {
             type?: null | string;
@@ -1037,34 +1037,34 @@ export interface components {
             status?: null | number | string;
             detail?: null | string;
             instance?: null | string;
-            errors?: {
+            errors: {
                 [key: string]: string[];
             };
         };
         /** @description Signs in with email and password. */
         LoginRequest: {
             /** @description Gets or sets the email address. */
-            email?: string;
+            email: string;
             /** @description Gets or sets the password. */
-            password?: string;
+            password: string;
         };
         /** @description A seated player as the platform sees them. */
         PlayerSlot: {
             /** @description Gets or sets the player id (UUID). */
-            id?: string;
+            id: string;
             /** @description Gets or sets the display name. */
-            displayName?: string;
+            displayName: string;
             /**
              * Format: int32
              * @description Gets or sets the zero-based seat.
              */
-            seat?: number | string;
+            seat: number | string;
             /** @description Gets or sets equipped cosmetics, slot to cosmetic id (e.g. "diceSkin": "dice_neon"). */
-            cosmetics?: {
+            cosmetics: {
                 [key: string]: string;
             };
             /** @description Gets or sets a value indicating whether an AI controls this seat. */
-            isAI?: boolean;
+            isAI: boolean;
         };
         ProblemDetails: {
             type?: null | string;
@@ -1077,18 +1077,18 @@ export interface components {
         /** @description A player's public profile basics (Prompt 1.1). Frames, titles and stats come with Progression. */
         ProfileResponse: {
             /** @description Gets or sets the account id (UUID). */
-            userId?: string;
+            userId: string;
             /** @description Gets or sets the display name shown to other players. */
-            displayName?: string;
+            displayName: string;
             /** @description Gets or sets the avatar id, one of IReadOnlyList&lt;string&gt; ProfileAvatars.All. */
-            avatarId?: string;
+            avatarId: string;
         };
         /** @description Where and how to open the realtime socket. */
         RealtimeInfo: {
             /** @description Gets or sets the WebSocket URL, e.g. wss://api.gameverse.app/ws/play/{sessionId}. */
-            wsUrl?: string;
+            wsUrl: string;
             /** @description Gets or sets the single-use ticket, valid for 30 seconds. Never the JWT. */
-            ticket?: string;
+            ticket: string;
         };
         /**
          * @description Exchanges a refresh token for new tokens (the old one stops working). Web clients leave
@@ -1101,11 +1101,11 @@ export interface components {
         /** @description Sets a new password with the 6-digit code from the reset email. Signs out every session. */
         ResetPasswordRequest: {
             /** @description Gets or sets the email address. */
-            email?: string;
+            email: string;
             /** @description Gets or sets the 6-digit code. */
-            code?: string;
+            code: string;
             /** @description Gets or sets the new password (at least 10 characters). */
-            newPassword?: string;
+            newPassword: string;
         };
         /** @description The common config shape from CLAUDE.md 4.2. */
         SessionConfigOfDictionaryOfstringAndstring: {
@@ -1127,31 +1127,31 @@ export interface components {
             /** @description Gets or sets the initial state; may be absent when the game builds it from the config. */
             initialState?: unknown;
             /** @description Gets or sets the catalog game id, e.g. "ludo". */
-            gameId?: string;
+            gameId: string;
             /** @description Gets or sets the game build version the session was created for. */
-            gameVersion?: string;
+            gameVersion: string;
             /** @description Gets or sets the session id (UUID). */
-            sessionId?: string;
+            sessionId: string;
             /** @description Gets or sets the mode, one of GameModes. */
-            mode?: string;
+            mode: string;
             /** @description Gets or sets the id of the player on this device. */
-            localPlayerId?: string;
+            localPlayerId: string;
             /** @description Gets or sets the seated players. */
-            players?: components["schemas"]["PlayerSlot"][];
+            players: components["schemas"]["PlayerSlot"][];
             realtime?: null | components["schemas"]["RealtimeInfo"];
         };
         /** @description One of the player's sessions. */
         SessionSummary: {
             /** @description Gets or sets the session id. */
-            sessionId?: string;
+            sessionId: string;
             /** @description Gets or sets the game id. */
-            gameId?: string;
+            gameId: string;
             /** @description Gets or sets the mode key. */
-            mode?: string;
+            mode: string;
             /** @description Gets or sets the status, one of SessionStatuses. */
-            status?: string;
+            status: string;
             /** @description Gets or sets when the session was created (ISO 8601, UTC). */
-            createdAt?: string;
+            createdAt: string;
         };
         /** @description Changes the signed-in player's profile. Fields left null stay as they are. */
         UpdateProfileRequest: {
@@ -1166,19 +1166,19 @@ export interface components {
          */
         UpgradeRequest: {
             /** @description Gets or sets the email address. A 6-digit verification code is sent to it. */
-            email?: string;
+            email: string;
             /** @description Gets or sets the password: at least 10 characters, no other composition rules. */
-            password?: string;
+            password: string;
             /**
              * Format: int32
              * @description Gets or sets the birth year (four digits).
              */
-            birthYear?: number | string;
+            birthYear: number | string;
         };
         /** @description Confirms the signed-in account's email with the 6-digit code that was mailed to it. */
         VerifyEmailRequest: {
             /** @description Gets or sets the 6-digit code. */
-            code?: string;
+            code: string;
         };
     };
     responses: never;

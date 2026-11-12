@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { CloudOff, Gamepad2, LayoutGrid, ScrollText, UserPlus } from 'lucide-react';
+import { Clock, CloudOff, Gamepad2, LayoutGrid, ScrollText, UserPlus } from 'lucide-react';
 import { homeFeedKey, useHomeFeed } from '../../data/api';
-import type { CategorySummary, ContinueEntry, Friend, HomeFeed, Quest } from '../../data/types';
+import type { CategorySummary, ContinueEntry, Friend, GameSummary, HomeFeed, Quest } from '../../data/types';
 import { cn } from '../../lib/cn';
 import { usePlayerStore } from '../../stores/usePlayerStore';
 import { Button, buttonClasses } from '../../components/ui/Button';
@@ -79,13 +79,14 @@ function HomeLayout({ feed }: { feed: HomeFeed }) {
             </div>
           )}
           <ContinuePlaying entries={feed.continuePlaying} className="order-2 xl:order-none" />
-          <Categories categories={feed.categories} className="order-4 xl:order-none" />
+          <ComingSoonRow games={feed.comingSoon} className="order-4 xl:order-none" />
+          <Categories categories={feed.categories} className="order-5 xl:order-none" />
         </>
       }
       side={
         <>
           <DailyQuests quests={feed.quests} resetInMinutes={feed.questsResetInMinutes} className="order-3 xl:order-none" />
-          <FriendsOnline friends={feed.friends} className="order-5 xl:order-none" />
+          <FriendsOnline friends={feed.friends} className="order-6 xl:order-none" />
         </>
       }
     />
@@ -113,6 +114,33 @@ function ContinuePlaying({ entries, className }: { entries: ContinueEntry[]; cla
           ))}
         </ul>
       )}
+    </Section>
+  );
+}
+
+/** Listed games that are not playable yet (catalog status coming_soon). Hidden entirely when there are none. */
+function ComingSoonRow({ games, className }: { games: GameSummary[]; className?: string }) {
+  if (games.length === 0) return null;
+  return (
+    <Section
+      id="coming-soon"
+      title="More games coming"
+      aside={
+        <span className="inline-flex items-center gap-4 text-body-sm text-text-secondary">
+          <Clock className="size-12" aria-hidden="true" />
+          {games.length} on the way
+        </span>
+      }
+      action={{ label: 'All games', to: '/games' }}
+      className={className}
+    >
+      <ul className="scroll-row -mx-gutter-mobile flex gap-12 overflow-x-auto scroll-px-gutter-mobile px-gutter-mobile py-4 sm:-mx-gutter-tablet sm:scroll-px-gutter-tablet sm:px-gutter-tablet lg:mx-0 lg:grid lg:grid-cols-4 lg:overflow-visible lg:px-0 lg:py-0">
+        {games.map((g, i) => (
+          <li key={g.id} className={cn('w-2/5 shrink-0 sm:w-1/4 lg:w-auto', i >= 4 && 'lg:hidden')}>
+            <GameCard game={g} />
+          </li>
+        ))}
+      </ul>
     </Section>
   );
 }
