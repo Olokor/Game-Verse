@@ -1,6 +1,6 @@
 # ADR-0007: Game catalog and sessions data model
 
-- **Status:** Accepted (catalog part; the sessions part is added when it lands in Prompt 1.2)
+- **Status:** Accepted
 - **Date:** 2026-11-12
 - **Deciders:** Wisdom (owner: "Coming soon" for disabled games), Claude Code (tech lead: data model)
 
@@ -37,8 +37,45 @@ Every game shares one registry (the catalog), one way to describe a play session
 ### Naming
 "8 Ball Pool" is a third-party trademark (CLAUDE.md section 1). The pool game is seeded as **"Pool"** (`pool`) until the owner chooses its name; a test fails if the catalog ever contains "8 Ball".
 
+## Decisions: sessions
+
+### The session row
+- A `GameSession` records:
+  - game id and version;
+  - mode key (catalog) and mode kind (manifest vocabulary);
+  - status: `created`, `active`, `finished` or `abandoned`;
+  - config as jsonb (variant, house rules, AI level);
+  - creator and timestamps;
+  - a nullable `SeedCommitment` for Ludo's commit-reveal dice (Prompt 1.3).
+- Offline sessions start `active`. Online ones start `created` until a room or match fills.
+
+### Seats
+- A `SessionPlayer` is one seat. Humans carry their account id; AI and extra pass-and-play players carry none.
+- The display name is a **snapshot** taken at creation, so match history reads correctly after a rename or an account deletion.
+- There's no foreign key into `accounts`. Modules don't couple through each other's tables.
+
+### The move log is append-only, enforced by the database
+- `MoveLog (session, seq)` stores each accepted action as jsonb with its state version.
+- `seq` must be exactly the next number; duplicates and gaps are refused, and the primary key settles races.
+- A **Postgres trigger rejects every `UPDATE` and `DELETE`** on `sessions.move_logs`. Replays, disputes and score verification (CLAUDE.md 4.3) can trust the log even against an application bug or a manual query.
+- Actions are opaque JSON in Prompt 1.2. Each game's engine validates them before they're appended (Ludo: 1.3).
+
+### Results
+- `MatchResult` holds one row per session: outcome (`win`, `draw` or `abandoned`), winning seats, reason, and placements as jsonb. Writing it finishes the session.
+- A second result is refused, and no move can be appended after the finish.
+
+### Manifest
+- `GET /sessions/{id}/manifest` returns the Contracts `SessionManifest`. Its `mode` is the kind, and players come from the seat snapshots.
+- Only participants can read it; anyone else gets the same 404 as a missing session.
+- `cosmetics` is empty until Economy (2.2), `initialState` until the engine (1.3), and `realtime` until private rooms (1.4).
+
+### Creating sessions
+- `POST /sessions` creates **offline sessions only** (`local`, `vs_ai`, `solo`) for an enabled game and an allowed player count. The caller takes seat 0.
+- Online sessions are created through `ISessionService` by private rooms and matchmaking.
+
 ## Consequences
 
 - Turning a game on is a data change, not a deploy.
+- The move log can grow large: partitioning or archiving finished sessions' moves is a later operational task, not a schema change.
 - Clients style games from tokens, so a rebrand of category colors needs no catalog change.
 - Open question for the owner: the final name of the pool game.
