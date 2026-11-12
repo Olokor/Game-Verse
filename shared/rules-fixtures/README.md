@@ -70,8 +70,8 @@ Fields:
 |---|---|
 | `config` | the house-rule toggles: `sixToLeaveBase`, `threeSixesForfeit`, `captureBonus`, `mustCapture`, `safeSquares`, `quickMode`, `placings`, `teams`. Anything left out takes its Classic Naija default. |
 | `config.dice` | **test only**: the die values to roll, in order. Every listed value must be used. Once the list runs out, the dice come from the seeded PRNG again. |
-| actions | `{"roll": true}` or `{"move": tokenIndex}` |
-| `state` | `tokens` (4 per seat), `currentSeat`, `phase` (`roll`, `move` or `over`), `lastRoll`, `sixesInRow`, `finished` (seats in finishing order), `colors`, `hasDice` (false in a player's view), `moveNumber` |
+| actions | `{"roll": true}`, `{"move": tokenIndex}`, or `{"forfeit": true}` (resign, allowed out of turn) |
+| `state` | `tokens` (4 per seat), `currentSeat`, `phase` (`roll`, `move` or `over`), `lastRoll`, `sixesInRow`, `finished` (seats in finishing order), `left` (seats that forfeited, in order), `colors`, `hasDice` (false in a player's view), `moveNumber` |
 | `initialState` | the same fields. The dice there start from seed 1. |
 
 `seeded-dice.json` has no scripted dice. It pins the real PRNG rolls for seed 42.

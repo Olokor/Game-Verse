@@ -1,0 +1,18 @@
+{
+  "game": "ludo",
+  "name": "Placings 3 with 3 players is capped at 2",
+  "description": "Seat 0 is home; seat 1 finishing second ends the game.",
+  "config": {"placings": 3, "dice": [1]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"},
+    {"seat": 2, "playerId": "p2"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[56, 56, 56, 56], [56, 56, 56, 55], [-1, -1, -1, -1]], "currentSeat": 1, "finished": [0]},
+  "steps": [
+    {"seat": 1, "action": {"roll": true}, "expect": {}},
+    {"seat": 1, "action": {"move": 3}, "expect": {"state": {"phase": "over"}}}
+  ],
+  "outcome": {"kind": "win", "winningSeats": [0], "placements": [0, 1, 2], "reason": "all_tokens_home"}
+}

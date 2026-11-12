@@ -10,7 +10,8 @@ namespace GameVerse.Rules.Ludo
     /// dice PRNG.
     /// <list type="bullet">
     /// <item>Level 1: a random legal move.</item>
-    /// <item>Level 2: heuristics (capture, reach home, escape danger, safe squares, leave base, progress).</item>
+    /// <item>Level 2: integer heuristics, strongest first: capture, reach home, leave base, enter the home column, escape
+    /// danger, land on a safe square, progress.</item>
     /// <item>Level 3: expectimax over the next roll: each move is scored by the average position after the next
     /// player's best level-2 reply to each of the six dice.</item>
     /// </list>
@@ -56,6 +57,11 @@ namespace GameVerse.Rules.Ludo
             }
 
             var moves = LudoEngine.Candidates(state, seat, state.LastRoll);
+            if (moves.Count == 0)
+            {
+                throw new InvalidOperationException("A Move phase with no legal move is not a reachable state.");
+            }
+
             int clamped = System.Math.Max(MinLevel, System.Math.Min(MaxLevel, level));
             if (clamped == 1)
             {
@@ -128,7 +134,8 @@ namespace GameVerse.Rules.Ludo
             int actor = after.CurrentSeat;
             for (int die = 1; die <= 6; die++)
             {
-                var replies = LudoEngine.Candidates(after, actor, die);
+                bool forfeits = die == 6 && after.Config.ThreeSixesForfeit && after.SixesInRow >= 2;
+                var replies = forfeits ? new List<LudoMove>() : LudoEngine.Candidates(after, actor, die);
                 if (replies.Count == 0)
                 {
                     total += Position(after, seat);
@@ -161,13 +168,30 @@ namespace GameVerse.Rules.Ludo
             var outcome = Referee.Outcome(state);
             if (outcome != null)
             {
-                return Contains(outcome.WinningSeats, seat) ? WinScore : -WinScore;
+                // By final place: any place above last is a placing (placings 2-3) and beats every unfinished position;
+                // higher places beat lower ones. Last place is a loss.
+                int sides = state.Config.Teams ? 2 : state.PlayerCount;
+                int rank = state.Config.Teams ? (Contains(outcome.WinningSeats, seat) ? 0 : 1) : IndexOf(outcome.Placements, seat);
+                return rank >= sides - 1 ? -WinScore : WinScore - (rank * (WinScore / 4));
             }
 
-            int opponents = state.Config.Teams ? 2 : state.PlayerCount - 1;
+            int opponents = 0;
+            for (int other = 0; other < state.PlayerCount; other++)
+            {
+                if (!OnSide(state, seat, other) && !state.HasLeft(other))
+                {
+                    opponents++;
+                }
+            }
+
             int value = 0;
             for (int other = 0; other < state.PlayerCount; other++)
             {
+                if (state.HasLeft(other) && !OnSide(state, seat, other))
+                {
+                    continue; // a leaver's tokens are inert
+                }
+
                 int tokens = 0;
                 int color = state.Colors[other];
                 for (int t = 0; t < LudoBoard.TokensPerSeat; t++)
@@ -193,7 +217,7 @@ namespace GameVerse.Rules.Ludo
                     }
                 }
 
-                value += OnSide(state, seat, other) ? tokens : -tokens / opponents; // the average opponent
+                value += OnSide(state, seat, other) ? tokens : -tokens / System.Math.Max(1, opponents); // the average opponent
             }
 
             return value;
@@ -213,7 +237,7 @@ namespace GameVerse.Rules.Ludo
             int threats = 0;
             for (int other = 0; other < state.PlayerCount; other++)
             {
-                if (other == owner || (state.Config.Teams && other == LudoEngine.Partner(owner)))
+                if (other == owner || (state.Config.Teams && other == LudoEngine.Partner(owner)) || state.HasLeft(other))
                 {
                     continue;
                 }
@@ -225,7 +249,8 @@ namespace GameVerse.Rules.Ludo
                     int index = (other * LudoBoard.TokensPerSeat) + t;
                     if (ignore != null && Array.IndexOf(ignore, index) >= 0)
                     {
-                        continue; // about to be captured
+                        inBase = true; // about to be captured: back in base, where it threatens its start square
+                        continue;
                     }
 
                     int p = state.TokenAt(other, t);
@@ -259,6 +284,19 @@ namespace GameVerse.Rules.Ludo
 
         private static bool OnSide(LudoState state, int seat, int other) =>
             other == seat || (state.Config.Teams && other == LudoEngine.Partner(seat));
+
+        private static int IndexOf(IReadOnlyList<int> list, int value)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] == value)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
 
         private static bool Contains(IReadOnlyList<int> list, int value)
         {

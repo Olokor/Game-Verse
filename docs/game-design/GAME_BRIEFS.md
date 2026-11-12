@@ -13,27 +13,53 @@ Shared across every game:
 
 **Pitch:** The Ludo every Nigerian already knows, played the way their family plays it, with fair dice you can actually verify.
 
-**Core loop:** Roll, choose a token, move, capture, race all four home.
+**Core loop:** Roll, choose a token, move, capture, race all four home (all eight in teams).
 
 **Modes:** Local pass-and-play (2 to 4), vs AI (3 levels), online quick match (2 or 4 players), private room, teams 2v2.
 
-**House rules (room-configurable toggles):**
+**House rules (room-configurable toggles), defaults confirmed by the owner 2026-11-12 ("Classic Naija", ADR-0008):**
 - Six required to leave base (default on)
-- Rolling three sixes forfeits the turn
-- Capture grants a bonus roll
-- Must capture when possible (off by default)
-- Safe squares on/off
-- Quick mode: each player starts with one token already out
+- Rolling three sixes forfeits the turn; the third six isn't moved (default on)
+- Capture grants a bonus roll (default on)
+- Must capture when possible (default off)
+- Safe squares: the 4 start squares and 4 star squares (default on)
+- Quick mode: each player starts with one token already out (default off)
 
-**Authority:** Server rolls dice with commit-reveal (server publishes hash of seed before match, reveals after). Server validates every token move.
+**Always on:**
+- A six gives another roll.
+- An exact roll is needed to reach home.
+- Reaching home gives another roll.
+- There are no blocks: landing on a square captures every opponent token there.
 
-**AI:** Level 1 random legal move. Level 2 heuristic (capture > escape danger > progress). Level 3 expectimax over one roll.
+**Game end (players choose):**
+- `placings` is 1, 2 or 3: the game ends when that many players have finished. It's capped at players minus 1.
+- The default is 1: the first player home wins.
+- The rest rank by tokens home, then progress.
+
+**Teams 2v2:**
+- Partners sit opposite and never capture each other.
+- A finished player keeps rolling and moves the partner's tokens.
+- The team wins when all 8 tokens are home.
+
+**Leaving:**
+- A player may resign at any time. The server forfeits a seat after the disconnect grace window.
+- Leavers are skipped and rank last.
+- In teams, a leaver forfeits for the team.
+
+**Authority:**
+- The server rolls dice with commit-reveal. It publishes the hash of a secret at creation; the seed is derived from that secret, which is revealed via `/sessions/{id}/fairness` after the match.
+- The server validates every token move.
+
+**AI:**
+- Level 1: random legal move.
+- Level 2: heuristic (capture > reach home > leave base > enter home column > escape danger > safe square > progress).
+- Level 3: expectimax over one roll.
 
 **Feel:** Dice roll is the hero moment. Physical dice tumble with sound, token hops square by square with a small squash, capture sends the victim flying back to base with a comic sound. Board themes as cosmetics (classic wood, Ankara print, neon, marble).
 
 **Accessibility:** Token colors also carry a shape/pattern so colorblind players can play.
 
-**MVP:** 2 and 4 player online, private rooms, vs AI, local, default house rules plus 3 toggles.
+**MVP:** 2 and 4 player online, private rooms, vs AI, local (2 to 4, including 3 players). The engine already supports all 6 toggles, placings and teams 2v2; which of them online rooms expose at launch is a UI decision (Prompt 1.7).
 
 ---
 

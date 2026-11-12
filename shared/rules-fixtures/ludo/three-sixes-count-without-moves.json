@@ -1,0 +1,18 @@
+{
+  "game": "ludo",
+  "name": "Sixes with no legal move still count towards three in a row",
+  "description": "Seat 0's last tokens (51 and 53) cannot move a 6. Two sixes roll again with no move; the third forfeits the turn.",
+  "config": {"dice": [6, 6, 6]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[56, 56, 51, 53], [-1, -1, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"currentSeat": 0, "sixesInRow": 1}}},
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"currentSeat": 0, "sixesInRow": 2}}},
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"currentSeat": 1, "sixesInRow": 0, "lastRoll": 6}}}
+  ],
+  "outcome": {"kind": "none"}
+}

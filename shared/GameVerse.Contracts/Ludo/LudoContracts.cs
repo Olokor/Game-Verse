@@ -52,11 +52,27 @@ namespace GameVerse.Contracts.Ludo
         /// <summary>Gets or sets a value indicating whether quick mode is on.</summary>
         public bool QuickMode { get; set; }
 
-        /// <summary>Gets or sets how many players finish before the game ends.</summary>
+        /// <summary>Gets or sets how many players finish before the game ends (effective: capped at players minus 1, 1 for teams).</summary>
         public int Placings { get; set; }
 
         /// <summary>Gets or sets a value indicating whether this is a 2v2 team game.</summary>
         public bool Teams { get; set; }
+    }
+
+    /// <summary>
+    /// Ludo actions on the wire: <c>{"roll": true}</c>, <c>{"move": token}</c> (0 to 3; a finished team player's index
+    /// refers to the partner's token) or <c>{"forfeit": true}</c> (resign, allowed out of turn).
+    /// </summary>
+    public static class LudoActions
+    {
+        /// <summary>Property of a roll action.</summary>
+        public const string Roll = "roll";
+
+        /// <summary>Property of a move action; the value is the token index.</summary>
+        public const string Move = "move";
+
+        /// <summary>Property of a forfeit action.</summary>
+        public const string Forfeit = "forfeit";
     }
 
     /// <summary>
@@ -88,6 +104,9 @@ namespace GameVerse.Contracts.Ludo
 
         /// <summary>Gets or sets the seats that have finished, in order.</summary>
         public int[] Finished { get; set; } = System.Array.Empty<int>();
+
+        /// <summary>Gets or sets the seats that forfeited, in order (their tokens stay on the board, inert).</summary>
+        public int[] Left { get; set; } = System.Array.Empty<int>();
 
         /// <summary>Gets or sets the number of state changes so far.</summary>
         public int MoveNumber { get; set; }

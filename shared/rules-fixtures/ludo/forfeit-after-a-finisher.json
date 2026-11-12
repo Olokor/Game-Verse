@@ -1,0 +1,17 @@
+{
+  "game": "ludo",
+  "name": "Placings 2: when everyone else leaves, the finished player wins and the last one standing is second",
+  "description": "Seat 0 is home. Seat 1 resigns, leaving only seat 2 still playing, so the game ends.",
+  "config": {"placings": 2},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"},
+    {"seat": 2, "playerId": "p2"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[56, 56, 56, 56], [10, -1, -1, -1], [5, -1, -1, -1]], "currentSeat": 2, "finished": [0]},
+  "steps": [
+    {"seat": 1, "action": {"forfeit": true}, "expect": {"state": {"phase": "over"}}}
+  ],
+  "outcome": {"kind": "win", "winningSeats": [0], "placements": [0, 2, 1], "reason": "opponents_left"}
+}

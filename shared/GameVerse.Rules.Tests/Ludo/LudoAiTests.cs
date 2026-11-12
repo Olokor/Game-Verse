@@ -47,6 +47,16 @@ public class LudoAiTests
     }
 
     [Fact]
+    public void Level_3_values_finishing_second_when_placings_is_2()
+    {
+        // Rules-auditor case: seat 1 already finished. Bringing token 2 home (53 -> 56) earns a bonus roll that can finish
+        // seat 0 in second place, which ends the game in a good place for it, not a loss.
+        var positions = new[] { H, H, 53, 50, H, H, H, H, 10, B, B, B };
+        var state = new LudoState(new LudoConfig(placings: 2), LudoBoard.ColorsFor(3), positions, 0, LudoPhase.Move, 3, 0, [1], null, 0);
+        LudoAi.Choose(state, 0, 3, new Xoshiro256StarStar(1)).ShouldBe(LudoAction.Move(2));
+    }
+
+    [Fact]
     public void Rolls_in_the_roll_phase_and_refuses_out_of_turn()
     {
         var state = Engine.NewGame(LudoConfig.Default, Seats(2), 1);
@@ -107,9 +117,9 @@ public class LudoAiTests
     }
 
     [Theory]
-    [InlineData(3, 1, 85)] // measured 94/100
+    [InlineData(3, 1, 85)] // measured 95/100
     [InlineData(2, 1, 80)] // measured 89/100
-    [InlineData(3, 2, 55)] // measured 60/100
+    [InlineData(3, 2, 55)] // measured 59/100
     public void A_stronger_level_beats_a_weaker_one(int strong, int weak, int minWinsOf100)
     {
         var wins = 0;
