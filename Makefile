@@ -17,7 +17,7 @@ SHARED_LIBS := shared/GameVerse.Rules/GameVerse.Rules.csproj shared/GameVerse.Co
 REQUIRE_ENV = $(if $(wildcard .env),,$(error .env not found. Copy .env.example to .env first))
 
 .DEFAULT_GOAL := help
-.PHONY: help build test rules up down logs migrate schema tokens tokens-check install web web-test e2e unity-setup unity-test android device-check web-spike web-spike-sizes errors-up errors-down errors-setup
+.PHONY: help build test rules up down logs migrate schema tokens tokens-check install web web-test e2e unity-setup unity-test android device-check errors-up errors-down errors-setup
 
 help: ## List targets
 	@echo make build    - build the solution - backend and shared
@@ -38,8 +38,6 @@ help: ## List targets
 	@echo make unity-test  - Unity EditMode tests, headless, results in apps/mobile/TestResults
 	@echo make android     - IL2CPP ARM64 development APK in apps/mobile/Build/Android
 	@echo make device-check - install the APK on the connected phone and print the rules self-check
-	@echo make web-spike  - Prompt 0.7 spike: release Web builds of the 2D and 3D test scenes into apps/web/public/unity
-	@echo make web-spike-sizes - print Brotli and raw sizes of the spike Web builds
 	@echo make errors-up    - start self-hosted GlitchTip error reporting on localhost:8000
 	@echo make errors-setup - create the GlitchTip admin, org and projects and print the DSNs
 	@echo make errors-down  - stop GlitchTip, data kept
@@ -109,13 +107,6 @@ unity-test: rules ## Unity EditMode tests (headless)
 
 android: rules ## IL2CPP Android development build
 	node infrastructure/scripts/unity-batch.mjs $(UNITY_PROJECT)/Logs/android.log "GV_BUILD android" "result=Succeeded" -- "$(UNITY)" -batchmode -nographics -quit -projectPath $(UNITY_PROJECT) -buildTarget Android -executeMethod GameVerse.Editor.BuildScript.BuildAndroid
-
-web-spike: rules ## Prompt 0.7 spike: Web builds of the 2D and 3D test scenes (throwaway, removed with ADR-0002)
-	node infrastructure/scripts/unity-batch.mjs $(UNITY_PROJECT)/Logs/web-spike.log "GV_BUILD web-spike" "result=Succeeded" -- "$(UNITY)" -batchmode -nographics -quit -projectPath $(UNITY_PROJECT) -buildTarget WebGL -executeMethod GameVerse.Editor.BuildScript.BuildWebSpike
-	node infrastructure/scripts/web-spike-sizes.mjs apps/web/public/unity
-
-web-spike-sizes: ## Brotli and raw sizes of the spike Web builds
-	node infrastructure/scripts/web-spike-sizes.mjs apps/web/public/unity
 
 device-check: ## Install the APK on the USB-connected phone, launch it and print the GV_SELFCHECK line
 	node infrastructure/scripts/device-check.mjs "$(ADB)" $(UNITY_PROJECT)/Build/Android/GameVerse.apk

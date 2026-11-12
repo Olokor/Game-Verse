@@ -67,7 +67,7 @@ namespace GameVerse.Editor
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
 
-            // Web defaults, chosen for download size (Prompt 0.7 spike; ADR-0002 confirms or changes them). Per platform,
+            // Web defaults, chosen for download size (measured in the Prompt 0.7 spike; ADR-0002). Per platform,
             // so Android is unaffected. Brotli without decompression fallback means the server must send
             // Content-Encoding: br for *.br (see apps/web/vite-plugin-unity-brotli.ts).
             var web = NamedBuildTarget.WebGL;

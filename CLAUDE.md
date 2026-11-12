@@ -336,7 +336,6 @@ make unity-setup   # apply Unity project settings and generated assets (ProjectS
 make unity-test    # Unity EditMode tests headless (UNITY=path overrides the editor)
 make android       # IL2CPP ARM64 development APK -> apps/mobile/Build/Android/GameVerse.apk
 make device-check  # install on the USB phone, launch, require "GV_SELFCHECK prng ok" and GV_ERRORCHECK (event found in GlitchTip when sent)
-make web-spike     # Prompt 0.7 spike (throwaway): release Web builds of the 2D/3D test scenes -> apps/web/public/unity, prints sizes
 # Linux/CI Unity tests: unity-editor -batchmode -nographics -projectPath apps/mobile -runTests -testPlatform EditMode -testResults TestResults/editmode.xml -logFile -
 make tokens        # regenerate design tokens (CSS, USS, C#) from packages/design-tokens/tokens.json
 make tokens-check  # fail if a token output is stale or missing a token
