@@ -179,6 +179,228 @@
           }
         }
       }
+    },
+    "/auth/upgrade": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Turn the signed-in guest into an email account (same account id); mails a verification code",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpgradeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthTokensResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/email/verify": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Confirm the email of the signed-in account with the mailed 6-digit code",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyEmailRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/auth/email/resend": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Mail a new verification code",
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Sign in with email and password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthTokensResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/password/forgot": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Mail a password-reset code (always 202, whether or not the email has an account)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted"
+          }
+        }
+      }
+    },
+    "/auth/password/reset": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Set a new password with the mailed code; signs out every session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -248,6 +470,16 @@
           }
         },
         "description": "Tokens returned by every sign-in style call (ADR-0006). The access token is a short-lived JWT for the\r\nAuthorization header. The refresh token is in this body for Unity and other clients; web clients\r\n(header `X-GameVerse-Client: web`) get it as an httpOnly cookie instead and see `null` here."
+      },
+      "ForgotPasswordRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Gets or sets the email address."
+          }
+        },
+        "description": "Asks for a password-reset code. Always accepted (202), whether or not the email has an account."
       },
       "GuestCreatedResponse": {
         "type": "object",
@@ -347,6 +579,20 @@
           }
         }
       },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Gets or sets the email address."
+          },
+          "password": {
+            "type": "string",
+            "description": "Gets or sets the password."
+          }
+        },
+        "description": "Signs in with email and password."
+      },
       "ProblemDetails": {
         "type": "object",
         "properties": {
@@ -397,6 +643,57 @@
           }
         },
         "description": "Exchanges a refresh token for new tokens (the old one stops working). Web clients leave\r\nstring? RefreshRequest.RefreshToken empty; the cookie is used instead. Also the body of a logout."
+      },
+      "ResetPasswordRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Gets or sets the email address."
+          },
+          "code": {
+            "type": "string",
+            "description": "Gets or sets the 6-digit code."
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "Gets or sets the new password (at least 10 characters)."
+          }
+        },
+        "description": "Sets a new password with the 6-digit code from the reset email. Signs out every session."
+      },
+      "UpgradeRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Gets or sets the email address. A 6-digit verification code is sent to it."
+          },
+          "password": {
+            "type": "string",
+            "description": "Gets or sets the password: at least 10 characters, no other composition rules."
+          },
+          "birthYear": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the birth year (four digits).",
+            "format": "int32"
+          }
+        },
+        "description": "Turns the signed-in guest into an email account. The account id stays the same, so everything the guest earned\r\nstays attached. Only the birth year is asked, to decide whether the player is a minor (ADR-0006)."
+      },
+      "VerifyEmailRequest": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Gets or sets the 6-digit code."
+          }
+        },
+        "description": "Confirms the signed-in account's email with the 6-digit code that was mailed to it."
       }
     }
   },

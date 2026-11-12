@@ -1,6 +1,6 @@
 # ADR-0006: Accounts and auth
 
-- **Status:** Accepted (increment 1 of Prompt 1.1; email and profiles sections are added as they land)
+- **Status:** Accepted (increments 1 and 2 of Prompt 1.1; the profiles and deletion sections land with increment 3)
 - **Date:** 2026-11-12
 - **Deciders:** Wisdom (owner: email, age, deletion), Claude Code (tech lead: everything technical below)
 
@@ -47,7 +47,35 @@ Players are mostly on Android phones with unreliable mobile data, and many will 
 - Access tokens are always in the JSON body.
 - **Web** (`X-GameVerse-Client: web`) gets the refresh token as an `httpOnly; Secure; SameSite=Strict; Path=/auth` cookie, which page scripts can't read. Unity and other clients get it in the body.
 
-### Passwords (for upgraded accounts, increment 2)
+### Upgrading a guest to an email account
+- `POST /auth/upgrade {email, password, birthYear}`, for a signed-in guest only, converts **the same account id**. Anything a guest earned stays attached by construction.
+- It runs in one transaction: password, email, birth year and the guest flag change together.
+- Afterwards:
+  - the device secret is deleted;
+  - the guest sessions are revoked;
+  - a new session is returned;
+  - a verification code is mailed.
+- Email addresses are unique case-insensitively, enforced by a filtered unique index on `normalized_email`, so racing upgrades can't share one.
+- A taken address returns 409, and a non-guest returns 403.
+
+### Email codes
+- Verification and password reset use **6-digit codes**, not links: easier to type on a phone, and they need no web page.
+- Each code is stored as a salted SHA-256 hash, valid **15 minutes**, and burned after **5 wrong attempts**. A new code replaces the old one.
+- Reset:
+  - `POST /auth/password/forgot` always answers 202, so the response never reveals whether an address has an account;
+  - `POST /auth/password/reset` sets the password, clears lockout, marks the email verified (the player proved they read it), and **revokes every session**.
+- Email sign-in (`POST /auth/login`) gives the same 401 for an unknown email, a guest, a wrong password and a lockout.
+
+### Sending email
+- **Owner decision:** SMTP now. Development uses the owner's own mailbox if wanted; a transactional provider is chosen before deploy.
+- The sender is `IEmailSender` (Platform), implemented with MailKit (MIT) in Infrastructure and configured by `GameVerse__Email__{Host,Port,Security,Username,Password,From}`.
+- **Development default:** Mailpit (MIT), which catches every message (UI at http://127.0.0.1:8025). The integration tests run a Mailpit container and read the codes from its API.
+- **Personal Gmail:** `smtp.gmail.com:587`, StartTls, with an app password (`.env.example`).
+- **No host configured:** messages are dropped with a warning, and request bodies are never logged (they carry codes).
+- **A failed send never fails the request** (the player can ask again). It is logged at Error, which reaches GlitchTip.
+- Emails are plain text plus minimal HTML, with no tracking and no external content.
+
+### Passwords
 - Minimum 10 characters with no composition rules (NIST 800-63B).
 - Identity lockout after 5 failures, for 15 minutes.
 
@@ -72,5 +100,5 @@ Limits are configurable (`GameVerse__Auth__RateLimits__*`). Behind Traefik and C
 
 - Access tokens can't be revoked before they expire (15 minutes). Logout and reuse detection revoke refresh tokens, so a stolen access token is useful for at most 15 minutes.
 - A future game server only needs the public key.
-- Increment 2 adds email upgrade, verification, password reset and the SMTP sender (Mailpit in development, the owner's mailbox optional, a production provider before deploy).
+- **Before deploy:** choose a transactional email provider (cost, deliverability). Gmail suits development only, because of its daily send limits.
 - Increment 3 adds profiles and account deletion.

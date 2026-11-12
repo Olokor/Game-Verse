@@ -56,6 +56,7 @@ make migrate            # apply EF Core migrations on demand
 | `migrate` | one-shot container from the API image that applies migrations and exits |
 | `api` | ASP.NET Core API (`GameVerse__Role=api`) at `127.0.0.1:8080`: `/health`, `/auth/*` and `/accounts/me` (ADR-0006), `/ws/echo`, `/openapi/v1.json` |
 | `worker` | same image as `api` with `GameVerse__Role=worker`: runs the Hangfire job server |
+| `mailpit` | catches every email the API sends: inbox at http://127.0.0.1:8025 (codes for verification and password reset). Set `GAMEVERSE_EMAIL_*` in `.env` to send real mail instead |
 
 To run the API on the host instead (Scalar UI at `/scalar`, Hangfire dashboard at `/hangfire`, both Development and localhost only), start `postgres` and `redis` with `docker compose up -d postgres redis`, then `dotnet run --project backend/src/GameVerse.Api`.
 

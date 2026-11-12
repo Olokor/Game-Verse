@@ -37,6 +37,47 @@ public static class AccountsEndpoints
             .WithSummary("End the session the refresh token belongs to")
             .Produces(StatusCodes.Status204NoContent);
 
+        auth.MapPost("/upgrade", UpgradeAsync)
+            .RequireAuthorization()
+            .RequireRateLimiting(RateLimits.Create)
+            .Validate<UpgradeRequest>()
+            .WithSummary("Turn the signed-in guest into an email account (same account id); mails a verification code")
+            .Produces<AuthTokensResponse>()
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status409Conflict);
+
+        auth.MapPost("/email/verify", VerifyEmailAsync)
+            .RequireAuthorization()
+            .RequireRateLimiting(RateLimits.SignIn)
+            .Validate<VerifyEmailRequest>()
+            .WithSummary("Confirm the email of the signed-in account with the mailed 6-digit code")
+            .Produces(StatusCodes.Status204NoContent);
+
+        auth.MapPost("/email/resend", ResendAsync)
+            .RequireAuthorization()
+            .RequireRateLimiting(RateLimits.Email)
+            .WithSummary("Mail a new verification code")
+            .Produces(StatusCodes.Status202Accepted);
+
+        auth.MapPost("/login", LoginAsync)
+            .RequireRateLimiting(RateLimits.SignIn)
+            .Validate<LoginRequest>()
+            .WithSummary("Sign in with email and password")
+            .Produces<AuthTokensResponse>()
+            .ProducesProblem(StatusCodes.Status401Unauthorized);
+
+        auth.MapPost("/password/forgot", ForgotAsync)
+            .RequireRateLimiting(RateLimits.Email)
+            .Validate<ForgotPasswordRequest>()
+            .WithSummary("Mail a password-reset code (always 202, whether or not the email has an account)")
+            .Produces(StatusCodes.Status202Accepted);
+
+        auth.MapPost("/password/reset", ResetAsync)
+            .RequireRateLimiting(RateLimits.SignIn)
+            .Validate<ResetPasswordRequest>()
+            .WithSummary("Set a new password with the mailed code; signs out every session")
+            .Produces(StatusCodes.Status204NoContent);
+
         app.MapGet("/accounts/me", MeAsync)
             .RequireAuthorization()
             .WithTags("Accounts")
@@ -84,6 +125,82 @@ public static class AccountsEndpoints
         TokenDelivery.ClearCookie(http);
         return Results.NoContent();
     }
+
+    private static async Task<IResult> UpgradeAsync(UpgradeRequest request, HttpContext http, EmailAccountService accounts)
+    {
+        if (AccountClaims.UserId(http.User) is not { } userId)
+        {
+            return InvalidCredentials();
+        }
+
+        var (outcome, tokens, errors) = await accounts.UpgradeAsync(userId, request.Email, request.Password, request.BirthYear, http.RequestAborted).ConfigureAwait(false);
+        return outcome switch
+        {
+            UpgradeOutcome.Upgraded => Results.Ok(TokenDelivery.Deliver(http, tokens!, new AuthTokensResponse())),
+            UpgradeOutcome.NotAGuest => Results.Problem(statusCode: StatusCodes.Status403Forbidden, title: "Already an email account"),
+            UpgradeOutcome.EmailTaken => Results.Problem(statusCode: StatusCodes.Status409Conflict, title: "Email already in use", detail: "Sign in with that email, or use another one."),
+            UpgradeOutcome.InvalidPassword => Results.ValidationProblem(new Dictionary<string, string[]> { [nameof(UpgradeRequest.Password)] = errors.ToArray() }),
+            _ => InvalidCredentials(),
+        };
+    }
+
+    private static async Task<IResult> VerifyEmailAsync(VerifyEmailRequest request, HttpContext http, EmailAccountService accounts)
+    {
+        if (AccountClaims.UserId(http.User) is not { } userId)
+        {
+            return InvalidCredentials();
+        }
+
+        return CodeResult(await accounts.VerifyEmailAsync(userId, request.Code, http.RequestAborted).ConfigureAwait(false), nameof(VerifyEmailRequest.Code));
+    }
+
+    private static async Task<IResult> ResendAsync(HttpContext http, EmailAccountService accounts)
+    {
+        if (AccountClaims.UserId(http.User) is { } userId)
+        {
+            await accounts.ResendVerificationAsync(userId, http.RequestAborted).ConfigureAwait(false);
+        }
+
+        return Results.Accepted();
+    }
+
+    private static async Task<IResult> LoginAsync(LoginRequest request, HttpContext http, EmailAccountService accounts)
+    {
+        var tokens = await accounts.LoginAsync(request.Email, request.Password, http.RequestAborted).ConfigureAwait(false);
+        return tokens is null
+            ? Results.Problem(
+                statusCode: StatusCodes.Status401Unauthorized,
+                title: "Sign-in failed",
+                detail: "The email or password is not valid, or the account is locked for 15 minutes after too many attempts.")
+            : Results.Ok(TokenDelivery.Deliver(http, tokens, new AuthTokensResponse()));
+    }
+
+    private static async Task<IResult> ForgotAsync(ForgotPasswordRequest request, HttpContext http, EmailAccountService accounts)
+    {
+        await accounts.ForgotPasswordAsync(request.Email, http.RequestAborted).ConfigureAwait(false);
+        return Results.Accepted();
+    }
+
+    private static async Task<IResult> ResetAsync(ResetPasswordRequest request, HttpContext http, EmailAccountService accounts)
+    {
+        var (check, errors) = await accounts.ResetPasswordAsync(request.Email, request.Code, request.NewPassword, http.RequestAborted).ConfigureAwait(false);
+        var passwordErrors = errors.ToArray();
+        if (passwordErrors.Length > 0)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]> { [nameof(ResetPasswordRequest.NewPassword)] = passwordErrors });
+        }
+
+        return CodeResult(check, nameof(ResetPasswordRequest.Code));
+    }
+
+    /// <summary>A wrong, expired or exhausted code is a 400 on the code field; the message says what to do next.</summary>
+    private static IResult CodeResult(CodeCheck check, string field) => check switch
+    {
+        CodeCheck.Valid => Results.NoContent(),
+        CodeCheck.Expired => Results.ValidationProblem(new Dictionary<string, string[]> { [field] = ["The code has expired. Ask for a new one."] }),
+        CodeCheck.TooManyAttempts => Results.ValidationProblem(new Dictionary<string, string[]> { [field] = ["Too many wrong attempts. Ask for a new code."] }),
+        _ => Results.ValidationProblem(new Dictionary<string, string[]> { [field] = ["The code is not valid."] }),
+    };
 
     private static async Task<IResult> MeAsync(HttpContext http, IAccountDirectory directory)
     {
@@ -173,5 +290,45 @@ internal sealed class GuestLoginRequestValidator : AbstractValidator<GuestLoginR
     {
         RuleFor(r => r.GuestId).Must(id => Guid.TryParse(id, out _)).WithMessage("Must be a valid account id.");
         RuleFor(r => r.DeviceSecret).NotEmpty().MaximumLength(128);
+    }
+}
+
+internal sealed class UpgradeRequestValidator : AbstractValidator<UpgradeRequest>
+{
+    public UpgradeRequestValidator(TimeProvider time)
+    {
+        var year = time.GetUtcNow().Year;
+        RuleFor(r => r.Email).NotEmpty().MaximumLength(254).EmailAddress();
+        RuleFor(r => r.Password).NotEmpty().MinimumLength(10).MaximumLength(128);
+        RuleFor(r => r.BirthYear).InclusiveBetween(year - 100, year - 5).WithMessage("Enter the year you were born.");
+    }
+}
+
+internal sealed class LoginRequestValidator : AbstractValidator<LoginRequest>
+{
+    public LoginRequestValidator()
+    {
+        RuleFor(r => r.Email).NotEmpty().MaximumLength(254);
+        RuleFor(r => r.Password).NotEmpty().MaximumLength(128);
+    }
+}
+
+internal sealed class VerifyEmailRequestValidator : AbstractValidator<VerifyEmailRequest>
+{
+    public VerifyEmailRequestValidator() => RuleFor(r => r.Code).Matches("^[0-9]{6}$").WithMessage("Enter the 6-digit code.");
+}
+
+internal sealed class ForgotPasswordRequestValidator : AbstractValidator<ForgotPasswordRequest>
+{
+    public ForgotPasswordRequestValidator() => RuleFor(r => r.Email).NotEmpty().MaximumLength(254).EmailAddress();
+}
+
+internal sealed class ResetPasswordRequestValidator : AbstractValidator<ResetPasswordRequest>
+{
+    public ResetPasswordRequestValidator()
+    {
+        RuleFor(r => r.Email).NotEmpty().MaximumLength(254).EmailAddress();
+        RuleFor(r => r.Code).Matches("^[0-9]{6}$").WithMessage("Enter the 6-digit code.");
+        RuleFor(r => r.NewPassword).NotEmpty().MinimumLength(10).MaximumLength(128);
     }
 }

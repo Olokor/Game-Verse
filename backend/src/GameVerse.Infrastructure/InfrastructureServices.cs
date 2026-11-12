@@ -1,4 +1,6 @@
+using GameVerse.Infrastructure.Email;
 using GameVerse.Infrastructure.Persistence;
+using GameVerse.Platform;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Identity;
@@ -61,6 +63,23 @@ public static class InfrastructureServices
         services.AddHealthChecks()
             .AddNpgSql(connections.Postgres, name: "postgres", timeout: TimeSpan.FromSeconds(3))
             .AddRedis(connections.Redis, name: "redis", timeout: TimeSpan.FromSeconds(3));
+
+        return services;
+    }
+
+    /// <summary>SMTP email (MailKit) when a host is configured; otherwise a sender that drops messages with a warning.</summary>
+    public static IServiceCollection AddGameVerseEmail(this IServiceCollection services, EmailOptions email)
+    {
+        ArgumentNullException.ThrowIfNull(email);
+        services.AddSingleton(email);
+        if (email.IsConfigured)
+        {
+            services.AddSingleton<IEmailSender, SmtpEmailSender>();
+        }
+        else
+        {
+            services.AddSingleton<IEmailSender, UnconfiguredEmailSender>();
+        }
 
         return services;
     }

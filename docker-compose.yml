@@ -23,6 +23,14 @@ x-api-env: &api-env
   GameVerse__ConnectionStrings__Redis: redis:6379
   GameVerse__Log__Pretty: ${GAMEVERSE_LOG_PRETTY:-false}
   GameVerse__Auth__SigningKey: ${GAMEVERSE_AUTH_SIGNING_KEY:-}
+  # Email (ADR-0006): Mailpit catches everything by default (UI http://127.0.0.1:8025). Point these at a real SMTP
+  # server (your own Gmail with an app password, or a provider) in .env to send real mail.
+  GameVerse__Email__Host: ${GAMEVERSE_EMAIL_HOST:-mailpit}
+  GameVerse__Email__Port: ${GAMEVERSE_EMAIL_PORT:-1025}
+  GameVerse__Email__Security: ${GAMEVERSE_EMAIL_SECURITY:-None}
+  GameVerse__Email__Username: ${GAMEVERSE_EMAIL_USERNAME:-}
+  GameVerse__Email__Password: ${GAMEVERSE_EMAIL_PASSWORD:-}
+  GameVerse__Email__From: ${GAMEVERSE_EMAIL_FROM:-GameVerse <no-reply@gameverse.local>}
   # Error reporting (ADR-0005): empty = off. Inside this network GlitchTip is http://glitchtip:8000.
   GameVerse__ErrorReporting__Dsn: ${GAMEVERSE_ERROR_DSN_API:-}
   GameVerse__ErrorReporting__Environment: ${GAMEVERSE_ERROR_ENVIRONMENT:-development}
@@ -58,6 +66,14 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  # Development mail catcher (MIT): every email the API sends lands here, nothing leaves the machine.
+  mailpit:
+    image: axllent/mailpit:v1.32.0
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${MAILPIT_UI_PORT:-8025}:8025"
+      - "127.0.0.1:${MAILPIT_SMTP_PORT:-1025}:1025"
 
   # One-shot: applies EF Core migrations, then exits. api and worker wait for it.
   migrate:
