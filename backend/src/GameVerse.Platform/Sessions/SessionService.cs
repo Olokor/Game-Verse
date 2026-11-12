@@ -97,7 +97,7 @@ internal sealed class SessionService(DbContext db, ICatalog catalog, IProfileSer
         }
 
         // Commit-reveal (ADR-0008): the secret stays on the server until the end; only its hash is published now.
-        var secret = GameSetups.UsesServerRandomness(game.Id) ? RandomNumberGenerator.GetBytes(SeedCommitment.SecretLength) : null;
+        var secret = GameSetups.UsesServerRandomness(game.Id, mode.Kind) ? RandomNumberGenerator.GetBytes(SeedCommitment.SecretLength) : null;
 
         var now = time.GetUtcNow();
         var online = mode.Kind is ModeKinds.OnlineRanked or ModeKinds.OnlinePrivate;
@@ -224,8 +224,11 @@ internal sealed class SessionService(DbContext db, ICatalog catalog, IProfileSer
 
         var config = JsonSerializer.Deserialize<SessionConfig<Dictionary<string, string>>>(session.ConfigJson, Json)!;
         var localSeat = session.Players.First(p => p.UserId == localUserId).Seat;
-        var initialState = session.SeedSecret is { } secret
-            ? GameSetups.InitialState(session.GameId, config.HouseRules, session.Players.Count, SeedCommitment.DeriveSeed(secret), localSeat)
+        // The view never contains the dice PRNG, so a session without a server seed (pass-and-play) gets the same initial
+        // state from seed 0; its device seeds its own dice.
+        var initialState = GameSetups.HasInitialState(session.GameId)
+            ? GameSetups.InitialState(session.GameId, config.HouseRules, session.Players.Count,
+                session.SeedSecret is { } secret ? SeedCommitment.DeriveSeed(secret) : 0, localSeat)
             : null;
 
         return new SessionManifest<SessionConfig<Dictionary<string, string>>, JsonElement?>

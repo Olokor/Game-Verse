@@ -114,6 +114,20 @@ CLAUDE.md 4.5 forfeits a player after the disconnect grace window. The engine mo
    - Anyone can check `SHA-256(secret) == commitment` and replay every roll with `GameVerse.Rules`.
    - Before the end, it returns only the commitment.
 
+### Who hosts each mode (owner, 2026-11-12)
+
+A results-earning game must be decided by the server (CLAUDE.md 4.3 and 7), and only the server can roll committed dice.
+
+| Mode | Played where | Dice | Commitment | Result |
+|---|---|---|---|---|
+| `online_private`, `online_ranked` | Server match host (Prompt 1.4) | Server PRNG | Yes | Verified |
+| `vs_ai` | Server match host; the AI seats run `LudoAi` on the server | Server PRNG | Yes | Verified |
+| `local` (pass-and-play) | On the device, no connection needed | The device seeds its own PRNG | None | Client-reported, unverified |
+
+- **vs AI needs a connection.** The owner chose verified dice and safe rewards over offline vs-AI play.
+- **Pass-and-play stays offline.** Its manifest still carries the initial state, computed from seed 0. The view never holds the dice, so the seed doesn't change it.
+- **An unverified result never counts for anything competitive:** no rating and no leaderboard. How much XP or how many coins pass-and-play earns, if any, is decided with Progression (Prompt 2.1).
+
 ## Consequences
 
 - **Fixtures are the rulebook.** Changing a rule means changing a fixture in `shared/rules-fixtures/ludo/`. A disputed rule is settled by the fixture.

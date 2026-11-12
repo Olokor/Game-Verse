@@ -28,7 +28,7 @@ public static class SessionsModule
 
         sessions.MapPost("/", CreateAsync)
             .Validate<CreateSessionRequest>()
-            .WithSummary("Start an offline session (pass and play, vs AI, solo); returns its manifest")
+            .WithSummary("Start a single-owner session (pass and play, vs AI, solo); returns its manifest")
             .Produces<SessionManifest<SessionConfig<Dictionary<string, string>>, object?>>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status409Conflict);

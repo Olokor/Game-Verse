@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace GameVerse.Contracts.Session
 {
     /// <summary>
-    /// Starts an offline session (local pass-and-play, vs AI, solo) for the signed-in player, who takes seat 0. Online
+    /// Starts a single-owner session (local pass-and-play, vs AI, solo) for the signed-in player, who takes seat 0. Online
     /// sessions are created by private rooms and matchmaking instead (Prompts 1.4, 1.5).
     /// </summary>
     public class CreateSessionRequest

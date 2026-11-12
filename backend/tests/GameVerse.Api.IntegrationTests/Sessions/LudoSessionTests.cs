@@ -116,6 +116,25 @@ public class LudoSessionTests(StackFixture stack)
     }
 
     [Fact]
+    public async Task Pass_and_play_has_no_server_dice_but_still_gets_its_initial_state()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var api = AccountsApi.Start(stack);
+        var guest = await api.CreateGuestAsync(ct);
+
+        using var created = await PostAsync(api, guest.AccessToken, new CreateSessionRequest { GameId = "ludo", Mode = "pass-and-play", PlayerCount = 3 }, ct);
+
+        created.StatusCode.ShouldBe(HttpStatusCode.Created);
+        var manifest = (await created.Content.ReadFromJsonAsync<SessionManifest<SessionConfig<Dictionary<string, string>>, LudoStateDto>>(ct)).ShouldNotBeNull();
+        manifest.InitialState.ShouldNotBeNull().Colors.ShouldBe([0, 1, 2]);
+        var fairness = await GetFairnessAsync(api, $"/sessions/{manifest.SessionId}/fairness", guest.AccessToken, ct);
+        fairness.Commitment.ShouldBeNull("the device rolls pass-and-play dice itself, so there is nothing to commit to (ADR-0008)");
+        fairness.Revealed.ShouldBeFalse();
+        await using var scope = api.Factory.Services.CreateAsyncScope();
+        (await scope.ServiceProvider.GetRequiredService<ISessionService>().GetSeedAsync(Guid.Parse(manifest.SessionId), ct)).ShouldBeNull();
+    }
+
+    [Fact]
     public async Task Every_session_gets_its_own_secret()
     {
         var ct = TestContext.Current.CancellationToken;
