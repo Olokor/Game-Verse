@@ -502,6 +502,69 @@
           }
         }
       }
+    },
+    "/catalog/games": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "summary": "Every listed game with its modes (playable and coming soon)",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GameInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/games/{id}": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "summary": "One game with its modes",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -594,6 +657,77 @@
           }
         },
         "description": "Asks for a password-reset code. Always accepted (202), whether or not the email has an account."
+      },
+      "GameInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Gets or sets the game id (slug), e.g. \"ludo\". Also the SessionManifest gameId."
+          },
+          "title": {
+            "type": "string",
+            "description": "Gets or sets the display title."
+          },
+          "tagline": {
+            "type": "string",
+            "description": "Gets or sets the one-line pitch shown on cards."
+          },
+          "category": {
+            "type": "string",
+            "description": "Gets or sets the category: board, cards, brain, arcade, adventure, racing or fight."
+          },
+          "accentToken": {
+            "type": "string",
+            "description": "Gets or sets the accent as a design-token path (e.g. \"color.category.board\"), never a color value: each\r\nclient resolves it with its own generated tokens."
+          },
+          "version": {
+            "type": "string",
+            "description": "Gets or sets the current game version (SessionManifest gameVersion)."
+          },
+          "status": {
+            "type": "string",
+            "description": "Gets or sets the availability, one of GameStatuses."
+          },
+          "modes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameModeInfo"
+            },
+            "description": "Gets or sets the ways to play, in display order."
+          }
+        },
+        "description": "A game in the catalog (Prompt 1.2, ADR-0007). Shared by the web and Unity game lists."
+      },
+      "GameModeInfo": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Gets or sets the mode key, unique within the game (e.g. \"blitz-3-2\")."
+          },
+          "kind": {
+            "type": "string",
+            "description": "Gets or sets the kind: local, vs_ai, online_ranked, online_private or solo (CLAUDE.md 4.2)."
+          },
+          "label": {
+            "type": "string",
+            "description": "Gets or sets the display label, e.g. \"Quick match\"."
+          },
+          "playerCounts": {
+            "type": "array",
+            "items": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            },
+            "description": "Gets or sets the allowed player counts, humans and AI together (e.g. 2 and 4 for Ludo quick match)."
+          }
+        },
+        "description": "One way to play a game."
       },
       "GuestCreatedResponse": {
         "type": "object",
@@ -858,6 +992,9 @@
     },
     {
       "name": "Profiles"
+    },
+    {
+      "name": "Catalog"
     }
   ]
 }

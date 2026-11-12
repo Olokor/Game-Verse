@@ -5,6 +5,7 @@ using GameVerse.Infrastructure;
 using GameVerse.Infrastructure.Email;
 using GameVerse.Platform;
 using GameVerse.Platform.Accounts;
+using GameVerse.Platform.Catalog;
 using GameVerse.Platform.Profiles;
 using Hangfire;
 using Scalar.AspNetCore;
@@ -76,6 +77,7 @@ var accountsOptions = builder.Configuration.GetSection(AccountsOptions.Section).
 var signingKey = AccountsSigningKey.Create(accountsOptions.SigningKey, allowEphemeral: builder.Environment.IsDevelopment() || BuildTimeOpenApi.IsRunning);
 builder.Services.AddAccountsModule(accountsOptions, signingKey).AddGameVerseIdentityStores();
 builder.Services.AddProfilesModule();
+builder.Services.AddCatalogModule();
 builder.Services.AddPlatformValidators();
 builder.Services.AddGameVerseEmail(builder.Configuration.GetSection(EmailOptions.Section).Get<EmailOptions>() ?? new EmailOptions());
 builder.Services.AddRateLimiter(limiter =>
@@ -131,6 +133,7 @@ if (!options.IsWorker)
     app.MapEchoSocket();
     app.MapAccounts();
     app.MapProfiles();
+    app.MapCatalog();
     app.MapOpenApi();
 
     if (app.Environment.IsDevelopment())
