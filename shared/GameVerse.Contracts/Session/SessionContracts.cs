@@ -25,7 +25,7 @@ namespace GameVerse.Contracts.Session
 
         /// <summary>
         /// Gets or sets house-rule toggles as strings (e.g. "sixToLeaveBase": "true"). Each game's engine parses and
-        /// validates its own (Ludo: Prompt 1.3).
+        /// validates its own; Ludo's keys are in <c>GameVerse.Contracts.Ludo.LudoHouseRules</c>.
         /// </summary>
         public Dictionary<string, string> HouseRules { get; set; } = new Dictionary<string, string>();
     }
@@ -47,6 +47,29 @@ namespace GameVerse.Contracts.Session
 
         /// <summary>Gets or sets when the session was created (ISO 8601, UTC).</summary>
         public string CreatedAt { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Dice fairness by commit-reveal (ADR-0008). The commitment (SHA-256 of a 32-byte server secret) is published when the
+    /// session is created; the secret and the seed derived from it are revealed only once the session has ended, so anyone
+    /// can check the commitment and replay every roll with GameVerse.Rules.
+    /// </summary>
+    public class SessionFairness
+    {
+        /// <summary>Gets or sets the session id.</summary>
+        public string SessionId { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the commitment as lowercase hex, or null for games without server randomness.</summary>
+        public string? Commitment { get; set; }
+
+        /// <summary>Gets or sets a value indicating whether the secret is revealed (the session has ended).</summary>
+        public bool Revealed { get; set; }
+
+        /// <summary>Gets or sets the secret as lowercase hex, once revealed.</summary>
+        public string? Secret { get; set; }
+
+        /// <summary>Gets or sets the PRNG seed derived from the secret, as a decimal string (it exceeds JSON's safe integers).</summary>
+        public string? Seed { get; set; }
     }
 
     /// <summary>Values of <see cref="SessionSummary.Status"/>.</summary>

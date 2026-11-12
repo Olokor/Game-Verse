@@ -38,6 +38,11 @@ public static class SessionsModule
             .Produces<SessionManifest<SessionConfig<Dictionary<string, string>>, object?>>()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
+        sessions.MapGet("/{sessionId:guid}/fairness", FairnessAsync)
+            .WithSummary("Dice commit-reveal: the seed commitment always, the secret and seed once the session has ended (participants only)")
+            .Produces<SessionFairness>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
         sessions.MapGet("/me", MineAsync)
             .WithSummary("The signed-in player's recent sessions, optionally filtered by status")
             .Produces<List<SessionSummary>>();
@@ -57,6 +62,11 @@ public static class SessionsModule
         if (mode is not null && !OfflineKinds.Contains(mode.Kind))
         {
             return Field(nameof(CreateSessionRequest.Mode), "Online modes start from a private room or matchmaking.");
+        }
+
+        if (game is not null && GameSetups.HouseRulesError(game.Id, request.HouseRules, request.PlayerCount) is { } rulesError)
+        {
+            return Field(nameof(CreateSessionRequest.HouseRules), rulesError);
         }
 
         var seats = new List<NewSeat> { new(userId, false, null) };
@@ -80,6 +90,7 @@ public static class SessionsModule
             CreateSessionError.UnknownGame => Results.Problem(statusCode: StatusCodes.Status404NotFound, title: "Game not found"),
             CreateSessionError.NotPlayable => Results.Problem(statusCode: StatusCodes.Status409Conflict, title: "Coming soon", detail: "This game is not playable yet."),
             CreateSessionError.UnknownMode => Field(nameof(CreateSessionRequest.Mode), "This game has no such mode."),
+            CreateSessionError.BadHouseRules => Field(nameof(CreateSessionRequest.HouseRules), "These house rules are not valid for this game."),
             _ => Field(nameof(CreateSessionRequest.PlayerCount), "This mode does not support that many players."),
         };
     }
@@ -92,6 +103,14 @@ public static class SessionsModule
 
         // Non-participants get the same 404 as a missing session: session ids are not discoverable.
         return manifest is null ? Results.Problem(statusCode: StatusCodes.Status404NotFound, title: "Session not found") : Results.Ok(manifest);
+    }
+
+    private static async Task<IResult> FairnessAsync(Guid sessionId, HttpContext http, SessionService sessions)
+    {
+        var fairness = SignedInUser(http) is { } userId
+            ? await sessions.GetFairnessAsync(sessionId, userId, http.RequestAborted).ConfigureAwait(false)
+            : null;
+        return fairness is null ? Results.Problem(statusCode: StatusCodes.Status404NotFound, title: "Session not found") : Results.Ok(fairness);
     }
 
     private static async Task<IResult> MineAsync(HttpContext http, SessionService sessions, string? status = null) =>
