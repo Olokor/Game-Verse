@@ -1,0 +1,19 @@
+{
+  "game": "ludo",
+  "name": "Safe-squares off: star and start squares give no protection",
+  "description": "Both captures that the safe-square fixtures forbid now happen: a star square, then the start square.",
+  "config": {"safeSquares": false, "dice": [3, 6]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[5, -1, -1, -1], [34, 26, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"state": {"tokens": [[8, -1, -1, -1], [-1, 26, -1, -1]], "currentSeat": 0}}},
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 1}, "expect": {"state": {"tokens": [[8, 0, -1, -1], [-1, -1, -1, -1]], "currentSeat": 0}}}
+  ],
+  "outcome": {"kind": "none"}
+}

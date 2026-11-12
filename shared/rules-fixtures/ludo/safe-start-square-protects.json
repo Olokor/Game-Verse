@@ -1,0 +1,17 @@
+{
+  "game": "ludo",
+  "name": "A token on a start square cannot be captured, even by a token leaving base",
+  "description": "Seat 1's token at relative 26 sits on absolute 0, seat 0's start. Seat 0 brings a token out onto it with a 6: no capture.",
+  "config": {"dice": [6]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[-1, -1, -1, -1], [26, -1, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"state": {"tokens": [[0, -1, -1, -1], [26, -1, -1, -1]], "currentSeat": 0, "sixesInRow": 1}}}
+  ],
+  "outcome": {"kind": "none"}
+}

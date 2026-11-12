@@ -1,0 +1,18 @@
+{
+  "game": "ludo",
+  "name": "Three players use colours 0, 1, 2 and play in seat order",
+  "description": "Turn order is seat 0, 1, 2, then back to 0.",
+  "config": {"dice": [1, 2, 3]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"},
+    {"seat": 2, "playerId": "p2"}
+  ],
+  "seed": 1,
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"colors": [0, 1, 2], "currentSeat": 1}}},
+    {"seat": 1, "action": {"roll": true}, "expect": {"state": {"currentSeat": 2}}},
+    {"seat": 2, "action": {"roll": true}, "expect": {"state": {"currentSeat": 0, "tokens": [[-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1]]}}}
+  ],
+  "outcome": {"kind": "none"}
+}

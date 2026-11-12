@@ -1,0 +1,19 @@
+{
+  "game": "ludo",
+  "name": "Teams: the team wins when all 8 of its tokens are home",
+  "description": "Seat 0 already finished. It moves seat 2's last token home, and team 0+2 wins.",
+  "config": {"teams": true, "dice": [1]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"},
+    {"seat": 2, "playerId": "p2"},
+    {"seat": 3, "playerId": "p3"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[56, 56, 56, 56], [-1, -1, -1, -1], [56, 56, 56, 55], [10, -1, -1, -1]], "currentSeat": 0, "finished": [0]},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 3}, "expect": {"state": {"finished": [0, 2], "phase": "over"}}}
+  ],
+  "outcome": {"kind": "win", "winningSeats": [0, 2], "placements": [0, 2, 3, 1], "reason": "all_tokens_home"}
+}
