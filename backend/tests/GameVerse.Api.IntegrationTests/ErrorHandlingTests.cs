@@ -125,8 +125,13 @@ public class ErrorHandlingTests(StackFixture stack)
         }
 
         await Task.Delay(1000, ct); // give any duplicate time to arrive
-        var reported = transport.Events.ToArray();
-        reported.Length.ShouldBe(1); // the exception only; the 500 access-log line must not become a second event
+        // The Sentry SDK keeps process-wide state, so while this host has it on it also sees failures other test hosts
+        // trigger in parallel (startup errors by design). Count only events about this request: the exception itself, or
+        // anything mentioning its route, such as a 500 access-log line, which must not become a second event.
+        var reported = transport.Events
+            .Where(e => e.GetRawText().Contains(SecretDetail, StringComparison.Ordinal) || e.GetRawText().Contains(ThrowPath, StringComparison.Ordinal))
+            .ToArray();
+        reported.Length.ShouldBe(1);
         var exception = reported[0].GetProperty("exception").GetProperty("values")[0];
         exception.GetProperty("type").GetString().ShouldBe(typeof(InvalidOperationException).FullName);
         exception.GetProperty("value").GetString().ShouldBe(SecretDetail);

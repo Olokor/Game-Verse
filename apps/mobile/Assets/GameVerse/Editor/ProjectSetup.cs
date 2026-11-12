@@ -1,5 +1,7 @@
 using System.IO;
 using GameVerse.Platform;
+using GameVerse.Platform.Diagnostics;
+using Sentry.Unity;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.SceneManagement;
@@ -30,10 +32,15 @@ namespace GameVerse.Editor
         public const string HomeDocumentPath = Root + "/UI/Home/Home.uxml";
         public const string BootScenePath = Root + "/Scenes/Boot.unity";
 
+        // Error reporting (ADR-0005). The Sentry Unity SDK loads its options from this exact Resources path.
+        public const string SentryOptionsPath = "Assets/Resources/Sentry/SentryOptions.asset";
+        public const string SentryConfigurationPath = Root + "/Platform/Diagnostics/GameVerseSentryConfiguration.asset";
+
         [MenuItem("GameVerse/Apply Project Setup")]
         public static void Apply()
         {
             ConfigurePlayer();
+            ConfigureErrorReporting();
             ConfigureRendering();
             var panel = EnsurePanelSettings();
             EnsureBootScene(panel);
@@ -86,6 +93,50 @@ namespace GameVerse.Editor
                     so.ApplyModifiedPropertiesWithoutUndo();
                 }
             }
+        }
+
+        /// <summary>
+        /// Sentry Unity SDK settings, privacy first (ADR-0005). The DSN stays empty in the committed asset: BuildScript
+        /// injects UNITY_ERROR_DSN only for the duration of a build, so no environment's DSN is ever committed.
+        /// Also switches off Unity's own analytics and performance reporting, which phone home from every build.
+        /// </summary>
+        public static ScriptableSentryUnityOptions ConfigureErrorReporting()
+        {
+            UnityEditor.Analytics.AnalyticsSettings.enabled = false;
+            UnityEditor.CrashReporting.CrashReportingSettings.enabled = false;
+            UnityEditor.Analytics.PerformanceReportingSettings.enabled = false;
+
+            var configuration = AssetDatabase.LoadAssetAtPath<GameVerseSentryConfiguration>(SentryConfigurationPath);
+            if (configuration == null)
+            {
+                configuration = ScriptableObject.CreateInstance<GameVerseSentryConfiguration>();
+                AssetDatabase.CreateAsset(configuration, SentryConfigurationPath);
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(SentryOptionsPath));
+            var options = AssetDatabase.LoadAssetAtPath<ScriptableSentryUnityOptions>(SentryOptionsPath);
+            if (options == null)
+            {
+                options = ScriptableObject.CreateInstance<ScriptableSentryUnityOptions>();
+                AssetDatabase.CreateAsset(options, SentryOptionsPath);
+            }
+
+            options.Enabled = true;
+            options.Dsn = string.Empty;
+            options.CaptureInEditor = false;
+            options.SendDefaultPii = false;
+            options.AttachScreenshot = false;
+            options.AttachViewHierarchy = false;
+            options.EnableLogDebouncing = true;
+            options.TracesSampleRate = 0;
+            options.AutoStartupTraces = false;
+            options.Il2CppLineNumberSupportEnabled = true;
+            options.AndroidNativeSupportEnabled = true;
+            options.NdkIntegrationEnabled = true;
+            options.AnrDetectionEnabled = true;
+            options.OptionsConfiguration = configuration;
+            EditorUtility.SetDirty(options);
+            return options;
         }
 
         private static void ConfigureRendering()

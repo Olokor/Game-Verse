@@ -6,7 +6,8 @@ namespace GameVerse.Platform
 {
     /// <summary>
     /// Entry point of the Boot scene: shows the Home UI document and, in development builds, runs the shared-rules
-    /// self-check so a device build proves GameVerse.Rules behaves identically under IL2CPP (see RulesSelfCheck).
+    /// self-checks: GameVerse.Rules behaves identically under IL2CPP (RulesSelfCheck) and error reports reach GlitchTip
+    /// (ErrorReportingSelfCheck, ADR-0005).
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public sealed class Boot : MonoBehaviour
@@ -18,8 +19,9 @@ namespace GameVerse.Platform
             if (Debug.isDebugBuild)
             {
                 var report = RulesSelfCheck.Run();
-                // One parseable line for `make device-check` (adb logcat -s Unity) and for CI logs.
+                // One parseable line each for `make device-check` (adb logcat -s Unity) and for CI logs.
                 Debug.Log(report.ToLogLine());
+                Debug.Log(ErrorReportingSelfCheck.Run());
             }
         }
     }

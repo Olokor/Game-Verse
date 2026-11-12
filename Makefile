@@ -6,6 +6,9 @@ SLN := backend/GameVerse.slnx
 UNITY ?= C:/Program Files/Unity/Hub/Editor/6000.6.8f1/Editor/Unity.exe
 UNITY_PROJECT := apps/mobile
 ADB ?= C:/Program Files/Unity/Hub/Editor/6000.6.8f1/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb.exe
+# Error reporting for device builds (ADR-0005): baked in by BuildScript for the duration of `make android`. Empty = off.
+UNITY_ERROR_DSN ?= $(shell node infrastructure/scripts/env-get.mjs UNITY_ERROR_DSN)
+export UNITY_ERROR_DSN
 API := backend/src/GameVerse.Api/GameVerse.Api.csproj
 TOKENS := packages/design-tokens
 SHARED_LIBS := shared/GameVerse.Rules/GameVerse.Rules.csproj shared/GameVerse.Contracts/GameVerse.Contracts.csproj
@@ -102,7 +105,7 @@ unity-setup: rules ## Apply Unity project settings (ProjectSetup.Apply)
 	node infrastructure/scripts/unity-batch.mjs $(UNITY_PROJECT)/Logs/setup.log "GV_SETUP" "ok" -- "$(UNITY)" -batchmode -nographics -quit -projectPath $(UNITY_PROJECT) -executeMethod GameVerse.Editor.ProjectSetup.Apply
 
 unity-test: rules ## Unity EditMode tests (headless)
-	"$(UNITY)" -batchmode -nographics -projectPath $(UNITY_PROJECT) -runTests -testPlatform EditMode -testResults TestResults/editmode.xml -logFile $(UNITY_PROJECT)/Logs/editmode.log
+	node infrastructure/scripts/unity-batch.mjs $(UNITY_PROJECT)/Logs/editmode.log "Test run completed" "Exiting with code 0" -- "$(UNITY)" -batchmode -nographics -projectPath $(UNITY_PROJECT) -runTests -testPlatform EditMode -testResults TestResults/editmode.xml
 
 android: rules ## IL2CPP Android development build
 	node infrastructure/scripts/unity-batch.mjs $(UNITY_PROJECT)/Logs/android.log "GV_BUILD android" "result=Succeeded" -- "$(UNITY)" -batchmode -nographics -quit -projectPath $(UNITY_PROJECT) -buildTarget Android -executeMethod GameVerse.Editor.BuildScript.BuildAndroid

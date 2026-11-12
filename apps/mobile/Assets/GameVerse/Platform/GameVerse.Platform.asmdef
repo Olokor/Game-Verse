@@ -13,7 +13,9 @@
     "precompiledReferences": [
         "GameVerse.Rules.dll",
         "GameVerse.Contracts.dll",
-        "Newtonsoft.Json.dll"
+        "Newtonsoft.Json.dll",
+        "Sentry.dll",
+        "Sentry.Unity.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],
