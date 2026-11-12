@@ -1,11 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <!--
-      TODO(gameverse): no module code exists yet, so this project has no tests. Exit code 8 means
-      "zero tests ran"; it is ignored here only. Remove this line when Accounts lands (Prompt 1.1).
-    -->
-    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --ignore-exit-code 8</TestingPlatformCommandLineArguments>
-  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/GameVerse.Platform/GameVerse.Platform.csproj" />
   </ItemGroup>

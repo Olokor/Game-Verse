@@ -2,6 +2,7 @@ using System.Globalization;
 using GameVerse.Api.Endpoints;
 using GameVerse.Api.Hosting;
 using GameVerse.Infrastructure;
+using GameVerse.Platform.Accounts;
 using Hangfire;
 using Scalar.AspNetCore;
 using Serilog;
@@ -59,6 +60,25 @@ if (options.ErrorReporting.IsEnabled)
 builder.Services.AddProblemDetails();
 
 builder.Services.AddGameVerseInfrastructure(options.ConnectionStrings, runJobServer: options.IsWorker);
+
+// Accounts (Prompt 1.1, ADR-0006). The signing key is required outside Development; `make schema` boots without one.
+var accountsOptions = builder.Configuration.GetSection(AccountsOptions.Section).Get<AccountsOptions>() ?? new AccountsOptions();
+var signingKey = AccountsSigningKey.Create(accountsOptions.SigningKey, allowEphemeral: builder.Environment.IsDevelopment() || BuildTimeOpenApi.IsRunning);
+builder.Services.AddAccountsModule(accountsOptions, signingKey).AddGameVerseIdentityStores();
+builder.Services.AddRateLimiter(limiter =>
+{
+    limiter.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    limiter.OnRejected = async (context, ct) =>
+    {
+        var problems = context.HttpContext.RequestServices.GetRequiredService<IProblemDetailsService>();
+        await problems.WriteAsync(new ProblemDetailsContext
+        {
+            HttpContext = context.HttpContext,
+            ProblemDetails = { Status = StatusCodes.Status429TooManyRequests, Title = "Too many requests", Detail = "Please wait a moment and try again." },
+        });
+    };
+    AccountsModule.AddRateLimitPolicies(limiter, accountsOptions.RateLimits);
+});
 builder.Services.AddOpenApi();
 
 // TODO(gameverse): OpenTelemetry tracing (CLAUDE.md section 3) once there is real traffic (Phase 1). Errors: ADR-0005.
@@ -72,6 +92,11 @@ if (args.Length > 0 && args[0] == "migrate")
     return 0;
 }
 
+if (signingKey.IsEphemeral && !BuildTimeOpenApi.IsRunning)
+{
+    StartupLog.EphemeralSigningKey(app.Logger);
+}
+
 app.UseSerilogRequestLogging(requestLog =>
 {
     // A 500's exception is already logged (and reported) at Error by the exception handler; logging the access line at
@@ -81,12 +106,16 @@ app.UseSerilogRequestLogging(requestLog =>
 });
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapGameVerseHealth();
 
 if (!options.IsWorker)
 {
     app.UseWebSockets(new WebSocketOptions { KeepAliveInterval = TimeSpan.FromSeconds(15) });
     app.MapEchoSocket();
+    app.MapAccounts();
     app.MapOpenApi();
 
     if (app.Environment.IsDevelopment())

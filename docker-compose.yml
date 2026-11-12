@@ -22,6 +22,7 @@ x-api-env: &api-env
   GameVerse__ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=${POSTGRES_DB:-gameverse};Username=${POSTGRES_USER:-gameverse};Password=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
   GameVerse__ConnectionStrings__Redis: redis:6379
   GameVerse__Log__Pretty: ${GAMEVERSE_LOG_PRETTY:-false}
+  GameVerse__Auth__SigningKey: ${GAMEVERSE_AUTH_SIGNING_KEY:-}
   # Error reporting (ADR-0005): empty = off. Inside this network GlitchTip is http://glitchtip:8000.
   GameVerse__ErrorReporting__Dsn: ${GAMEVERSE_ERROR_DSN_API:-}
   GameVerse__ErrorReporting__Environment: ${GAMEVERSE_ERROR_ENVIRONMENT:-development}

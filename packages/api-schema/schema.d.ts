@@ -3,10 +3,329 @@
  * Do not make direct changes to the file.
  */
 
-export type paths = Record<string, never>;
+export interface paths {
+    "/accounts/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The signed-in account */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AccountResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/guest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a device-bound guest account */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GuestCreatedResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/guest/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign a guest back in with its device secret */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["GuestLoginRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AuthTokensResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Exchange a refresh token for new tokens (rotates the refresh token) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": null | components["schemas"]["RefreshRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AuthTokensResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** End the session the refresh token belongs to */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": null | components["schemas"]["RefreshRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+}
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: never;
+    schemas: {
+        /** @description The signed-in account. */
+        AccountResponse: {
+            /** @description Gets or sets the account id (UUID). */
+            userId?: string;
+            /** @description Gets or sets a value indicating whether the account is a guest. */
+            isGuest?: boolean;
+            /** @description Gets or sets the email, or null for guests. */
+            email?: null | string;
+            /** @description Gets or sets a value indicating whether the email has been verified. */
+            emailVerified?: boolean;
+            /**
+             * @description Gets or sets a value indicating whether the player counts as under 18 (guests always do, CLAUDE.md
+             *     section 7: chat is off for minors).
+             */
+            isMinor?: boolean;
+            /** @description Gets or sets when the account was created (ISO 8601, UTC). */
+            createdAt?: string;
+        };
+        /**
+         * @description Tokens returned by every sign-in style call (ADR-0006). The access token is a short-lived JWT for the
+         *     Authorization header. The refresh token is in this body for Unity and other clients; web clients
+         *     (header `X-GameVerse-Client: web`) get it as an httpOnly cookie instead and see `null` here.
+         */
+        AuthTokensResponse: {
+            /** @description Gets or sets the account id (UUID). */
+            userId?: string;
+            /** @description Gets or sets a value indicating whether the account is a guest (device-bound, no email). */
+            isGuest?: boolean;
+            /** @description Gets or sets the access token (JWT, about 15 minutes). */
+            accessToken?: string;
+            /** @description Gets or sets when the access token expires (ISO 8601, UTC). */
+            accessTokenExpiresAt?: string;
+            /** @description Gets or sets the refresh token, or null when it was set as a cookie (web). */
+            refreshToken?: null | string;
+            /** @description Gets or sets when the refresh token expires (ISO 8601, UTC). */
+            refreshTokenExpiresAt?: string;
+        };
+        /**
+         * @description Response to creating a guest. string GuestCreatedResponse.DeviceSecret is shown exactly once; the client stores it in secure
+         *     storage and signs back in with it (GuestLoginRequest). The server keeps only a hash.
+         */
+        GuestCreatedResponse: {
+            /** @description Gets or sets the device secret. Never sent again. */
+            deviceSecret?: string;
+            /** @description Gets or sets the account id (UUID). */
+            userId?: string;
+            /** @description Gets or sets a value indicating whether the account is a guest (device-bound, no email). */
+            isGuest?: boolean;
+            /** @description Gets or sets the access token (JWT, about 15 minutes). */
+            accessToken?: string;
+            /** @description Gets or sets when the access token expires (ISO 8601, UTC). */
+            accessTokenExpiresAt?: string;
+            /** @description Gets or sets the refresh token, or null when it was set as a cookie (web). */
+            refreshToken?: null | string;
+            /** @description Gets or sets when the refresh token expires (ISO 8601, UTC). */
+            refreshTokenExpiresAt?: string;
+        };
+        /** @description Signs a guest back in on the device that created it. */
+        GuestLoginRequest: {
+            /** @description Gets or sets the guest's account id. */
+            guestId?: string;
+            /** @description Gets or sets the device secret returned when the guest was created. */
+            deviceSecret?: string;
+        };
+        HttpValidationProblemDetails: {
+            type?: null | string;
+            title?: null | string;
+            /** Format: int32 */
+            status?: null | number | string;
+            detail?: null | string;
+            instance?: null | string;
+            errors?: {
+                [key: string]: string[];
+            };
+        };
+        ProblemDetails: {
+            type?: null | string;
+            title?: null | string;
+            /** Format: int32 */
+            status?: null | number | string;
+            detail?: null | string;
+            instance?: null | string;
+        };
+        /**
+         * @description Exchanges a refresh token for new tokens (the old one stops working). Web clients leave
+         *     string? RefreshRequest.RefreshToken empty; the cookie is used instead. Also the body of a logout.
+         */
+        RefreshRequest: {
+            /** @description Gets or sets the refresh token, or null for web clients. */
+            refreshToken?: null | string;
+        };
+    };
     responses: never;
     parameters: never;
     requestBodies: never;
