@@ -50,6 +50,21 @@ namespace GameVerse.Contracts.Realtime
 
         /// <summary>Client to server heartbeat reply. No payload.</summary>
         public const string Pong = "pong";
+
+        /// <summary>Server to client: a seat connected or disconnected. Payload <see cref="PresencePayload"/>.</summary>
+        public const string Presence = "presence";
+
+        /// <summary>
+        /// Server to client: the match is over and its result is recorded. Payload
+        /// <see cref="GameVerse.Contracts.Events.MatchEndedEvent"/> (the same shape the game reports to the platform).
+        /// </summary>
+        public const string Ended = "ended";
+
+        /// <summary>
+        /// Server to client on a private room's lobby socket (<c>/ws/room/{code}</c>): the room after a change. Payload
+        /// <see cref="GameVerse.Contracts.Matchmaking.RoomDto"/>.
+        /// </summary>
+        public const string Room = "room";
     }
 
     /// <summary>Payload of <see cref="MessageTypes.State"/> and <see cref="MessageTypes.Snapshot"/>.</summary>
@@ -61,6 +76,31 @@ namespace GameVerse.Contracts.Realtime
 
         /// <summary>Gets or sets the client seq of the action that produced this state, when it was this client's.</summary>
         public long? AppliedSeq { get; set; }
+
+        /// <summary>Gets or sets the seat whose decision the game is waiting for; null when the match is over.</summary>
+        public int? TurnSeat { get; set; }
+
+        /// <summary>
+        /// Gets or sets when the server plays for <see cref="TurnSeat"/> if it has not acted, in Unix milliseconds (UTC);
+        /// null when there is no turn clock (vs AI, AI seats, or the match is over).
+        /// </summary>
+        public long? TurnDeadline { get; set; }
+    }
+
+    /// <summary>Payload of <see cref="MessageTypes.Presence"/>.</summary>
+    public class PresencePayload
+    {
+        /// <summary>Gets or sets the seat.</summary>
+        public int Seat { get; set; }
+
+        /// <summary>Gets or sets a value indicating whether the seat has at least one live connection.</summary>
+        public bool Connected { get; set; }
+
+        /// <summary>
+        /// Gets or sets when a disconnected seat forfeits unless it reconnects, in Unix milliseconds (UTC); null while
+        /// connected, or when the mode has no disconnect forfeit (vs AI pauses instead).
+        /// </summary>
+        public long? GraceEndsAt { get; set; }
     }
 
     /// <summary>Payload of <see cref="MessageTypes.Resync"/>.</summary>

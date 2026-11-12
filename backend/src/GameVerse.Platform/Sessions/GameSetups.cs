@@ -53,15 +53,17 @@ internal static class GameSetups
             return null;
         }
 
-        var (config, error) = ParseLudo(rules, playerCount);
-        if (config is null)
-        {
-            throw new InvalidOperationException("Stored Ludo house rules are invalid: " + error);
-        }
-
+        var config = LudoConfigFor(rules, playerCount);
         var seats = Enumerable.Range(0, playerCount).Select(s => new SeatInfo(s, "seat-" + s.ToString(CultureInfo.InvariantCulture), false)).ToList();
         var view = Ludo.ViewFor(Ludo.NewGame(config, seats, seed), viewSeat);
         return JsonSerializer.SerializeToElement(ToDto(view), Json);
+    }
+
+    /// <summary>The Ludo config for house rules that were validated when the session was created.</summary>
+    public static LudoConfig LudoConfigFor(IReadOnlyDictionary<string, string> rules, int playerCount)
+    {
+        var (config, error) = ParseLudo(rules, playerCount);
+        return config ?? throw new InvalidOperationException("Stored Ludo house rules are invalid: " + error);
     }
 
     /// <summary>Maps a Ludo state to its wire form. Never includes the dice PRNG.</summary>

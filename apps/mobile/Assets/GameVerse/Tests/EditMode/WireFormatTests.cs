@@ -95,7 +95,20 @@ namespace GameVerse.Tests
             Assert.That(e.Seq, Is.EqualTo(42));
             Assert.That(e.StateVersion, Is.EqualTo(9_007_199_254_740_993L), "long above 2^53 survives");
             Assert.That(e.Payload.AppliedSeq, Is.Null);
+            Assert.That(e.Payload.TurnSeat, Is.EqualTo(1));
+            Assert.That(e.Payload.TurnDeadline, Is.EqualTo(1_794_484_800_000L), "Unix milliseconds");
             Assert.That(e.Payload.State.Board, Is.EqualTo(new[] { 1, 2 }));
+        }
+
+        [Test]
+        public void Presence_envelope_round_trips()
+        {
+            var e = RoundTrip<Envelope<PresencePayload>>("envelope-presence");
+            Assert.That(e.T, Is.EqualTo(MessageTypes.Presence));
+            Assert.That(e.StateVersion, Is.Null);
+            Assert.That(e.Payload.Seat, Is.EqualTo(2));
+            Assert.That(e.Payload.Connected, Is.False);
+            Assert.That(e.Payload.GraceEndsAt, Is.EqualTo(1_794_484_860_000L));
         }
 
         [Test]

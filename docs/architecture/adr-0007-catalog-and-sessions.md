@@ -72,7 +72,7 @@ Every game shares one registry (the catalog), one way to describe a play session
 ### Creating sessions
 - `POST /sessions` creates **single-owner sessions only** (`local`, `vs_ai`, `solo`) for an enabled game and an allowed player count. The caller takes seat 0.
 - Ludo vs AI is played through the server's match host, not offline (ADR-0008); only `local` pass-and-play runs entirely on the device.
-- Online sessions are created through `ISessionService` by private rooms and matchmaking.
+- Online sessions are created through `ISessionService` by private rooms (Prompt 1.4, ADR-0009) and matchmaking (1.5). They start `created` and become `active` when the match host first loads them.
 
 ## Decisions: clients
 

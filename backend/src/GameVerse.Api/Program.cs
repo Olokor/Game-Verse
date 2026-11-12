@@ -6,7 +6,9 @@ using GameVerse.Infrastructure.Email;
 using GameVerse.Platform;
 using GameVerse.Platform.Accounts;
 using GameVerse.Platform.Catalog;
+using GameVerse.Platform.Matchmaking;
 using GameVerse.Platform.Profiles;
+using GameVerse.Platform.Realtime;
 using GameVerse.Platform.Sessions;
 using Hangfire;
 using Scalar.AspNetCore;
@@ -80,6 +82,8 @@ builder.Services.AddAccountsModule(accountsOptions, signingKey).AddGameVerseIden
 builder.Services.AddProfilesModule();
 builder.Services.AddCatalogModule();
 builder.Services.AddSessionsModule();
+builder.Services.AddRoomsModule(builder.Configuration.GetSection(RoomsOptions.Section).Get<RoomsOptions>() ?? new RoomsOptions());
+builder.Services.AddRealtimeModule(builder.Configuration.GetSection(RealtimeOptions.Section).Get<RealtimeOptions>() ?? new RealtimeOptions());
 builder.Services.AddPlatformValidators();
 builder.Services.AddGameVerseEmail(builder.Configuration.GetSection(EmailOptions.Section).Get<EmailOptions>() ?? new EmailOptions());
 builder.Services.AddRateLimiter(limiter =>
@@ -95,6 +99,8 @@ builder.Services.AddRateLimiter(limiter =>
         });
     };
     AccountsModule.AddRateLimitPolicies(limiter, accountsOptions.RateLimits);
+    RealtimeModule.AddRateLimitPolicies(limiter);
+    RoomsModule.AddRateLimitPolicies(limiter);
 });
 builder.Services.AddOpenApi(openApi => openApi.AddSchemaTransformer<OpenApiRequiredProperties>());
 
@@ -129,14 +135,28 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapGameVerseHealth();
 
-if (!options.IsWorker)
+if (options.IsWorker)
+{
+    // Safety net for live matches nobody is hosting (ADR-0009): every minute, resume overdue ones on this worker.
+    app.Services.GetRequiredService<IRecurringJobManager>()
+        .AddOrUpdate<MatchWatchdog>(MatchWatchdog.JobId, watchdog => watchdog.RunAsync(), Cron.Minutely());
+    app.Services.GetRequiredService<IRecurringJobManager>()
+        .AddOrUpdate<RoomCleanup>(RoomCleanup.JobId, cleanup => cleanup.RunAsync(), Cron.Daily());
+}
+else
 {
     app.UseWebSockets(new WebSocketOptions { KeepAliveInterval = TimeSpan.FromSeconds(15) });
-    app.MapEchoSocket();
+    if (app.Environment.IsDevelopment())
+    {
+        app.MapEchoSocket(); // local tunnel and proxy checks only; games use /ws/play
+    }
+
     app.MapAccounts();
     app.MapProfiles();
     app.MapCatalog();
     app.MapSessions();
+    app.MapRealtime();
+    app.MapRooms();
     app.MapOpenApi();
 
     if (app.Environment.IsDevelopment())

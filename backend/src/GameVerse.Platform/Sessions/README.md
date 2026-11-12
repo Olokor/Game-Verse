@@ -4,12 +4,16 @@ Game sessions, seats, the append-only move log and match results. Decisions: [AD
 
 | Endpoint | What it does |
 |---|---|
-| `POST /sessions` | Start an offline session (pass and play, vs AI, solo); returns the SessionManifest |
-| `GET /sessions/{id}/manifest` | The SessionManifest (participants only; others get 404) |
+| `POST /sessions` | Start a single-owner session (pass and play, vs AI, solo); returns the SessionManifest. Server-hosted modes (vs AI) carry a socket ticket in `realtime` (ADR-0009) |
+| `GET /sessions/{id}/manifest` | The SessionManifest (participants only; others get 404). Each read of a server-hosted session mints a fresh ticket |
 | `GET /sessions/{id}/fairness` | Dice commit-reveal: the commitment always, the secret and seed once the session has ended (participants only) |
 | `GET /sessions/me?status=` | The signed-in player's recent sessions |
 
-Public surface for other modules: `ISessionService` (`CreateAsync`, `AppendMoveAsync`, `RecordResultAsync`, `GetManifestAsync`, `GetSeedAsync`, `GetFairnessAsync`). `sessions.move_logs` is append-only: a database trigger rejects UPDATE and DELETE. Moves are opaque JSON here; the Realtime match host validates them with the shared engine before appending (Prompt 1.4).
+Public surface for other modules:
+- `ISessionService`: `CreateAsync`, `AppendMoveAsync`, `RecordResultAsync`, `GetManifestAsync`, `GetSeedAsync`, `GetFairnessAsync`, plus for the match host `GetLiveAsync` (seats and seed), `ListMovesAsync` (resume) and `MarkActiveAsync`.
+- `IMatchGames` / `IMatchGame` (`MatchGames.cs`): each game as the Realtime match host drives it. JSON actions and views in the game's wire format, timeout and AI actions, and full server-only snapshots (dice PRNG included). Ludo today.
+
+`sessions.move_logs` is append-only: a database trigger rejects UPDATE and DELETE. The Realtime match host validates every action with the shared engine before appending it, and the log is what a resumed match replays (ADR-0009).
 
 ## Per-game setup (`GameSetups.cs`)
 

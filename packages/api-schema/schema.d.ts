@@ -96,6 +96,64 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/realtime/tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A single-use WebSocket ticket (30 seconds): for a session you are seated in, or a private room you are in */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TicketRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RealtimeInfo"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/guest": {
         parameters: {
             query?: never;
@@ -937,6 +995,381 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/rooms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Open a private room; you are the host on seat 0 */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateRoomRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RoomDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rooms/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A room by code (404 unknown, 410 expired or closed) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    code: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RoomDto"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Gone */
+                410: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rooms/{code}/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Take the first free seat (lobby only) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    code: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RoomDto"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Gone */
+                410: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rooms/{code}/ready": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark yourself ready or not. After a game, everyone ready starts the next game (or a new series) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    code: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RoomReadyRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RoomDto"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rooms/{code}/rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change the house rules (host, lobby only); everyone's ready flag resets */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    code: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RoomRulesRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RoomDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/rooms/{code}/leave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Leave the room. During a game your seat frees when the game ends; resign or disconnect to forfeit it */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    code: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RoomDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rooms/{code}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start the first game (host; every seat filled and ready). The room then carries the session id */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    code: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RoomDto"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -977,6 +1410,25 @@ export interface components {
             refreshToken?: null | string;
             /** @description Gets or sets when the refresh token expires (ISO 8601, UTC). */
             refreshTokenExpiresAt: string;
+        };
+        /** @description Creates a private room (CLAUDE.md 4.6). The creator becomes the host on seat 0. */
+        CreateRoomRequest: {
+            /** @description Gets or sets the catalog game id, e.g. "ludo". */
+            gameId: string;
+            /**
+             * Format: int32
+             * @description Gets or sets the number of seats; the game's private-room mode must allow it.
+             */
+            playerCount: number | string;
+            /** @description Gets or sets the house rules, validated like a session's (e.g. GameVerse.Contracts.Ludo.LudoHouseRules). */
+            houseRules: {
+                [key: string]: string;
+            };
+            /**
+             * Format: int32
+             * @description Gets or sets 1 (a single game) or 3 (best of three).
+             */
+            bestOf: number | string;
         };
         /**
          * @description Starts a single-owner session (local pass-and-play, vs AI, solo) for the signed-in player, who takes seat 0. Online
@@ -1154,6 +1606,83 @@ export interface components {
             /** @description Gets or sets the new password (at least 10 characters). */
             newPassword: string;
         };
+        /**
+         * @description A private room as every member sees it: from the REST endpoints and pushed on `/ws/room/{code}` as a
+         *     `room` envelope after every change.
+         */
+        RoomDto: {
+            /** @description Gets or sets the 6-character code (no O/0, I/1/L). */
+            code: string;
+            /** @description Gets or sets the link to share, e.g. https://gameverse.app/r/ABC234. */
+            shareUrl: string;
+            /** @description Gets or sets the catalog game id. */
+            gameId: string;
+            /**
+             * Format: int32
+             * @description Gets or sets the number of seats.
+             */
+            playerCount: number | string;
+            /** @description Gets or sets the house rules in force. */
+            houseRules: {
+                [key: string]: string;
+            };
+            /**
+             * Format: int32
+             * @description Gets or sets 1 or 3.
+             */
+            bestOf: number | string;
+            /** @description Gets or sets one of RoomStatuses. */
+            status: string;
+            /**
+             * Format: int32
+             * @description Gets or sets the host's seat.
+             */
+            hostSeat: number | string;
+            /** @description Gets or sets the seats, in order, empty ones included. */
+            seats: components["schemas"]["RoomSeatDto"][];
+            /** @description Gets or sets the session of the game being played, or of the last one played; null before the first. */
+            sessionId?: null | string;
+            /**
+             * Format: int32
+             * @description Gets or sets the number of the current or last game within the series (1-based; 0 before the first).
+             */
+            gameNumber: number | string;
+            /** @description Gets or sets the seats that won the series, once it is decided (both partners in teams). */
+            seriesWinners: (number | string)[];
+            /** @description Gets or sets when the room closes if nothing happens, ISO 8601 UTC; null while a game is being played. */
+            expiresAt?: null | string;
+        };
+        /** @description Marks the caller ready or not. */
+        RoomReadyRequest: {
+            /** @description Gets or sets a value indicating whether the caller is ready. */
+            ready: boolean;
+        };
+        /** @description The host changes the house rules (lobby only). Everyone's ready flag resets. */
+        RoomRulesRequest: {
+            /** @description Gets or sets the new house rules. */
+            houseRules: {
+                [key: string]: string;
+            };
+        };
+        /** @description A seat in a room. */
+        RoomSeatDto: {
+            /**
+             * Format: int32
+             * @description Gets or sets the zero-based seat.
+             */
+            seat: number | string;
+            /** @description Gets or sets the player's id, or null for an empty seat. */
+            playerId?: null | string;
+            /** @description Gets or sets the player's display name, or null for an empty seat. */
+            displayName?: null | string;
+            /** @description Gets or sets a value indicating whether the player is ready. */
+            ready: boolean;
+            /**
+             * Format: int32
+             * @description Gets or sets the games this seat has won in the current series.
+             */
+            wins: number | string;
+        };
         /** @description The common config shape from CLAUDE.md 4.2. */
         SessionConfigOfDictionaryOfstringAndstring: {
             /** @description Gets or sets the variant id, e.g. "international_10x10". */
@@ -1216,6 +1745,17 @@ export interface components {
             status: string;
             /** @description Gets or sets when the session was created (ISO 8601, UTC). */
             createdAt: string;
+        };
+        /**
+         * @description Asks for a single-use WebSocket ticket (valid 30 seconds, CLAUDE.md section 7). Set exactly one target: a session to
+         *     play in (`/ws/play/{sessionId}`) or a private room's lobby (`/ws/room/{code}`). The response is a
+         *     RealtimeInfo.
+         */
+        TicketRequest: {
+            /** @description Gets or sets the session to play in. */
+            sessionId?: null | string;
+            /** @description Gets or sets the private room code whose lobby to follow. */
+            roomCode?: null | string;
         };
         /** @description Changes the signed-in player's profile. Fields left null stay as they are. */
         UpdateProfileRequest: {

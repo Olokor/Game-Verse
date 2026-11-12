@@ -17,6 +17,8 @@ public static class PlatformHttp
         public const string SignIn = "auth-sign-in";
         public const string Create = "auth-create";
         public const string Email = "auth-email";
+        public const string RealtimeTicket = "realtime-ticket";
+        public const string Rooms = "rooms";
     }
 
     /// <summary>

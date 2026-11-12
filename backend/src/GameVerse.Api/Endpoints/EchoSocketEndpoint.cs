@@ -4,8 +4,8 @@ namespace GameVerse.Api.Endpoints;
 
 /// <summary>
 /// /ws/echo: echoes text messages back. Proves the raw WebSocket stack (the same one /ws/play will use)
-/// works through Docker, Traefik and Cloudflare, and that message limits are enforced.
-/// TODO(gameverse): remove or restrict to Development when /ws/play lands (Prompt 1.4).
+/// works through Docker, Traefik and Cloudflare, and that message limits are enforced. Mapped in Development only since
+/// /ws/play landed (Prompt 1.4); it remains handy for checking a tunnel or proxy without a game session.
 /// </summary>
 internal static class EchoSocketEndpoint
 {

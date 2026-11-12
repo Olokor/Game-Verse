@@ -27,7 +27,7 @@ namespace GameVerse.Contracts.Session
         /// <summary>Gets or sets the seated players.</summary>
         public List<PlayerSlot> Players { get; set; } = new List<PlayerSlot>();
 
-        /// <summary>Gets or sets realtime connection details; null for local, vs AI and solo modes.</summary>
+        /// <summary>Gets or sets realtime connection details; null for modes played entirely on the device (local pass-and-play, solo).</summary>
         public RealtimeInfo? Realtime { get; set; }
     }
 

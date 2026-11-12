@@ -34,7 +34,9 @@ public class SessionsTests(StackFixture stack)
         m.GetProperty("mode").GetString().ShouldBe("vs_ai", "the manifest mode uses the CLAUDE.md 4.2 kind vocabulary");
         m.GetProperty("localPlayerId").GetString().ShouldBe(guest.UserId);
         m.GetProperty("config").GetProperty("aiLevel").GetInt32().ShouldBe(2);
-        m.GetProperty("realtime").ValueKind.ShouldBe(JsonValueKind.Null);
+        var realtime = m.GetProperty("realtime"); // vs AI is played by the server's match host (ADR-0008, ADR-0009)
+        realtime.GetProperty("wsUrl").GetString().ShouldBe($"ws://localhost/ws/play/{m.GetProperty("sessionId").GetString()}");
+        realtime.GetProperty("ticket").GetString().ShouldNotBeNullOrEmpty();
 
         // The initial state is seat 0's view of a fresh game: board and rules, never the dice PRNG.
         var state = m.GetProperty("initialState");

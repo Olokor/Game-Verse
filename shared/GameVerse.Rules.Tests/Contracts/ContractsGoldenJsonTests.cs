@@ -72,7 +72,18 @@ public class ContractsGoldenJsonTests
                 Seq = 42,
                 SessionId = "8d0f6c3e-2b7a-4c55-9a51-0e7f5d1b2c3a",
                 StateVersion = 9_007_199_254_740_993,
-                Payload = new StateUpdate<SampleState> { State = new SampleState { Board = [1, 2], Turn = 0, Seed = 12345 }, AppliedSeq = null },
+                Payload = new StateUpdate<SampleState> { State = new SampleState { Board = [1, 2], Turn = 0, Seed = 12345 }, AppliedSeq = null, TurnSeat = 1, TurnDeadline = 1_794_484_800_000 },
+            }
+        },
+        {
+            "envelope-presence",
+            new Envelope<PresencePayload>
+            {
+                T = MessageTypes.Presence,
+                Seq = 43,
+                SessionId = "8d0f6c3e-2b7a-4c55-9a51-0e7f5d1b2c3a",
+                StateVersion = null,
+                Payload = new PresencePayload { Seat = 2, Connected = false, GraceEndsAt = 1_794_484_860_000 },
             }
         },
         {

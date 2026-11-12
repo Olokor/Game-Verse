@@ -9,6 +9,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <!-- Realtime: tickets, match leases, snapshots and pub/sub. Infrastructure registers the multiplexer. -->
+    <PackageReference Include="StackExchange.Redis" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../../shared/GameVerse.Rules/GameVerse.Rules.csproj" />
