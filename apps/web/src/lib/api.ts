@@ -20,7 +20,7 @@ export interface ApiClientOptions {
   onSignedOut?: () => void;
 }
 
-export function createApiClient({ baseUrl = apiBaseUrl, fetch: fetchImpl = globalThis.fetch, onSignedOut }: ApiClientOptions = {}) {
+export function createApiClient({ baseUrl = apiBaseUrl, fetch: fetchImpl = (input, init) => globalThis.fetch(input, init), onSignedOut }: ApiClientOptions = {}) {
   let accessToken: string | undefined;
   let refreshing: Promise<boolean> | undefined;
   const retryCopies = new WeakMap<Request, Request>();

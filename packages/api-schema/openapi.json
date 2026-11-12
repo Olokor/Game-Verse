@@ -703,6 +703,13 @@
   "components": {
     "schemas": {
       "AccountResponse": {
+        "required": [
+          "userId",
+          "isGuest",
+          "emailVerified",
+          "isMinor",
+          "createdAt"
+        ],
         "type": "object",
         "properties": {
           "userId": {
@@ -736,6 +743,13 @@
         "description": "The signed-in account."
       },
       "AuthTokensResponse": {
+        "required": [
+          "userId",
+          "isGuest",
+          "accessToken",
+          "accessTokenExpiresAt",
+          "refreshTokenExpiresAt"
+        ],
         "type": "object",
         "properties": {
           "userId": {
@@ -769,6 +783,12 @@
         "description": "Tokens returned by every sign-in style call (ADR-0006). The access token is a short-lived JWT for the\r\nAuthorization header. The refresh token is in this body for Unity and other clients; web clients\r\n(header `X-GameVerse-Client: web`) get it as an httpOnly cookie instead and see `null` here."
       },
       "CreateSessionRequest": {
+        "required": [
+          "gameId",
+          "mode",
+          "playerCount",
+          "houseRules"
+        ],
         "type": "object",
         "properties": {
           "gameId": {
@@ -829,6 +849,9 @@
         "description": "Deletes the signed-in account. Email accounts confirm with their password; guests leave it empty."
       },
       "ForgotPasswordRequest": {
+        "required": [
+          "email"
+        ],
         "type": "object",
         "properties": {
           "email": {
@@ -839,6 +862,16 @@
         "description": "Asks for a password-reset code. Always accepted (202), whether or not the email has an account."
       },
       "GameInfo": {
+        "required": [
+          "id",
+          "title",
+          "tagline",
+          "category",
+          "accentToken",
+          "version",
+          "status",
+          "modes"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -880,6 +913,12 @@
         "description": "A game in the catalog (Prompt 1.2, ADR-0007). Shared by the web and Unity game lists."
       },
       "GameModeInfo": {
+        "required": [
+          "key",
+          "kind",
+          "label",
+          "playerCounts"
+        ],
         "type": "object",
         "properties": {
           "key": {
@@ -910,6 +949,14 @@
         "description": "One way to play a game."
       },
       "GuestCreatedResponse": {
+        "required": [
+          "deviceSecret",
+          "userId",
+          "isGuest",
+          "accessToken",
+          "accessTokenExpiresAt",
+          "refreshTokenExpiresAt"
+        ],
         "type": "object",
         "properties": {
           "deviceSecret": {
@@ -947,6 +994,10 @@
         "description": "Response to creating a guest. string GuestCreatedResponse.DeviceSecret is shown exactly once; the client stores it in secure\r\nstorage and signs back in with it (GuestLoginRequest). The server keeps only a hash."
       },
       "GuestLoginRequest": {
+        "required": [
+          "guestId",
+          "deviceSecret"
+        ],
         "type": "object",
         "properties": {
           "guestId": {
@@ -961,6 +1012,9 @@
         "description": "Signs a guest back in on the device that created it."
       },
       "HttpValidationProblemDetails": {
+        "required": [
+          "errors"
+        ],
         "type": "object",
         "properties": {
           "type": {
@@ -1008,6 +1062,10 @@
         }
       },
       "LoginRequest": {
+        "required": [
+          "email",
+          "password"
+        ],
         "type": "object",
         "properties": {
           "email": {
@@ -1022,6 +1080,13 @@
         "description": "Signs in with email and password."
       },
       "PlayerSlot": {
+        "required": [
+          "id",
+          "displayName",
+          "seat",
+          "cosmetics",
+          "isAI"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -1094,6 +1159,11 @@
         }
       },
       "ProfileResponse": {
+        "required": [
+          "userId",
+          "displayName",
+          "avatarId"
+        ],
         "type": "object",
         "properties": {
           "userId": {
@@ -1112,6 +1182,10 @@
         "description": "A player's public profile basics (Prompt 1.1). Frames, titles and stats come with Progression."
       },
       "RealtimeInfo": {
+        "required": [
+          "wsUrl",
+          "ticket"
+        ],
         "type": "object",
         "properties": {
           "wsUrl": {
@@ -1139,6 +1213,11 @@
         "description": "Exchanges a refresh token for new tokens (the old one stops working). Web clients leave\r\nstring? RefreshRequest.RefreshToken empty; the cookie is used instead. Also the body of a logout."
       },
       "ResetPasswordRequest": {
+        "required": [
+          "email",
+          "code",
+          "newPassword"
+        ],
         "type": "object",
         "properties": {
           "email": {
@@ -1190,6 +1269,14 @@
         "description": "The common config shape from CLAUDE.md 4.2."
       },
       "SessionManifestOfSessionConfigOfDictionaryOfstringAndstringAndObject": {
+        "required": [
+          "gameId",
+          "gameVersion",
+          "sessionId",
+          "mode",
+          "localPlayerId",
+          "players"
+        ],
         "type": "object",
         "properties": {
           "config": {
@@ -1248,6 +1335,13 @@
         "description": "The full manifest a game module reads, with its own config and state types."
       },
       "SessionSummary": {
+        "required": [
+          "sessionId",
+          "gameId",
+          "mode",
+          "status",
+          "createdAt"
+        ],
         "type": "object",
         "properties": {
           "sessionId": {
@@ -1294,6 +1388,11 @@
         "description": "Changes the signed-in player's profile. Fields left null stay as they are."
       },
       "UpgradeRequest": {
+        "required": [
+          "email",
+          "password",
+          "birthYear"
+        ],
         "type": "object",
         "properties": {
           "email": {
@@ -1317,6 +1416,9 @@
         "description": "Turns the signed-in guest into an email account. The account id stays the same, so everything the guest earned\r\nstays attached. Only the birth year is asked, to decide whether the player is a minor (ADR-0006)."
       },
       "VerifyEmailRequest": {
+        "required": [
+          "code"
+        ],
         "type": "object",
         "properties": {
           "code": {

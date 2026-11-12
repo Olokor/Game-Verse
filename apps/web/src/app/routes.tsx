@@ -2,6 +2,7 @@ import type { RouteObject } from 'react-router';
 import { Compass, Gamepad2, Play, User, Users } from 'lucide-react';
 import { AppShell } from '../components/shell/AppShell';
 import { HomeScreen } from '../features/home/HomeScreen';
+import { GamesPage } from '../features/games/GamesPage';
 import { ComingSoon } from '../features/placeholder/ComingSoon';
 import { RouteErrorScreen } from '../features/errors/RouteErrorScreen';
 
@@ -14,12 +15,9 @@ export const routes: RouteObject[] = [
     errorElement: <RouteErrorScreen />,
     children: [
       { index: true, element: <HomeScreen /> },
-      // TODO(gameverse): real screens. games: catalog (Prompt 1.2); games/:gameId: lobby (1.7); play: matchmaking (1.5);
+      // TODO(gameverse): real screens. games/:gameId: lobby (1.7); play: matchmaking (1.5);
       // social: friends (2.3); profile: Phase 2. Player-facing copy says "Coming soon" without plan details.
-      {
-        path: 'games',
-        element: <ComingSoon icon={Gamepad2} title="Games" body="Browse the full library by category." />,
-      },
+      { path: 'games', element: <GamesPage /> },
       {
         path: 'games/:gameId',
         element: <ComingSoon icon={Gamepad2} title="Game lobby" body="Modes, house rules and a leaderboard peek for each game." />,
