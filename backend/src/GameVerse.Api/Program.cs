@@ -7,6 +7,7 @@ using GameVerse.Platform;
 using GameVerse.Platform.Accounts;
 using GameVerse.Platform.Catalog;
 using GameVerse.Platform.Profiles;
+using GameVerse.Platform.Sessions;
 using Hangfire;
 using Scalar.AspNetCore;
 using Serilog;
@@ -78,6 +79,7 @@ var signingKey = AccountsSigningKey.Create(accountsOptions.SigningKey, allowEphe
 builder.Services.AddAccountsModule(accountsOptions, signingKey).AddGameVerseIdentityStores();
 builder.Services.AddProfilesModule();
 builder.Services.AddCatalogModule();
+builder.Services.AddSessionsModule();
 builder.Services.AddPlatformValidators();
 builder.Services.AddGameVerseEmail(builder.Configuration.GetSection(EmailOptions.Section).Get<EmailOptions>() ?? new EmailOptions());
 builder.Services.AddRateLimiter(limiter =>
@@ -134,6 +136,7 @@ if (!options.IsWorker)
     app.MapAccounts();
     app.MapProfiles();
     app.MapCatalog();
+    app.MapSessions();
     app.MapOpenApi();
 
     if (app.Environment.IsDevelopment())

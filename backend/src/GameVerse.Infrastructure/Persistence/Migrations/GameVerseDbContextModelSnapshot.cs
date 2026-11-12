@@ -383,6 +383,194 @@ namespace GameVerse.Infrastructure.Persistence.Migrations
                     b.ToTable("profiles", "profiles");
                 });
 
+            modelBuilder.Entity("GameVerse.Platform.Sessions.GameSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ConfigJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("config_json");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("EndedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ended_at");
+
+                    b.Property<string>("GameId")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("game_id");
+
+                    b.Property<string>("GameVersion")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("game_version");
+
+                    b.Property<string>("ModeKey")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("mode_key");
+
+                    b.Property<string>("ModeKind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("mode_kind");
+
+                    b.Property<string>("SeedCommitment")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("seed_commitment");
+
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id")
+                        .HasName("pk_game_sessions");
+
+                    b.HasIndex("CreatedBy", "Status")
+                        .HasDatabaseName("ix_game_sessions_created_by_status");
+
+                    b.ToTable("game_sessions", "sessions");
+                });
+
+            modelBuilder.Entity("GameVerse.Platform.Sessions.MatchResult", b =>
+                {
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("session_id");
+
+                    b.Property<DateTimeOffset>("FinishedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("finished_at");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("outcome");
+
+                    b.Property<string>("PlacementsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("placements_json");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("reason");
+
+                    b.PrimitiveCollection<int[]>("WinningSeats")
+                        .IsRequired()
+                        .HasColumnType("integer[]")
+                        .HasColumnName("winning_seats");
+
+                    b.HasKey("SessionId")
+                        .HasName("pk_match_results");
+
+                    b.ToTable("match_results", "sessions");
+                });
+
+            modelBuilder.Entity("GameVerse.Platform.Sessions.MoveLog", b =>
+                {
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("session_id");
+
+                    b.Property<int>("Seq")
+                        .HasColumnType("integer")
+                        .HasColumnName("seq");
+
+                    b.Property<string>("ActionJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("action_json");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("Seat")
+                        .HasColumnType("integer")
+                        .HasColumnName("seat");
+
+                    b.Property<long>("StateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("state_version");
+
+                    b.HasKey("SessionId", "Seq")
+                        .HasName("pk_move_logs");
+
+                    b.ToTable("move_logs", "sessions");
+                });
+
+            modelBuilder.Entity("GameVerse.Platform.Sessions.SessionPlayer", b =>
+                {
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("session_id");
+
+                    b.Property<int>("Seat")
+                        .HasColumnType("integer")
+                        .HasColumnName("seat");
+
+                    b.Property<int?>("AiLevel")
+                        .HasColumnType("integer")
+                        .HasColumnName("ai_level");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("display_name");
+
+                    b.Property<bool>("IsAi")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_ai");
+
+                    b.Property<DateTimeOffset>("JoinedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("joined_at");
+
+                    b.Property<DateTimeOffset?>("LeftAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("left_at");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("SessionId", "Seat")
+                        .HasName("pk_session_players");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_session_players_user_id");
+
+                    b.ToTable("session_players", "sessions");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
                 {
                     b.Property<Guid>("Id")
@@ -585,6 +773,36 @@ namespace GameVerse.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_game_modes_games_game_id");
                 });
 
+            modelBuilder.Entity("GameVerse.Platform.Sessions.MatchResult", b =>
+                {
+                    b.HasOne("GameVerse.Platform.Sessions.GameSession", null)
+                        .WithOne()
+                        .HasForeignKey("GameVerse.Platform.Sessions.MatchResult", "SessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_match_results_game_sessions_session_id");
+                });
+
+            modelBuilder.Entity("GameVerse.Platform.Sessions.MoveLog", b =>
+                {
+                    b.HasOne("GameVerse.Platform.Sessions.GameSession", null)
+                        .WithMany()
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_move_logs_game_sessions_session_id");
+                });
+
+            modelBuilder.Entity("GameVerse.Platform.Sessions.SessionPlayer", b =>
+                {
+                    b.HasOne("GameVerse.Platform.Sessions.GameSession", null)
+                        .WithMany("Players")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_session_players_game_sessions_session_id");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -645,6 +863,11 @@ namespace GameVerse.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("GameVerse.Platform.Catalog.Game", b =>
                 {
                     b.Navigation("Modes");
+                });
+
+            modelBuilder.Entity("GameVerse.Platform.Sessions.GameSession", b =>
+                {
+                    b.Navigation("Players");
                 });
 #pragma warning restore 612, 618
         }
