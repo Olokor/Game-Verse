@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Business modules. One folder per module; types are internal unless they are the module's public interface. -->
+  <ItemGroup>
+    <ProjectReference Include="../../../shared/GameVerse.Rules/GameVerse.Rules.csproj" />
+    <ProjectReference Include="../../../shared/GameVerse.Contracts/GameVerse.Contracts.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="GameVerse.Infrastructure" />
+    <InternalsVisibleTo Include="GameVerse.Platform.Tests" />
+  </ItemGroup>
+</Project>

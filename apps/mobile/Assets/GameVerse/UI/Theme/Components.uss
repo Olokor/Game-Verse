@@ -1,0 +1,440 @@
+/*
+ * Core components for UI Toolkit, matching the web versions (apps/web/src/components/ui).
+ * Every color, size, radius and duration is a var(--gv-*) from Tokens.uss (generated from tokens.json).
+ * USS differences from CSS, handled here:
+ *   - no `gap`: spacing uses margins on children;
+ *   - no gradients: the game-art glow is a soft tinted disc instead of a radial gradient;
+ *   - no em units: label tracking uses 1px (about 0.08em at 11px; token font.letter-spacing.label).
+ */
+
+/* ---------- Base ---------- */
+
+.gv-root {
+    flex-grow: 1;
+    background-color: var(--gv-color-bg-base);
+    color: var(--gv-color-text-primary);
+    -unity-font-definition: url("../Fonts/Manrope-Regular.ttf");
+    font-size: var(--gv-font-size-body);
+}
+
+.gv-display {
+    -unity-font-definition: url("../Fonts/BricolageGrotesque-SemiBold.ttf");
+}
+
+.gv-display--bold {
+    -unity-font-definition: url("../Fonts/BricolageGrotesque-Bold.ttf");
+}
+
+.gv-bold {
+    -unity-font-definition: url("../Fonts/Manrope-Bold.ttf");
+}
+
+.gv-label {
+    -unity-font-definition: url("../Fonts/Manrope-Bold.ttf");
+    font-size: var(--gv-font-size-label);
+    letter-spacing: 1px;
+    color: var(--gv-color-text-secondary);
+}
+
+.gv-section-title {
+    -unity-font-definition: url("../Fonts/BricolageGrotesque-Bold.ttf");
+    font-size: var(--gv-font-size-title);
+    margin-bottom: var(--gv-space-16);
+}
+
+/* ---------- Button (web: Button.tsx) ---------- */
+
+.gv-button {
+    -unity-font-definition: url("../Fonts/Manrope-Bold.ttf");
+    margin: 0;
+    border-width: 0;
+    border-radius: var(--gv-radius-md);
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    -unity-text-align: middle-center;
+    transition-property: scale, background-color, border-color, color, opacity;
+    transition-duration: var(--gv-motion-instant-duration);
+    transition-timing-function: var(--gv-motion-instant-easing);
+}
+
+.gv-button:active {
+    scale: var(--gv-motion-press-scale) var(--gv-motion-press-scale);
+}
+
+.gv-button:focus {
+    border-width: 2px;
+    border-color: var(--gv-color-brand-volt);
+}
+
+.gv-button--sm {
+    height: var(--gv-layout-touch-target);
+    padding: 0 var(--gv-space-16);
+    font-size: var(--gv-font-size-body-sm);
+}
+
+.gv-button--md {
+    height: var(--gv-space-56);
+    padding: 0 var(--gv-space-24);
+    font-size: var(--gv-font-size-body);
+}
+
+.gv-button--lg {
+    height: var(--gv-space-72);
+    padding: 0 var(--gv-space-32);
+    font-size: var(--gv-font-size-title-sm);
+}
+
+.gv-button--pill {
+    border-radius: var(--gv-radius-pill);
+}
+
+.gv-button--primary {
+    background-color: var(--gv-color-brand-volt);
+    color: var(--gv-color-brand-volt-ink);
+}
+
+.gv-button--primary:hover {
+    opacity: 0.92;
+}
+
+.gv-button--secondary {
+    background-color: var(--gv-color-bg-surface);
+    color: var(--gv-color-text-primary);
+    border-width: var(--gv-border-width);
+    border-color: var(--gv-color-border-subtle);
+}
+
+.gv-button--secondary:hover {
+    background-color: var(--gv-color-bg-elevated);
+    border-color: var(--gv-color-border-strong);
+}
+
+.gv-button--ghost {
+    background-color: rgba(0, 0, 0, 0);
+    color: var(--gv-color-text-secondary);
+}
+
+.gv-button--ghost:hover {
+    background-color: var(--gv-color-bg-surface);
+    color: var(--gv-color-text-primary);
+}
+
+.gv-button--danger {
+    background-color: var(--gv-color-state-danger);
+    color: var(--gv-color-brand-volt-ink);
+}
+
+.gv-button:disabled {
+    color: var(--gv-color-text-muted);
+}
+
+.gv-button--primary:disabled,
+.gv-button--danger:disabled {
+    background-color: var(--gv-color-bg-elevated);
+}
+
+.gv-button--ghost:disabled {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+/* Loading: label hidden (color transparent keeps the width), three dots shown. */
+.gv-button--loading {
+    color: rgba(0, 0, 0, 0);
+}
+
+.gv-button__dots {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+
+.gv-button--loading .gv-button__dots {
+    display: flex;
+}
+
+.gv-button__dot {
+    width: var(--gv-space-8);
+    height: var(--gv-space-8);
+    margin: 0 var(--gv-space-4) 0 0;
+    border-radius: var(--gv-radius-pill);
+    background-color: var(--gv-color-brand-volt-ink);
+}
+
+.gv-button--secondary .gv-button__dot,
+.gv-button--ghost .gv-button__dot {
+    background-color: var(--gv-color-text-primary);
+}
+
+/* ---------- Chips ---------- */
+
+.gv-chip {
+    -unity-font-definition: url("../Fonts/Manrope-Bold.ttf");
+    font-size: var(--gv-font-size-label);
+    letter-spacing: 1px;
+    padding: var(--gv-space-4) var(--gv-space-8);
+    margin-right: var(--gv-space-8);
+    border-radius: var(--gv-radius-pill);
+    background-color: var(--gv-color-bg-base);
+    color: var(--gv-color-text-primary);
+}
+
+.gv-chip--new {
+    background-color: var(--gv-color-text-primary);
+    color: var(--gv-color-brand-volt-ink);
+}
+
+.gv-chip--event {
+    background-color: var(--gv-color-accent-flare);
+    color: var(--gv-color-brand-volt-ink);
+}
+
+/* ---------- GameCard (web: GameCard.tsx) ---------- */
+
+.gv-card {
+    overflow: hidden;
+    border-width: var(--gv-border-width);
+    border-color: var(--gv-color-border-subtle);
+    border-radius: var(--gv-radius-lg);
+    background-color: var(--gv-color-bg-surface);
+    transition-property: scale, border-color;
+    transition-duration: var(--gv-motion-instant-duration);
+    transition-timing-function: var(--gv-motion-instant-easing);
+}
+
+.gv-card:hover {
+    border-color: var(--gv-color-border-strong);
+}
+
+.gv-card:active {
+    scale: var(--gv-motion-press-scale) var(--gv-motion-press-scale);
+}
+
+.gv-card:focus {
+    border-color: var(--gv-color-brand-volt);
+}
+
+.gv-card__art {
+    background-color: var(--gv-color-bg-inset);
+    overflow: hidden;
+}
+
+/* Placeholder silhouette: a rotated outlined tile in the category color (TODO(gameverse): key art). */
+.gv-card__glyph {
+    position: absolute;
+    border-width: 6px;
+    border-radius: var(--gv-radius-xl);
+    rotate: 12deg;
+    opacity: 0.9;
+}
+
+.gv-card__chips {
+    position: absolute;
+    top: var(--gv-space-12);
+    left: var(--gv-space-12);
+    flex-direction: row;
+}
+
+.gv-card__body {
+    padding: var(--gv-space-12);
+}
+
+.gv-card__eyebrow {
+    margin-bottom: var(--gv-space-4);
+}
+
+.gv-card__title {
+    -unity-font-definition: url("../Fonts/BricolageGrotesque-Bold.ttf");
+    font-size: var(--gv-font-size-title-sm);
+    color: var(--gv-color-text-primary);
+    margin: 0;
+    padding: 0;
+}
+
+.gv-card__subtitle {
+    font-size: var(--gv-font-size-body-sm);
+    color: var(--gv-color-text-secondary);
+    margin: 0;
+    padding: 0;
+    white-space: normal;
+}
+
+.gv-card__actions {
+    flex-direction: row;
+    align-items: center;
+    margin-top: var(--gv-space-16);
+}
+
+.gv-card__live {
+    margin-left: var(--gv-space-16);
+    font-size: var(--gv-font-size-body-sm);
+    color: var(--gv-color-text-secondary);
+}
+
+/* hero: wide, overlay text on art */
+.gv-card--hero {
+    height: 410px;
+}
+
+.gv-card--hero .gv-card__art {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.gv-card--hero .gv-card__glyph {
+    width: 45%;
+    height: 40%;
+    right: var(--gv-space-16);
+    top: var(--gv-space-24);
+}
+
+.gv-card--hero .gv-card__body {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: var(--gv-space-16);
+}
+
+.gv-card--hero .gv-card__title {
+    font-size: var(--gv-font-size-display);
+}
+
+.gv-card--hero .gv-card__subtitle {
+    font-size: var(--gv-font-size-body);
+}
+
+/* standard: portrait art over a body */
+.gv-card--standard {
+    width: 140px;
+    margin-right: var(--gv-space-12);
+}
+
+.gv-card--standard .gv-card__art {
+    height: 186px;
+}
+
+.gv-card--standard .gv-card__glyph {
+    width: 70%;
+    height: 50%;
+    right: -12%;
+    top: 30%;
+}
+
+/* compact: row */
+.gv-card--compact {
+    flex-direction: row;
+    align-items: center;
+    min-height: var(--gv-space-72);
+    padding: var(--gv-space-8);
+    border-radius: var(--gv-radius-md);
+    margin-bottom: var(--gv-space-8);
+}
+
+.gv-card--compact .gv-card__art {
+    width: var(--gv-space-56);
+    height: var(--gv-space-56);
+    border-radius: var(--gv-radius-sm);
+}
+
+.gv-card--compact .gv-card__glyph {
+    left: 20%;
+    top: 20%;
+    width: 60%;
+    height: 60%;
+    border-width: 3px;
+    border-radius: var(--gv-radius-sm);
+}
+
+.gv-card--compact .gv-card__body {
+    flex-grow: 1;
+    padding: 0 var(--gv-space-12);
+}
+
+/* Category colors for the placeholder art (glow disc + silhouette) and chip dot. */
+.gv-category--board .gv-card__glyph { border-color: var(--gv-color-category-board); }
+.gv-category--cards .gv-card__glyph { border-color: var(--gv-color-category-cards); }
+.gv-category--arcade .gv-card__glyph { border-color: var(--gv-color-category-arcade); }
+.gv-category--racing .gv-card__glyph { border-color: var(--gv-color-category-racing); }
+.gv-category--fight .gv-card__glyph { border-color: var(--gv-color-category-fight); }
+.gv-category--adventure .gv-card__glyph { border-color: var(--gv-color-category-adventure); }
+.gv-category--brain .gv-card__glyph { border-color: var(--gv-color-category-brain); }
+
+/* ---------- Home layout ---------- */
+
+.gv-screen {
+    padding: var(--gv-space-16) var(--gv-layout-gutter-mobile);
+}
+
+.gv-topbar {
+    flex-direction: row;
+    align-items: center;
+    height: var(--gv-space-56);
+    padding: 0 var(--gv-layout-gutter-mobile);
+    border-bottom-width: var(--gv-border-width);
+    border-color: var(--gv-color-border-subtle);
+}
+
+.gv-logo {
+    width: var(--gv-space-32);
+    height: var(--gv-space-32);
+    border-radius: var(--gv-radius-sm);
+    background-color: var(--gv-color-brand-volt);
+    color: var(--gv-color-brand-volt-ink);
+    -unity-font-definition: url("../Fonts/BricolageGrotesque-Bold.ttf");
+    font-size: var(--gv-font-size-title-sm);
+    -unity-text-align: middle-center;
+    margin-right: var(--gv-space-8);
+}
+
+.gv-wordmark {
+    -unity-font-definition: url("../Fonts/BricolageGrotesque-Bold.ttf");
+    font-size: var(--gv-font-size-title);
+    flex-grow: 1;
+}
+
+.gv-pill {
+    flex-direction: row;
+    align-items: center;
+    height: var(--gv-space-32);
+    padding: 0 var(--gv-space-12);
+    border-radius: var(--gv-radius-pill);
+    border-width: var(--gv-border-width);
+    border-color: var(--gv-color-border-subtle);
+    background-color: var(--gv-color-bg-surface);
+    -unity-font-definition: url("../Fonts/Manrope-Bold.ttf");
+    font-size: var(--gv-font-size-body-sm);
+}
+
+.gv-coin {
+    width: var(--gv-space-16);
+    height: var(--gv-space-16);
+    border-radius: var(--gv-radius-pill);
+    background-color: var(--gv-color-currency-coin);
+    margin-right: var(--gv-space-8);
+}
+
+.gv-greeting {
+    -unity-font-definition: url("../Fonts/BricolageGrotesque-Bold.ttf");
+    font-size: var(--gv-font-size-headline);
+    margin-bottom: var(--gv-space-24);
+    white-space: normal;
+}
+
+.gv-row {
+    flex-direction: row;
+    margin-top: var(--gv-space-12);
+}
+
+.gv-section {
+    margin-top: var(--gv-space-40);
+}

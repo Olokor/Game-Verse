@@ -1,0 +1,40 @@
+# Unity project (apps/mobile). Generated or machine-local folders are never committed.
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+/TestResults/
+
+# IDE files Unity regenerates
+*.csproj
+*.sln
+*.slnx
+*.suo
+*.user
+*.pidb
+*.booproj
+.vs/
+.idea/
+.vscode/
+
+# Build output from `make rules` (shared DLLs are ignored in the root .gitignore; fixtures here)
+/Assets/GameVerse/Resources/Fixtures/
+/Assets/GameVerse/Resources/Fixtures.meta
+
+# Crash and build reports
+sysinfo.txt
+crashlytics-build.properties
+*.apk
+*.aab
+*.symbols.zip
+
+# Android native build intermediates (CMake/ninja) written by the Gradle build
+/.utmp/
+
+# Burst output for Web builds
+/Data/
