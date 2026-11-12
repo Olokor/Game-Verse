@@ -1,5 +1,5 @@
-// Client-side view models for the shell. The real shapes come from the API (Prompt 1.2 catalog, 2.x progression)
-// and the generated client in packages/api-schema; these mirror what the screens need until then.
+// Client-side view models for the shell. Games come from the catalog API (Prompt 1.2, src/data/catalog.ts); quests,
+// friends and progression still come from mocks until their prompts (2.x).
 
 export type Category = 'board' | 'cards' | 'arcade' | 'racing' | 'fight' | 'adventure' | 'brain';
 
@@ -10,7 +10,10 @@ export interface GameSummary {
   title: string;
   category: Category;
   tagline: string;
-  livePlayers: number;
+  /** Enabled in the catalog. Coming-soon games are listed but cannot be opened (owner decision 2026-11-12). */
+  playable: boolean;
+  /** Players in game right now. Absent until presence data exists (Realtime): never invented. */
+  livePlayers?: number;
   badge?: 'new' | 'event';
 }
 
@@ -51,6 +54,8 @@ export interface CategorySummary {
 export interface HomeFeed {
   /** Absent when nothing is featured; Home then starts with Continue playing. */
   featured?: GameSummary;
+  /** Listed games that are not playable yet. */
+  comingSoon: GameSummary[];
   continuePlaying: ContinueEntry[];
   quests: Quest[];
   questsResetInMinutes: number;

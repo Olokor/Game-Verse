@@ -1,0 +1,15 @@
+{
+  "game": "ludo",
+  "name": "Two players sit at opposite corners; all tokens start in base",
+  "description": "Seats 0 and 1 play colours 0 and 2. A 3 with every token in base has no legal move, so the turn passes by itself.",
+  "config": {"dice": [3]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {"legalActions": [{"roll": true}], "state": {"tokens": [[-1, -1, -1, -1], [-1, -1, -1, -1]], "colors": [0, 2], "currentSeat": 1, "phase": "roll", "lastRoll": 3}}}
+  ],
+  "outcome": {"kind": "none"}
+}

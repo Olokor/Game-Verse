@@ -1,0 +1,16 @@
+{
+  "game": "ludo",
+  "name": "Six-to-leave off: any roll brings a token out",
+  "description": "The token still lands on the start square, whatever the roll. A 3 is not a bonus, so the turn passes.",
+  "config": {"sixToLeaveBase": false, "dice": [3]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"phase": "move", "lastRoll": 3}}},
+    {"seat": 0, "action": {"move": 1}, "expect": {"legalActions": [{"move": 0}, {"move": 1}, {"move": 2}, {"move": 3}], "state": {"tokens": [[-1, 0, -1, -1], [-1, -1, -1, -1]], "currentSeat": 1}}}
+  ],
+  "outcome": {"kind": "none"}
+}

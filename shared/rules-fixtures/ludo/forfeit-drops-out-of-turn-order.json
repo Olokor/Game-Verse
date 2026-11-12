@@ -1,0 +1,19 @@
+{
+  "game": "ludo",
+  "name": "Forfeit: a leaver is skipped, and the later leaver ranks above the earlier one",
+  "description": "Seat 1 resigns out of turn; after seat 0's turn, play goes to seat 2. Seat 2 then resigns on its own turn and seat 0 wins.",
+  "config": {"dice": [2]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"},
+    {"seat": 2, "playerId": "p2"}
+  ],
+  "seed": 1,
+  "steps": [
+    {"seat": 1, "action": {"forfeit": true}, "expect": {"state": {"left": [1], "currentSeat": 0}}},
+    {"seat": 1, "action": {"forfeit": true}, "expect": {"ok": false, "error": "not_playing"}},
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"currentSeat": 2}}},
+    {"seat": 2, "action": {"forfeit": true}, "expect": {"state": {"left": [1, 2], "phase": "over"}}}
+  ],
+  "outcome": {"kind": "win", "winningSeats": [0], "placements": [0, 2, 1], "reason": "opponents_left"}
+}

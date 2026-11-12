@@ -1,0 +1,19 @@
+{
+  "game": "ludo",
+  "name": "Teams: partners never capture each other",
+  "description": "Absolute square 36 holds seat 2's token (relative 10, partner) and seat 1's token (relative 23, opponent). Seat 0 lands there: only the opponent goes back to base.",
+  "config": {"teams": true, "dice": [3]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"},
+    {"seat": 2, "playerId": "p2"},
+    {"seat": 3, "playerId": "p3"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[33, -1, -1, -1], [23, -1, -1, -1], [10, -1, -1, -1], [-1, -1, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"state": {"tokens": [[36, -1, -1, -1], [-1, -1, -1, -1], [10, -1, -1, -1], [-1, -1, -1, -1]], "currentSeat": 0}}}
+  ],
+  "outcome": {"kind": "none"}
+}

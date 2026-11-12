@@ -1,0 +1,17 @@
+{
+  "game": "ludo",
+  "name": "Tokens in the home column cannot be captured",
+  "description": "Seat 0 at relative 48 and seat 1 in its own home column (relative 52) are on different paths; only the shared track (0..50) can capture.",
+  "config": {"dice": [4]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[48, -1, -1, -1], [52, -1, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"state": {"tokens": [[52, -1, -1, -1], [52, -1, -1, -1]], "currentSeat": 1}}}
+  ],
+  "outcome": {"kind": "none"}
+}

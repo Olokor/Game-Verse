@@ -1,0 +1,19 @@
+{
+  "game": "ludo",
+  "name": "Teams: an opponent finishing first does not end the game, and placings is ignored",
+  "description": "Seat 1 finished first, then seat 0. Placings 3 does not apply to teams: the game ends when seat 2 (moved by seat 0) completes team 0+2.",
+  "config": {"teams": true, "placings": 3, "dice": [1]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"},
+    {"seat": 2, "playerId": "p2"},
+    {"seat": 3, "playerId": "p3"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[56, 56, 56, 56], [56, 56, 56, 56], [56, 56, 56, 55], [10, -1, -1, -1]], "currentSeat": 0, "finished": [1, 0]},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 3}, "expect": {"state": {"finished": [1, 0, 2], "phase": "over"}}}
+  ],
+  "outcome": {"kind": "win", "winningSeats": [0, 2], "placements": [0, 2, 1, 3], "reason": "all_tokens_home"}
+}

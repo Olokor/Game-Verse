@@ -182,6 +182,7 @@ Plan mode. Implement the realtime protocol from CLAUDE.md 4.5 and private rooms 
 - MatchHost per live match (single-reader Channel), Redis snapshot after every action, Redis pub/sub fan-out
 - Room create/join by code, seats, ready states, house rules set by host
 - Server applies Ludo actions through the shared engine, broadcasts ViewFor(seat) with stateVersion
+- vs AI sessions run in the same MatchHost, with the AI seats played by LudoAi on the server (ADR-0008)
 - Turn timer with auto-move on timeout, reconnect with snapshot, disconnect grace and forfeit, heartbeat
 - Best of three and rematch at room level
 Write an integration test that runs two simulated WebSocket clients through a full Ludo game to completion, plus one that kills the MatchHost mid-game and resumes from Redis.
@@ -196,7 +197,7 @@ Implement Redis matchmaking queues for Ludo 2p and 4p as a hosted service, Glick
 ```
 Plan mode. Build the Ludo game module in Unity using the shared GameVerse.Rules Ludo engine (no rule logic in Unity):
 - Board, tokens, dice with the feel described in GAME_BRIEFS.md section 1 (dice tumble, hop animation, capture launch)
-- Modes: local and vs AI run the shared engine locally; online goes through IGameHost and the server
+- Modes: local pass-and-play runs the shared engine on the device; vs AI and online go through IGameHost and the server match host (ADR-0008: vs AI is server-hosted so its dice and rewards are verified)
 - Platform screens in UI Toolkit: lobby, matchmaking, private room, results
 Acceptance: two Android devices (or one device + Unity editor) play a full private-room game through the real backend.
 ```

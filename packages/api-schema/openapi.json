@@ -4,5 +4,1527 @@
     "title": "GameVerse.Api | v1",
     "version": "1.0.0"
   },
-  "paths": { }
+  "paths": {
+    "/accounts/me/delete": {
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Delete the signed-in account (email accounts confirm with their password); signs out everywhere",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteAccountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/me": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "The signed-in account",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/guest": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Create a device-bound guest account",
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestCreatedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/guest/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Sign a guest back in with its device secret",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuestLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthTokensResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Exchange a refresh token for new tokens (rotates the refresh token)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RefreshRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthTokensResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "End the session the refresh token belongs to",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RefreshRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/auth/upgrade": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Turn the signed-in guest into an email account (same account id); mails a verification code",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpgradeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthTokensResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/email/verify": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Confirm the email of the signed-in account with the mailed 6-digit code",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyEmailRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/auth/email/resend": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Mail a new verification code",
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Sign in with email and password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthTokensResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/password/forgot": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Mail a password-reset code (always 202, whether or not the email has an account)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted"
+          }
+        }
+      }
+    },
+    "/auth/password/reset": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Set a new password with the mailed code; signs out every session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/profiles/me": {
+      "get": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "The signed-in player's profile",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "Change display name and/or avatar",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/games": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "summary": "Every listed game with its modes (playable and coming soon)",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GameInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/games/{id}": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "summary": "One game with its modes",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Start a single-owner session (pass and play, vs AI, solo); returns its manifest",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionManifestOfSessionConfigOfDictionaryOfstringAndstringAndObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions/{sessionId}/manifest": {
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "The SessionManifest a game loads with (participants only)",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionManifestOfSessionConfigOfDictionaryOfstringAndstringAndObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions/{sessionId}/fairness": {
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Dice commit-reveal: the seed commitment always, the secret and seed once the session has ended (participants only)",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionFairness"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions/me": {
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "The signed-in player's recent sessions, optionally filtered by status",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SessionSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AccountResponse": {
+        "required": [
+          "userId",
+          "isGuest",
+          "emailVerified",
+          "isMinor",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "Gets or sets the account id (UUID)."
+          },
+          "isGuest": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether the account is a guest."
+          },
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the email, or null for guests."
+          },
+          "emailVerified": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether the email has been verified."
+          },
+          "isMinor": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether the player counts as under 18 (guests always do, CLAUDE.md\r\nsection 7: chat is off for minors)."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Gets or sets when the account was created (ISO 8601, UTC)."
+          }
+        },
+        "description": "The signed-in account."
+      },
+      "AuthTokensResponse": {
+        "required": [
+          "userId",
+          "isGuest",
+          "accessToken",
+          "accessTokenExpiresAt",
+          "refreshTokenExpiresAt"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "Gets or sets the account id (UUID)."
+          },
+          "isGuest": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether the account is a guest (device-bound, no email)."
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "Gets or sets the access token (JWT, about 15 minutes)."
+          },
+          "accessTokenExpiresAt": {
+            "type": "string",
+            "description": "Gets or sets when the access token expires (ISO 8601, UTC)."
+          },
+          "refreshToken": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the refresh token, or null when it was set as a cookie (web)."
+          },
+          "refreshTokenExpiresAt": {
+            "type": "string",
+            "description": "Gets or sets when the refresh token expires (ISO 8601, UTC)."
+          }
+        },
+        "description": "Tokens returned by every sign-in style call (ADR-0006). The access token is a short-lived JWT for the\r\nAuthorization header. The refresh token is in this body for Unity and other clients; web clients\r\n(header `X-GameVerse-Client: web`) get it as an httpOnly cookie instead and see `null` here."
+      },
+      "CreateSessionRequest": {
+        "required": [
+          "gameId",
+          "mode",
+          "playerCount",
+          "houseRules"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "string",
+            "description": "Gets or sets the catalog game id, e.g. \"ludo\"."
+          },
+          "mode": {
+            "type": "string",
+            "description": "Gets or sets the catalog mode key, e.g. \"vs-ai\"."
+          },
+          "playerCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the number of seats (humans and AI), one of the mode's player counts.",
+            "format": "int32"
+          },
+          "aiLevel": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the AI level 1 to 3 for vs AI modes (default 1).",
+            "format": "int32"
+          },
+          "variant": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the rules variant, when the game has several."
+          },
+          "houseRules": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Gets or sets house-rule toggles as strings (e.g. \"sixToLeaveBase\": \"true\"). Each game's engine parses and\r\nvalidates its own; Ludo's keys are in `GameVerse.Contracts.Ludo.LudoHouseRules`."
+          }
+        },
+        "description": "Starts a single-owner session (local pass-and-play, vs AI, solo) for the signed-in player, who takes seat 0. Online\r\nsessions are created by private rooms and matchmaking instead (Prompts 1.4, 1.5)."
+      },
+      "DeleteAccountRequest": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the current password (email accounts only)."
+          }
+        },
+        "description": "Deletes the signed-in account. Email accounts confirm with their password; guests leave it empty."
+      },
+      "ForgotPasswordRequest": {
+        "required": [
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Gets or sets the email address."
+          }
+        },
+        "description": "Asks for a password-reset code. Always accepted (202), whether or not the email has an account."
+      },
+      "GameInfo": {
+        "required": [
+          "id",
+          "title",
+          "tagline",
+          "category",
+          "accentToken",
+          "version",
+          "status",
+          "modes"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Gets or sets the game id (slug), e.g. \"ludo\". Also the SessionManifest gameId."
+          },
+          "title": {
+            "type": "string",
+            "description": "Gets or sets the display title."
+          },
+          "tagline": {
+            "type": "string",
+            "description": "Gets or sets the one-line pitch shown on cards."
+          },
+          "category": {
+            "type": "string",
+            "description": "Gets or sets the category: board, cards, brain, arcade, adventure, racing or fight."
+          },
+          "accentToken": {
+            "type": "string",
+            "description": "Gets or sets the accent as a design-token path (e.g. \"color.category.board\"), never a color value: each\r\nclient resolves it with its own generated tokens."
+          },
+          "version": {
+            "type": "string",
+            "description": "Gets or sets the current game version (SessionManifest gameVersion)."
+          },
+          "status": {
+            "type": "string",
+            "description": "Gets or sets the availability, one of GameStatuses."
+          },
+          "modes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameModeInfo"
+            },
+            "description": "Gets or sets the ways to play, in display order."
+          }
+        },
+        "description": "A game in the catalog (Prompt 1.2, ADR-0007). Shared by the web and Unity game lists."
+      },
+      "GameModeInfo": {
+        "required": [
+          "key",
+          "kind",
+          "label",
+          "playerCounts"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Gets or sets the mode key, unique within the game (e.g. \"blitz-3-2\")."
+          },
+          "kind": {
+            "type": "string",
+            "description": "Gets or sets the kind: local, vs_ai, online_ranked, online_private or solo (CLAUDE.md 4.2)."
+          },
+          "label": {
+            "type": "string",
+            "description": "Gets or sets the display label, e.g. \"Quick match\"."
+          },
+          "playerCounts": {
+            "type": "array",
+            "items": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            },
+            "description": "Gets or sets the allowed player counts, humans and AI together (e.g. 2 and 4 for Ludo quick match)."
+          }
+        },
+        "description": "One way to play a game."
+      },
+      "GuestCreatedResponse": {
+        "required": [
+          "deviceSecret",
+          "userId",
+          "isGuest",
+          "accessToken",
+          "accessTokenExpiresAt",
+          "refreshTokenExpiresAt"
+        ],
+        "type": "object",
+        "properties": {
+          "deviceSecret": {
+            "type": "string",
+            "description": "Gets or sets the device secret. Never sent again."
+          },
+          "userId": {
+            "type": "string",
+            "description": "Gets or sets the account id (UUID)."
+          },
+          "isGuest": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether the account is a guest (device-bound, no email)."
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "Gets or sets the access token (JWT, about 15 minutes)."
+          },
+          "accessTokenExpiresAt": {
+            "type": "string",
+            "description": "Gets or sets when the access token expires (ISO 8601, UTC)."
+          },
+          "refreshToken": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the refresh token, or null when it was set as a cookie (web)."
+          },
+          "refreshTokenExpiresAt": {
+            "type": "string",
+            "description": "Gets or sets when the refresh token expires (ISO 8601, UTC)."
+          }
+        },
+        "description": "Response to creating a guest. string GuestCreatedResponse.DeviceSecret is shown exactly once; the client stores it in secure\r\nstorage and signs back in with it (GuestLoginRequest). The server keeps only a hash."
+      },
+      "GuestLoginRequest": {
+        "required": [
+          "guestId",
+          "deviceSecret"
+        ],
+        "type": "object",
+        "properties": {
+          "guestId": {
+            "type": "string",
+            "description": "Gets or sets the guest's account id."
+          },
+          "deviceSecret": {
+            "type": "string",
+            "description": "Gets or sets the device secret returned when the guest was created."
+          }
+        },
+        "description": "Signs a guest back in on the device that created it."
+      },
+      "HttpValidationProblemDetails": {
+        "required": [
+          "errors"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "LoginRequest": {
+        "required": [
+          "email",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Gets or sets the email address."
+          },
+          "password": {
+            "type": "string",
+            "description": "Gets or sets the password."
+          }
+        },
+        "description": "Signs in with email and password."
+      },
+      "PlayerSlot": {
+        "required": [
+          "id",
+          "displayName",
+          "seat",
+          "cosmetics",
+          "isAI"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Gets or sets the player id (UUID)."
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Gets or sets the display name."
+          },
+          "seat": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the zero-based seat.",
+            "format": "int32"
+          },
+          "cosmetics": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Gets or sets equipped cosmetics, slot to cosmetic id (e.g. \"diceSkin\": \"dice_neon\")."
+          },
+          "isAI": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether an AI controls this seat."
+          }
+        },
+        "description": "A seated player as the platform sees them."
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "ProfileResponse": {
+        "required": [
+          "userId",
+          "displayName",
+          "avatarId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "Gets or sets the account id (UUID)."
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Gets or sets the display name shown to other players."
+          },
+          "avatarId": {
+            "type": "string",
+            "description": "Gets or sets the avatar id, one of IReadOnlyList&lt;string&gt; ProfileAvatars.All."
+          }
+        },
+        "description": "A player's public profile basics (Prompt 1.1). Frames, titles and stats come with Progression."
+      },
+      "RealtimeInfo": {
+        "required": [
+          "wsUrl",
+          "ticket"
+        ],
+        "type": "object",
+        "properties": {
+          "wsUrl": {
+            "type": "string",
+            "description": "Gets or sets the WebSocket URL, e.g. wss://api.gameverse.app/ws/play/{sessionId}."
+          },
+          "ticket": {
+            "type": "string",
+            "description": "Gets or sets the single-use ticket, valid for 30 seconds. Never the JWT."
+          }
+        },
+        "description": "Where and how to open the realtime socket."
+      },
+      "RefreshRequest": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the refresh token, or null for web clients."
+          }
+        },
+        "description": "Exchanges a refresh token for new tokens (the old one stops working). Web clients leave\r\nstring? RefreshRequest.RefreshToken empty; the cookie is used instead. Also the body of a logout."
+      },
+      "ResetPasswordRequest": {
+        "required": [
+          "email",
+          "code",
+          "newPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Gets or sets the email address."
+          },
+          "code": {
+            "type": "string",
+            "description": "Gets or sets the 6-digit code."
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "Gets or sets the new password (at least 10 characters)."
+          }
+        },
+        "description": "Sets a new password with the 6-digit code from the reset email. Signs out every session."
+      },
+      "SessionConfigOfDictionaryOfstringAndstring": {
+        "type": "object",
+        "properties": {
+          "variant": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the variant id, e.g. \"international_10x10\"."
+          },
+          "houseRules": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Gets or sets the house rules."
+          },
+          "aiLevel": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the AI difficulty for vs AI modes.",
+            "format": "int32"
+          }
+        },
+        "description": "The common config shape from CLAUDE.md 4.2."
+      },
+      "SessionFairness": {
+        "required": [
+          "sessionId",
+          "revealed"
+        ],
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Gets or sets the session id."
+          },
+          "commitment": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the commitment as lowercase hex, or null for games without server randomness."
+          },
+          "revealed": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether the secret is revealed (the session has ended)."
+          },
+          "secret": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the secret as lowercase hex, once revealed."
+          },
+          "seed": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the PRNG seed derived from the secret, as a decimal string (it exceeds JSON's safe integers)."
+          }
+        },
+        "description": "Dice fairness by commit-reveal (ADR-0008). The commitment (SHA-256 of a 32-byte server secret) is published when the\r\nsession is created; the secret and the seed derived from it are revealed only once the session has ended, so anyone\r\ncan check the commitment and replay every roll with GameVerse.Rules."
+      },
+      "SessionManifestOfSessionConfigOfDictionaryOfstringAndstringAndObject": {
+        "required": [
+          "gameId",
+          "gameVersion",
+          "sessionId",
+          "mode",
+          "localPlayerId",
+          "players"
+        ],
+        "type": "object",
+        "properties": {
+          "config": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Gets or sets the variant, house rules and AI level.",
+                "$ref": "#/components/schemas/SessionConfigOfDictionaryOfstringAndstring"
+              }
+            ]
+          },
+          "initialState": {
+            "description": "Gets or sets the initial state; may be absent when the game builds it from the config."
+          },
+          "gameId": {
+            "type": "string",
+            "description": "Gets or sets the catalog game id, e.g. \"ludo\"."
+          },
+          "gameVersion": {
+            "type": "string",
+            "description": "Gets or sets the game build version the session was created for."
+          },
+          "sessionId": {
+            "type": "string",
+            "description": "Gets or sets the session id (UUID)."
+          },
+          "mode": {
+            "type": "string",
+            "description": "Gets or sets the mode, one of GameModes."
+          },
+          "localPlayerId": {
+            "type": "string",
+            "description": "Gets or sets the id of the player on this device."
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlayerSlot"
+            },
+            "description": "Gets or sets the seated players."
+          },
+          "realtime": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Gets or sets realtime connection details; null for local, vs AI and solo modes.",
+                "$ref": "#/components/schemas/RealtimeInfo"
+              }
+            ]
+          }
+        },
+        "description": "The full manifest a game module reads, with its own config and state types."
+      },
+      "SessionSummary": {
+        "required": [
+          "sessionId",
+          "gameId",
+          "mode",
+          "status",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Gets or sets the session id."
+          },
+          "gameId": {
+            "type": "string",
+            "description": "Gets or sets the game id."
+          },
+          "mode": {
+            "type": "string",
+            "description": "Gets or sets the mode key."
+          },
+          "status": {
+            "type": "string",
+            "description": "Gets or sets the status, one of SessionStatuses."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Gets or sets when the session was created (ISO 8601, UTC)."
+          }
+        },
+        "description": "One of the player's sessions."
+      },
+      "UpdateProfileRequest": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the new display name: 3 to 20 letters, digits, spaces or underscores."
+          },
+          "avatarId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the new avatar id, one of IReadOnlyList&lt;string&gt; ProfileAvatars.All."
+          }
+        },
+        "description": "Changes the signed-in player's profile. Fields left null stay as they are."
+      },
+      "UpgradeRequest": {
+        "required": [
+          "email",
+          "password",
+          "birthYear"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Gets or sets the email address. A 6-digit verification code is sent to it."
+          },
+          "password": {
+            "type": "string",
+            "description": "Gets or sets the password: at least 10 characters, no other composition rules."
+          },
+          "birthYear": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the birth year (four digits).",
+            "format": "int32"
+          }
+        },
+        "description": "Turns the signed-in guest into an email account. The account id stays the same, so everything the guest earned\r\nstays attached. Only the birth year is asked, to decide whether the player is a minor (ADR-0006)."
+      },
+      "VerifyEmailRequest": {
+        "required": [
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Gets or sets the 6-digit code."
+          }
+        },
+        "description": "Confirms the signed-in account's email with the 6-digit code that was mailed to it."
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Accounts"
+    },
+    {
+      "name": "Auth"
+    },
+    {
+      "name": "Profiles"
+    },
+    {
+      "name": "Catalog"
+    },
+    {
+      "name": "Sessions"
+    }
+  ]
 }

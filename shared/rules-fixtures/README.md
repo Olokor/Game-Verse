@@ -35,7 +35,7 @@ Golden test vectors, one folder per game. They do two jobs:
       }
     }
   ],
-  "outcome": { "kind": "win", "winningSeats": [0], "reason": "all_tokens_home" }
+  "outcome": { "kind": "win", "winningSeats": [0], "placements": [0, 2, 1], "reason": "all_tokens_home" }
   // kind: "win" | "draw" | "abandoned" | "none" (the game must still be running)
 }
 ```
@@ -48,3 +48,30 @@ Rules of thumb:
 
 When a fixture fails, the runner reports the file, the step and the exact field, e.g.
 `nim-normal-win.json [Normal game] step 2 (seat 1): state.pile: expected 1, got 2`.
+
+## Ludo (`ludo/`)
+
+Board model (ADR-0008):
+
+| Position | Meaning |
+|---|---|
+| `-1` | in base |
+| `0..50` | the shared track, counted from the token's own start square |
+| `51..55` | the token's own home column (it can't be captured there) |
+| `56` | home |
+
+- A seat of colour `c` at relative position `p` (0..50) is on absolute square `(13c + p) mod 52`.
+- Two players play colours 0 and 2, three play 0, 1 and 2, and four play all four.
+- Safe absolute squares are `0, 13, 26, 39` (the starts) and `8, 21, 34, 47` (the stars).
+
+Fields:
+
+| Field | Shape |
+|---|---|
+| `config` | the house-rule toggles: `sixToLeaveBase`, `threeSixesForfeit`, `captureBonus`, `mustCapture`, `safeSquares`, `quickMode`, `placings`, `teams`. Anything left out takes its Classic Naija default. |
+| `config.dice` | **test only**: the die values to roll, in order. Every listed value must be used. Once the list runs out, the dice come from the seeded PRNG again. |
+| actions | `{"roll": true}`, `{"move": tokenIndex}`, or `{"forfeit": true}` (resign, allowed out of turn) |
+| `state` | `tokens` (4 per seat), `currentSeat`, `phase` (`roll`, `move` or `over`), `lastRoll`, `sixesInRow`, `finished` (seats in finishing order), `left` (seats that forfeited, in order), `colors`, `hasDice` (false in a player's view), `moveNumber` |
+| `initialState` | the same fields. The dice there start from seed 1. |
+
+`seeded-dice.json` has no scripted dice. It pins the real PRNG rolls for seed 42.

@@ -1,0 +1,17 @@
+{
+  "game": "ludo",
+  "name": "A token on a star square cannot be captured",
+  "description": "Seat 1's token at relative 34 is on absolute 8, a star. Seat 0 lands there; both tokens share the square and the turn passes.",
+  "config": {"dice": [3]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[5, -1, -1, -1], [34, -1, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"state": {"tokens": [[8, -1, -1, -1], [34, -1, -1, -1]], "currentSeat": 1}}}
+  ],
+  "outcome": {"kind": "none"}
+}

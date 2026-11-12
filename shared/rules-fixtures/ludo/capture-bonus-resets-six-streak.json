@@ -1,0 +1,23 @@
+{
+  "game": "ludo",
+  "name": "A bonus roll from a non-six capture starts a new six streak",
+  "description": "Six (streak 1), then a 3 that captures (bonus roll, streak back to 0), then two sixes: streak 2, not a forfeit.",
+  "config": {"dice": [6, 3, 6, 6]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[10, 33, -1, -1], [10, -1, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"state": {"sixesInRow": 1}}},
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 1}, "expect": {"state": {"tokens": [[16, 36, -1, -1], [-1, -1, -1, -1]], "currentSeat": 0, "sixesInRow": 0}}},
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 0}, "expect": {}},
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"phase": "move", "sixesInRow": 2}}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"state": {"tokens": [[28, 36, -1, -1], [-1, -1, -1, -1]], "currentSeat": 0}}}
+  ],
+  "outcome": {"kind": "none"}
+}

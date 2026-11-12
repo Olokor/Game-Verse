@@ -1,11 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- Business modules. One folder per module; types are internal unless they are the module's public interface. -->
   <ItemGroup>
+    <!-- Modules map their own Minimal API endpoints and use Identity, so they build against the ASP.NET Core framework. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../../../shared/GameVerse.Rules/GameVerse.Rules.csproj" />
     <ProjectReference Include="../../../shared/GameVerse.Contracts/GameVerse.Contracts.csproj" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="GameVerse.Infrastructure" />
     <InternalsVisibleTo Include="GameVerse.Platform.Tests" />
+    <InternalsVisibleTo Include="GameVerse.Api.IntegrationTests" />
   </ItemGroup>
 </Project>

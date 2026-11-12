@@ -1,0 +1,16 @@
+{
+  "game": "ludo",
+  "name": "Quick mode: each player starts with one token already out",
+  "description": "Token 0 of every seat starts on its start square (position 0), so a non-six can move it straight away.",
+  "config": {"quickMode": true, "dice": [2]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"tokens": [[0, -1, -1, -1], [0, -1, -1, -1]], "phase": "move"}}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"legalActions": [{"move": 0}], "state": {"tokens": [[2, -1, -1, -1], [0, -1, -1, -1]], "currentSeat": 1}}}
+  ],
+  "outcome": {"kind": "none"}
+}

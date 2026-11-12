@@ -70,5 +70,8 @@ public sealed class FixtureOutcome
 
     public List<int>? WinningSeats { get; set; }
 
+    /// <summary>Optional: every seat in finishing order (1st first).</summary>
+    public List<int>? Placements { get; set; }
+
     public string? Reason { get; set; }
 }

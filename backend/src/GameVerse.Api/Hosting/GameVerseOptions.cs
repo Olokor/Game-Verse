@@ -21,6 +21,12 @@ internal sealed class GameVerseOptions
 
     public ErrorReportingOptions ErrorReporting { get; set; } = new();
 
+    /// <summary>
+    /// Browser origins allowed to call the API with credentials (the web app sends the refresh cookie). Exact origins
+    /// only, never "*": e.g. http://localhost:5173 in development, https://gameverse.app in production.
+    /// </summary>
+    public string[] CorsOrigins { get; set; } = [];
+
     public bool IsWorker => string.Equals(Role, HostRoles.Worker, StringComparison.OrdinalIgnoreCase);
 
     public void Validate()
