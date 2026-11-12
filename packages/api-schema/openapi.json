@@ -1129,6 +1129,145 @@
           }
         }
       }
+    },
+    "/matchmaking/queue": {
+      "post": {
+        "tags": [
+          "Matchmaking"
+        ],
+        "summary": "Start searching for a casual or ranked game; poll GET /matchmaking/queue until matched",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinQueueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatusDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Matchmaking"
+        ],
+        "summary": "Searching (with the wait and the current rating band) or matched (with the session to load); 404 when not searching",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatusDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Matchmaking"
+        ],
+        "summary": "Stop searching",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/matchmaking/ratings/{gameId}": {
+      "get": {
+        "tags": [
+          "Matchmaking"
+        ],
+        "summary": "Your Glicko-2 rating in a game (1500 and provisional until you play ranked)",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingDto"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1533,6 +1672,34 @@
           }
         }
       },
+      "JoinQueueRequest": {
+        "required": [
+          "gameId",
+          "modeKey",
+          "playerCount"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "string",
+            "description": "Gets or sets the catalog game id, e.g. \"ludo\"."
+          },
+          "modeKey": {
+            "type": "string",
+            "description": "Gets or sets the catalog mode key, e.g. \"quick-match\" (casual) or \"ranked\"."
+          },
+          "playerCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the number of players in the game to find, e.g. 2 or 4.",
+            "format": "int32"
+          }
+        },
+        "description": "Joins a public queue (CLAUDE.md 4.6): a casual or ranked mode of a game, with a player count it allows."
+      },
       "LoginRequest": {
         "required": [
           "email",
@@ -1652,6 +1819,114 @@
           }
         },
         "description": "A player's public profile basics (Prompt 1.1). Frames, titles and stats come with Progression."
+      },
+      "QueueStatusDto": {
+        "required": [
+          "status",
+          "gameId",
+          "modeKey",
+          "playerCount",
+          "waitedSeconds"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Gets or sets one of QueueStatuses."
+          },
+          "gameId": {
+            "type": "string",
+            "description": "Gets or sets the game."
+          },
+          "modeKey": {
+            "type": "string",
+            "description": "Gets or sets the mode key."
+          },
+          "playerCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the number of players being matched.",
+            "format": "int32"
+          },
+          "waitedSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets how long the caller has been searching, in whole seconds.",
+            "format": "int32"
+          },
+          "ratingBand": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets how far from the caller's rating an opponent may be right now (ranked; it widens with the wait), or\r\nnull when any rating is accepted (casual, or ranked after a long wait).",
+            "format": "int32"
+          },
+          "sessionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the session to load once matched (GET /sessions/{id}/manifest), else null."
+          }
+        },
+        "description": "Where the caller is in matchmaking. Clients poll it while searching."
+      },
+      "RatingDto": {
+        "required": [
+          "gameId",
+          "rating",
+          "deviation",
+          "gamesPlayed",
+          "provisional"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "string",
+            "description": "Gets or sets the game."
+          },
+          "rating": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the rating, rounded (new players start at 1500).",
+            "format": "int32"
+          },
+          "deviation": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the rating deviation, rounded: how unsure the rating still is (350 for a new player).",
+            "format": "int32"
+          },
+          "gamesPlayed": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the number of rated games played.",
+            "format": "int32"
+          },
+          "provisional": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether the rating is still settling (deviation above 110)."
+          }
+        },
+        "description": "A player's Glicko-2 rating in one game."
       },
       "RealtimeInfo": {
         "required": [
@@ -2169,6 +2444,9 @@
     },
     {
       "name": "Rooms"
+    },
+    {
+      "name": "Matchmaking"
     }
   ]
 }

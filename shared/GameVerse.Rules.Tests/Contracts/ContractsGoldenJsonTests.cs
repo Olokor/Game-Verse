@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using GameVerse.Contracts.Events;
+using GameVerse.Contracts.Matchmaking;
 using GameVerse.Contracts.Realtime;
 using GameVerse.Contracts.Session;
 using GameVerse.Rules.Tests.Fixtures;
@@ -84,6 +85,19 @@ public class ContractsGoldenJsonTests
                 SessionId = "8d0f6c3e-2b7a-4c55-9a51-0e7f5d1b2c3a",
                 StateVersion = null,
                 Payload = new PresencePayload { Seat = 2, Connected = false, GraceEndsAt = 1_794_484_860_000 },
+            }
+        },
+        {
+            "matchmaking-status",
+            new QueueStatusDto
+            {
+                Status = QueueStatuses.Matched,
+                GameId = "ludo",
+                ModeKey = "ranked",
+                PlayerCount = 4,
+                WaitedSeconds = 23,
+                RatingBand = null,
+                SessionId = "8d0f6c3e-2b7a-4c55-9a51-0e7f5d1b2c3a",
             }
         },
         {

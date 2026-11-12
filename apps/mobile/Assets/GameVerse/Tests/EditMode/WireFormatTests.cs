@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using GameVerse.Contracts.Events;
+using GameVerse.Contracts.Matchmaking;
 using GameVerse.Contracts.Realtime;
 using GameVerse.Contracts.Session;
 using GameVerse.Net;
@@ -109,6 +110,16 @@ namespace GameVerse.Tests
             Assert.That(e.Payload.Seat, Is.EqualTo(2));
             Assert.That(e.Payload.Connected, Is.False);
             Assert.That(e.Payload.GraceEndsAt, Is.EqualTo(1_794_484_860_000L));
+        }
+
+        [Test]
+        public void Matchmaking_status_round_trips()
+        {
+            var e = RoundTrip<QueueStatusDto>("matchmaking-status");
+            Assert.That(e.Status, Is.EqualTo(QueueStatuses.Matched));
+            Assert.That(e.PlayerCount, Is.EqualTo(4));
+            Assert.That(e.RatingBand, Is.Null);
+            Assert.That(e.SessionId, Is.EqualTo("8d0f6c3e-2b7a-4c55-9a51-0e7f5d1b2c3a"));
         }
 
         [Test]

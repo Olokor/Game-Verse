@@ -82,6 +82,8 @@ builder.Services.AddAccountsModule(accountsOptions, signingKey).AddGameVerseIden
 builder.Services.AddProfilesModule();
 builder.Services.AddCatalogModule();
 builder.Services.AddSessionsModule();
+var matchmakingOptions = builder.Configuration.GetSection(MatchmakingOptions.Section).Get<MatchmakingOptions>() ?? new MatchmakingOptions();
+builder.Services.AddMatchmakingModule(matchmakingOptions, runMatcher: !options.IsWorker);
 builder.Services.AddRoomsModule(builder.Configuration.GetSection(RoomsOptions.Section).Get<RoomsOptions>() ?? new RoomsOptions());
 builder.Services.AddRealtimeModule(builder.Configuration.GetSection(RealtimeOptions.Section).Get<RealtimeOptions>() ?? new RealtimeOptions());
 builder.Services.AddPlatformValidators();
@@ -101,6 +103,7 @@ builder.Services.AddRateLimiter(limiter =>
     AccountsModule.AddRateLimitPolicies(limiter, accountsOptions.RateLimits);
     RealtimeModule.AddRateLimitPolicies(limiter);
     RoomsModule.AddRateLimitPolicies(limiter);
+    MatchmakingModule.AddRateLimitPolicies(limiter, matchmakingOptions.JoinsPerMinute);
 });
 builder.Services.AddOpenApi(openApi => openApi.AddSchemaTransformer<OpenApiRequiredProperties>());
 
@@ -157,6 +160,7 @@ else
     app.MapSessions();
     app.MapRealtime();
     app.MapRooms();
+    app.MapMatchmaking();
     app.MapOpenApi();
 
     if (app.Environment.IsDevelopment())

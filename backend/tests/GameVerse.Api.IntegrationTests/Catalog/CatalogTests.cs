@@ -49,10 +49,12 @@ public class CatalogTests(StackFixture stack)
         [
             ("pass-and-play", ModeKinds.Local),
             ("vs-ai", ModeKinds.VsAi),
-            ("quick-match", ModeKinds.OnlineRanked),
+            ("quick-match", ModeKinds.OnlineCasual),
+            ("ranked", ModeKinds.OnlineRanked),
             ("private-room", ModeKinds.OnlinePrivate),
         ]);
         ludo.Modes.Single(m => m.Key == "quick-match").PlayerCounts.ShouldBe([2, 4]);
+        ludo.Modes.Single(m => m.Key == "ranked").PlayerCounts.ShouldBe([2, 4]);
     }
 
     [Fact]

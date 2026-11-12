@@ -22,6 +22,10 @@ public sealed class GameVerseApiFactory(
         builder.UseSetting("GameVerse:Email:Host", stack.MailpitHost);
         builder.UseSetting("GameVerse:Email:Port", stack.MailpitSmtpPort.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
+        // Test hosts share one Redis, so a background matcher in every host would match other tests' players with its own
+        // fake clock. Matchmaking tests drive ticks themselves (or turn the loop back on for one host).
+        builder.UseSetting("GameVerse:Matchmaking:TickMilliseconds", "3600000");
+
         foreach (var (key, value) in overrides ?? new Dictionary<string, string?>())
         {
             builder.UseSetting(key, value);

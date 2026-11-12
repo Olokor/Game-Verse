@@ -15,7 +15,7 @@ Shared across every game:
 
 **Core loop:** Roll, choose a token, move, capture, race all four home (all eight in teams).
 
-**Modes:** Local pass-and-play (2 to 4), vs AI (3 levels), online quick match (2 or 4 players), private room, teams 2v2.
+**Modes:** Local pass-and-play (2 to 4), vs AI (3 levels), online quick match (casual: 2 or 4 players, AI fills empty seats after 20 seconds), ranked (2 or 4 players, Glicko-2, people only), private room, teams 2v2. Owner decision 2026-11-12, ADR-0010.
 
 **House rules (room-configurable toggles), defaults confirmed by the owner 2026-11-12 ("Classic Naija", ADR-0008):**
 - Six required to leave base (default on)

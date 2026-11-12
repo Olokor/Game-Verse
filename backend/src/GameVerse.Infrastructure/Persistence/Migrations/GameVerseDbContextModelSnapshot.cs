@@ -354,6 +354,52 @@ namespace GameVerse.Infrastructure.Persistence.Migrations
                     b.ToTable("game_modes", "catalog");
                 });
 
+            modelBuilder.Entity("GameVerse.Platform.Matchmaking.PlayerRating", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("GameId")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("game_id");
+
+                    b.Property<double>("Deviation")
+                        .HasColumnType("double precision")
+                        .HasColumnName("deviation");
+
+                    b.Property<int>("GamesPlayed")
+                        .HasColumnType("integer")
+                        .HasColumnName("games_played");
+
+                    b.Property<DateTimeOffset>("LastPlayedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_played_at");
+
+                    b.Property<double>("Rating")
+                        .HasColumnType("double precision")
+                        .HasColumnName("rating");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.Property<double>("Volatility")
+                        .HasColumnType("double precision")
+                        .HasColumnName("volatility");
+
+                    b.HasKey("UserId", "GameId")
+                        .HasName("pk_ratings");
+
+                    b.HasIndex("GameId", "Rating")
+                        .HasDatabaseName("ix_ratings_game_id_rating");
+
+                    b.ToTable("ratings", "matchmaking");
+                });
+
             modelBuilder.Entity("GameVerse.Platform.Matchmaking.Room", b =>
                 {
                     b.Property<Guid>("Id")

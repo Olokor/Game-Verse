@@ -16,7 +16,8 @@ internal static class CatalogSeed
         [
             new("pass-and-play", Local, "Pass and play", [2, 3, 4]),
             new("vs-ai", VsAi, "vs AI", [2, 3, 4]),
-            new("quick-match", OnlineRanked, "Quick match", [2, 4]),
+            new("quick-match", OnlineCasual, "Quick match", [2, 4]),
+            new("ranked", OnlineRanked, "Ranked", [2, 4]),
             new("private-room", OnlinePrivate, "Private room", [2, 3, 4]),
         ]),
         new("whot", "Whot", "The Naija card classic. Hold on, pick two.", "cards", GameStatuses.ComingSoon,

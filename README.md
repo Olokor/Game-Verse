@@ -3,7 +3,7 @@ GameVerse – A cross-platform gaming platform bringing together board, puzzle, 
 
 ## Status
 
-Phase 1 in progress (Ludo vertical slice): accounts and auth (Prompt 1.1, [ADR-0006](docs/architecture/adr-0006-accounts-and-auth.md)), the game catalog and sessions (Prompt 1.2, [ADR-0007](docs/architecture/adr-0007-catalog-and-sessions.md)), the Ludo rules engine with AI and verifiable dice (Prompt 1.3, [ADR-0008](docs/architecture/adr-0008-ludo-rules-and-fairness.md)), and realtime play with private rooms (Prompt 1.4, [ADR-0009](docs/architecture/adr-0009-realtime-and-rooms.md)) are done. Phase 0 (foundation) is complete: shared rules and contracts libraries (`shared/`), the backend skeleton (`backend/`), design tokens (`packages/design-tokens/`), the web shell (`apps/web/`) and the Unity project (`apps/mobile/`) are in place. Stack: C# end to end (.NET 10 backend, Unity 6 client, shared `GameVerse.Rules` library), see [ADR-0001](docs/architecture/adr-0001-core-technology-stack.md).
+Phase 1 in progress (Ludo vertical slice): accounts and auth (Prompt 1.1, [ADR-0006](docs/architecture/adr-0006-accounts-and-auth.md)), the game catalog and sessions (Prompt 1.2, [ADR-0007](docs/architecture/adr-0007-catalog-and-sessions.md)), the Ludo rules engine with AI and verifiable dice (Prompt 1.3, [ADR-0008](docs/architecture/adr-0008-ludo-rules-and-fairness.md)), realtime play with private rooms (Prompt 1.4, [ADR-0009](docs/architecture/adr-0009-realtime-and-rooms.md)), and matchmaking with Glicko-2 ratings (Prompt 1.5, [ADR-0010](docs/architecture/adr-0010-matchmaking-and-ratings.md)) are done. Phase 0 (foundation) is complete: shared rules and contracts libraries (`shared/`), the backend skeleton (`backend/`), design tokens (`packages/design-tokens/`), the web shell (`apps/web/`) and the Unity project (`apps/mobile/`) are in place. Stack: C# end to end (.NET 10 backend, Unity 6 client, shared `GameVerse.Rules` library), see [ADR-0001](docs/architecture/adr-0001-core-technology-stack.md).
 
 ## Build and test
 
@@ -54,7 +54,7 @@ make migrate            # apply EF Core migrations on demand
 | `postgres` | PostgreSQL 16, `127.0.0.1:5432` |
 | `redis` | Redis 7, `127.0.0.1:6379` |
 | `migrate` | one-shot container from the API image that applies migrations and exits |
-| `api` | ASP.NET Core API (`GameVerse__Role=api`) at `127.0.0.1:8080`: `/health`, `/auth/*`, `/accounts/me`, `/profiles/me` (ADR-0006), `/sessions/*`, `/rooms/*`, `/realtime/tickets`, `/ws/play/{sessionId}`, `/ws/room/{code}` (ADR-0009), `/ws/echo` (Development only), `/openapi/v1.json` |
+| `api` | ASP.NET Core API (`GameVerse__Role=api`) at `127.0.0.1:8080`: `/health`, `/auth/*`, `/accounts/me`, `/profiles/me` (ADR-0006), `/sessions/*`, `/rooms/*`, `/matchmaking/*`, `/realtime/tickets`, `/ws/play/{sessionId}`, `/ws/room/{code}` (ADR-0009), `/ws/echo` (Development only), `/openapi/v1.json` |
 | `worker` | same image as `api` with `GameVerse__Role=worker`: runs the Hangfire job server |
 | `mailpit` | catches every email the API sends: inbox at http://127.0.0.1:8025 (codes for verification and password reset). Set `GAMEVERSE_EMAIL_*` in `.env` to send real mail instead |
 

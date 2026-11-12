@@ -144,7 +144,7 @@ internal sealed class SessionService(
         var secret = GameSetups.UsesServerRandomness(game.Id, mode.Kind) ? RandomNumberGenerator.GetBytes(SeedCommitment.SecretLength) : null;
 
         var now = time.GetUtcNow();
-        var online = mode.Kind is ModeKinds.OnlineRanked or ModeKinds.OnlinePrivate;
+        var online = mode.Kind is ModeKinds.OnlineRanked or ModeKinds.OnlinePrivate or ModeKinds.OnlineCasual;
         var session = new GameSession
         {
             Id = Guid.CreateVersion7(now),

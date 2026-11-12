@@ -68,7 +68,7 @@ internal sealed class MatchHost(
 
     public Guid SessionId => sessionId;
 
-    private bool Online => live.ModeKind is ModeKinds.OnlinePrivate or ModeKinds.OnlineRanked;
+    private bool Online => live.ModeKind is ModeKinds.OnlinePrivate or ModeKinds.OnlineRanked or ModeKinds.OnlineCasual;
 
     private TimeSpan Grace => TimeSpan.FromSeconds(live.ModeKind == ModeKinds.OnlineRanked ? options.GraceRankedSeconds : options.GraceCasualSeconds);
 

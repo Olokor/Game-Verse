@@ -95,6 +95,9 @@ namespace GameVerse.Contracts.Session
         /// <summary>Online, ranked matchmaking.</summary>
         public const string OnlineRanked = "online_ranked";
 
+        /// <summary>Online, casual matchmaking (unrated; AI may fill seats).</summary>
+        public const string OnlineCasual = "online_casual";
+
         /// <summary>Pass and play on one device.</summary>
         public const string Local = "local";
 

@@ -1370,6 +1370,167 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/matchmaking/queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Searching (with the wait and the current rating band) or matched (with the session to load); 404 when not searching */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["QueueStatusDto"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Start searching for a casual or ranked game; poll GET /matchmaking/queue until matched */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["JoinQueueRequest"];
+                };
+            };
+            responses: {
+                /** @description Accepted */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["QueueStatusDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        /** Stop searching */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/matchmaking/ratings/{gameId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your Glicko-2 rating in a game (1500 and provisional until you play ranked) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    gameId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RatingDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1540,6 +1701,18 @@ export interface components {
                 [key: string]: string[];
             };
         };
+        /** @description Joins a public queue (CLAUDE.md 4.6): a casual or ranked mode of a game, with a player count it allows. */
+        JoinQueueRequest: {
+            /** @description Gets or sets the catalog game id, e.g. "ludo". */
+            gameId: string;
+            /** @description Gets or sets the catalog mode key, e.g. "quick-match" (casual) or "ranked". */
+            modeKey: string;
+            /**
+             * Format: int32
+             * @description Gets or sets the number of players in the game to find, e.g. 2 or 4.
+             */
+            playerCount: number | string;
+        };
         /** @description Signs in with email and password. */
         LoginRequest: {
             /** @description Gets or sets the email address. */
@@ -1581,6 +1754,55 @@ export interface components {
             displayName: string;
             /** @description Gets or sets the avatar id, one of IReadOnlyList&lt;string&gt; ProfileAvatars.All. */
             avatarId: string;
+        };
+        /** @description Where the caller is in matchmaking. Clients poll it while searching. */
+        QueueStatusDto: {
+            /** @description Gets or sets one of QueueStatuses. */
+            status: string;
+            /** @description Gets or sets the game. */
+            gameId: string;
+            /** @description Gets or sets the mode key. */
+            modeKey: string;
+            /**
+             * Format: int32
+             * @description Gets or sets the number of players being matched.
+             */
+            playerCount: number | string;
+            /**
+             * Format: int32
+             * @description Gets or sets how long the caller has been searching, in whole seconds.
+             */
+            waitedSeconds: number | string;
+            /**
+             * Format: int32
+             * @description Gets or sets how far from the caller's rating an opponent may be right now (ranked; it widens with the wait), or
+             *     null when any rating is accepted (casual, or ranked after a long wait).
+             */
+            ratingBand?: null | number | string;
+            /** @description Gets or sets the session to load once matched (GET /sessions/{id}/manifest), else null. */
+            sessionId?: null | string;
+        };
+        /** @description A player's Glicko-2 rating in one game. */
+        RatingDto: {
+            /** @description Gets or sets the game. */
+            gameId: string;
+            /**
+             * Format: int32
+             * @description Gets or sets the rating, rounded (new players start at 1500).
+             */
+            rating: number | string;
+            /**
+             * Format: int32
+             * @description Gets or sets the rating deviation, rounded: how unsure the rating still is (350 for a new player).
+             */
+            deviation: number | string;
+            /**
+             * Format: int32
+             * @description Gets or sets the number of rated games played.
+             */
+            gamesPlayed: number | string;
+            /** @description Gets or sets a value indicating whether the rating is still settling (deviation above 110). */
+            provisional: boolean;
         };
         /** @description Where and how to open the realtime socket. */
         RealtimeInfo: {

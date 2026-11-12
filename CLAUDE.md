@@ -171,7 +171,7 @@ SessionManifest (platform to game):
   "gameId": "ludo",
   "gameVersion": "1.0.0",
   "sessionId": "uuid",
-  "mode": "online_private | online_ranked | local | vs_ai | solo",
+  "mode": "online_private | online_ranked | online_casual | local | vs_ai | solo",
   "localPlayerId": "uuid",
   "players": [{ "id": "uuid", "displayName": "...", "seat": 0, "cosmetics": {...}, "isAI": false }],
   "config": { "variant": "...", "houseRules": {...}, "aiLevel": 3 },

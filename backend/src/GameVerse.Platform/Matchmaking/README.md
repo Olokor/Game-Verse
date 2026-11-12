@@ -1,6 +1,23 @@
 # Matchmaking module
 
-Private rooms and room codes (Prompt 1.4, ADR-0009). Coming in Prompt 1.5: Redis queues keyed by `gameId:mode:ratingBand` and Glicko-2 ratings.
+Private rooms and room codes (Prompt 1.4, [ADR-0009](../../../../docs/architecture/adr-0009-realtime-and-rooms.md)), and public queues with Glicko-2 ratings (Prompt 1.5, [ADR-0010](../../../../docs/architecture/adr-0010-matchmaking-and-ratings.md)).
+
+## Public queues and ratings
+
+| Endpoint | What it does |
+|---|---|
+| `POST /matchmaking/queue` | `{gameId, modeKey, playerCount}`. Join a casual (`online_casual`) or ranked (`online_ranked`) queue. Returns 202 while searching, 409 if already searching. Rate-limited. |
+| `GET /matchmaking/queue` | Poll: `searching` (wait, current rating band) or `matched` (`sessionId`: load `/sessions/{id}/manifest` and play on `/ws/play`). 404 when not searching. |
+| `DELETE /matchmaking/queue` | Stop searching. |
+| `GET /matchmaking/ratings/{gameId}` | Your rating: 1500 and provisional until you play ranked. |
+
+- **The matcher.** `MatchmakerService` is a hosted service on every API instance, ticking each second, with one instance per queue per tick (a Redis lock). Each group is claimed atomically (Lua).
+  - **Ranked:** the longest waiter anchors a game with the closest players both bands accept. The band starts at ±100, widens 50 every 5s up to ±500, and accepts anyone after 60s. Never AI.
+  - **Casual:** first in, first out. After 20s the oldest player's game fills up with level-2 AI.
+- **Ratings.** `Glicko2.cs` is Glickman's 2013 algorithm (tested against his worked example).
+  - `RatingsOnFinish` rates every finished `online_ranked` game between people. A 4-player finish counts as head-to-heads.
+  - Ratings are stored in `matchmaking.ratings`.
+- **Settings:** `GameVerse:Matchmaking` (`MatchmakingOptions`).
 
 ## Private rooms
 
