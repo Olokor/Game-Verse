@@ -3,7 +3,7 @@ GameVerse – A cross-platform gaming platform bringing together board, puzzle, 
 
 ## Status
 
-Phase 1 in progress (Ludo vertical slice): accounts and auth (Prompt 1.1) are being built. Phase 0 (foundation) is complete: shared rules and contracts libraries (`shared/`), the backend skeleton (`backend/`), design tokens (`packages/design-tokens/`), the web shell (`apps/web/`) and the Unity project (`apps/mobile/`) are in place. Stack: C# end to end (.NET 10 backend, Unity 6 client, shared `GameVerse.Rules` library), see [ADR-0001](docs/architecture/adr-0001-core-technology-stack.md).
+Phase 1 in progress (Ludo vertical slice): accounts and auth are done (Prompt 1.1, [ADR-0006](docs/architecture/adr-0006-accounts-and-auth.md)). Phase 0 (foundation) is complete: shared rules and contracts libraries (`shared/`), the backend skeleton (`backend/`), design tokens (`packages/design-tokens/`), the web shell (`apps/web/`) and the Unity project (`apps/mobile/`) are in place. Stack: C# end to end (.NET 10 backend, Unity 6 client, shared `GameVerse.Rules` library), see [ADR-0001](docs/architecture/adr-0001-core-technology-stack.md).
 
 ## Build and test
 
@@ -54,7 +54,7 @@ make migrate            # apply EF Core migrations on demand
 | `postgres` | PostgreSQL 16, `127.0.0.1:5432` |
 | `redis` | Redis 7, `127.0.0.1:6379` |
 | `migrate` | one-shot container from the API image that applies migrations and exits |
-| `api` | ASP.NET Core API (`GameVerse__Role=api`) at `127.0.0.1:8080`: `/health`, `/auth/*` and `/accounts/me` (ADR-0006), `/ws/echo`, `/openapi/v1.json` |
+| `api` | ASP.NET Core API (`GameVerse__Role=api`) at `127.0.0.1:8080`: `/health`, `/auth/*`, `/accounts/me`, `/profiles/me` (ADR-0006), `/ws/echo`, `/openapi/v1.json` |
 | `worker` | same image as `api` with `GameVerse__Role=worker`: runs the Hangfire job server |
 | `mailpit` | catches every email the API sends: inbox at http://127.0.0.1:8025 (codes for verification and password reset). Set `GAMEVERSE_EMAIL_*` in `.env` to send real mail instead |
 
