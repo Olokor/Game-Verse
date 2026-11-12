@@ -26,7 +26,7 @@ public class ContractsSerializationTests
             SessionId = "s-1",
             Mode = GameModes.OnlinePrivate,
             LocalPlayerId = "p-0",
-            Players = [new PlayerSlot { Id = "p-0", DisplayName = "Moses", Seat = 0, IsAI = false, Cosmetics = { ["diceSkin"] = "dice_neon" } }],
+            Players = [new PlayerSlot { Id = "p-0", DisplayName = "Wisdom", Seat = 0, IsAI = false, Cosmetics = { ["diceSkin"] = "dice_neon" } }],
             Config = new SessionConfig<TestHouseRules> { Variant = "classic", AiLevel = 3, HouseRules = new TestHouseRules { SixToLeaveBase = true } },
             Realtime = new RealtimeInfo { WsUrl = "wss://x/ws/play/s-1", Ticket = "t" },
         };

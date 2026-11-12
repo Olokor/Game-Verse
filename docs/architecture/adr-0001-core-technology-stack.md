@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-09
-- **Deciders:** Moses (owner), Claude Code (tech lead)
+- **Deciders:** Wisdom (owner), Claude Code (tech lead)
 - **Source:** `CLAUDE.md` section 3 ("Locked technical decisions")
 - **Supersedes:** the earlier Django/Python ADR-0001 from the same day, which was withdrawn before any application code was written (see "History" below).
 

@@ -56,7 +56,7 @@ public class ContractsGoldenJsonTests
                 LocalPlayerId = "p-0",
                 Players =
                 [
-                    new PlayerSlot { Id = "p-0", DisplayName = "Moses", Seat = 0, IsAI = false, Cosmetics = { ["diceSkin"] = "dice_neon", ["Frame"] = "gold_frame" } },
+                    new PlayerSlot { Id = "p-0", DisplayName = "Wisdom", Seat = 0, IsAI = false, Cosmetics = { ["diceSkin"] = "dice_neon", ["Frame"] = "gold_frame" } },
                     new PlayerSlot { Id = "ai-1", DisplayName = "Bot Ada", Seat = 1, IsAI = true },
                 ],
                 Config = new SessionConfig<SampleHouseRules> { Variant = null, AiLevel = 3, HouseRules = new SampleHouseRules { SixToLeaveBase = true, StackLimit = 2 } },

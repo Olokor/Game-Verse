@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-10
-- **Deciders:** Moses (owner), Claude Code (tech lead)
+- **Deciders:** Wisdom (owner), Claude Code (tech lead)
 - **Amends:** CLAUDE.md section 3 ("Unity 6 LTS")
 
 ## Context

@@ -14,7 +14,7 @@
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:ScrollView name="scroll" mode="Vertical" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" class="gv-screen">
-            <ui:Label name="greeting" text="Welcome back, Moses" class="gv-greeting" />
+            <ui:Label name="greeting" text="Welcome back, Wisdom" class="gv-greeting" />
             <gv:GameCard name="featured" variant="hero" title="Ludo" subtitle="Roll, race, capture. 2 to 4 players." category="board" badge="event" live-players="12840" />
             <ui:VisualElement class="gv-section">
                 <ui:Label text="Continue playing" class="gv-section-title" />

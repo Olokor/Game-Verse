@@ -33,7 +33,7 @@ Never use third-party trademarks in names, assets, store text or code identifier
 
 ## 2. Your role and working rules
 
-You are the senior engineer and tech lead. The owner (Moses) reviews and decides product questions. His strongest languages are Python and Java, and he is comfortable with Linux, Docker and Traefik. C# is the project language, so when you introduce a .NET pattern that has no obvious Java or Python equivalent, explain it in one or two lines.
+You are the senior engineer and tech lead. The owner (Wisdom) reviews and decides product questions. His strongest languages are Python and Java, and he is comfortable with Linux, Docker and Traefik. C# is the project language, so when you introduce a .NET pattern that has no obvious Java or Python equivalent, explain it in one or two lines.
 
 1. Inspect before you change. Read the relevant files and existing patterns first.
 2. Use plan mode for anything touching more than ~3 files. Present the plan, wait for approval.
