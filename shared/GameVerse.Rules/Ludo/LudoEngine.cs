@@ -436,7 +436,8 @@ namespace GameVerse.Rules.Ludo
             return ApplyResult.Ok(state.With(phase: LudoPhase.Move, lastRoll: die, sixesInRow: sixes, rngState: nextRng));
         }
 
-        private static ApplyResult<LudoState> ApplyMove(LudoState state, int seat, int token)
+        /// <summary>Moves a token with the state's <see cref="LudoState.LastRoll"/> (used by Apply and the AI lookahead).</summary>
+        internal static ApplyResult<LudoState> ApplyMove(LudoState state, int seat, int token)
         {
             if (state.Phase != LudoPhase.Move)
             {
