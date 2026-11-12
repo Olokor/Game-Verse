@@ -1,0 +1,21 @@
+{
+  "game": "ludo",
+  "name": "Forfeit on your own turn passes the turn; a leaver's tokens are inert",
+  "description": "Seat 0 rolls a 6 and resigns instead of moving: the turn passes to seat 1. Seat 1 then lands on seat 0's abandoned token (absolute 20) without capturing it.",
+  "config": {"dice": [6, 3]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"},
+    {"seat": 2, "playerId": "p2"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[20, -1, -1, -1], [4, -1, -1, -1], [-1, -1, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"phase": "move"}}},
+    {"seat": 0, "action": {"forfeit": true}, "expect": {"state": {"left": [0], "currentSeat": 1, "phase": "roll", "sixesInRow": 0}}},
+    {"seat": 0, "action": {"roll": true}, "expect": {"ok": false, "error": "not_your_turn"}},
+    {"seat": 1, "action": {"roll": true}, "expect": {}},
+    {"seat": 1, "action": {"move": 0}, "expect": {"state": {"tokens": [[20, -1, -1, -1], [7, -1, -1, -1], [-1, -1, -1, -1]], "currentSeat": 2}}}
+  ],
+  "outcome": {"kind": "none"}
+}

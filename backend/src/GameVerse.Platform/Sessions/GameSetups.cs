@@ -71,7 +71,7 @@ internal static class GameSetups
                 MustCapture = c.MustCapture,
                 SafeSquares = c.SafeSquares,
                 QuickMode = c.QuickMode,
-                Placings = c.Placings,
+                Placings = LudoEngine.EffectivePlacings(c, state.PlayerCount), // what the engine plays to, not what was asked
                 Teams = c.Teams,
             },
             Colors = [.. state.Colors],
@@ -82,6 +82,7 @@ internal static class GameSetups
             LastRoll = state.LastRoll,
             SixesInRow = state.SixesInRow,
             Finished = [.. state.Finished],
+            Left = [.. state.Left],
             MoveNumber = state.MoveNumber,
         };
     }
@@ -105,12 +106,12 @@ internal static class GameSetups
         {
             if (LudoFlags.Contains(key))
             {
-                if (!bool.TryParse(value, out var on))
+                if (value is not ("true" or "false"))
                 {
                     return (null, $"'{key}' must be \"true\" or \"false\".");
                 }
 
-                flags[key] = on;
+                flags[key] = value == "true";
             }
             else if (key == LudoHouseRules.Placings)
             {

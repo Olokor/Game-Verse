@@ -105,6 +105,110 @@ public class LudoEngineTests
         counts.Skip(1).ShouldAllBe(c => c > 9_500 && c < 10_500);
     }
 
+    [Fact]
+    public void State_lists_cannot_be_cast_back_and_changed()
+    {
+        var state = Engine.NewGame(LudoConfig.Default, Seats(2), 1);
+        Should.Throw<NotSupportedException>(() => ((IList<int>)state.Positions)[0] = 5);
+        Should.Throw<NotSupportedException>(() => ((IList<ulong>)state.RngState!)[0] = 5);
+        Should.Throw<NotSupportedException>(() => ((IList<int>)state.Colors)[0] = 3);
+        Should.Throw<NotSupportedException>(() => ((IList<int>)LudoBoard.SafeAbsoluteSquares)[1] = 9);
+        (state.Positions as int[]).ShouldBeNull();
+        LudoBoard.IsSafe(8).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void A_restored_state_is_validated()
+    {
+        var colors = LudoBoard.ColorsFor(2);
+        var ok = Enumerable.Repeat(LudoBoard.Base, 8).ToArray();
+        Should.Throw<ArgumentException>(() => new LudoState(LudoConfig.Default, colors, ok, 0, LudoPhase.Roll, 0, 0, [], [1UL, 2UL], 0));
+        Should.Throw<ArgumentException>(() => new LudoState(LudoConfig.Default, colors, [57, -1, -1, -1, -1, -1, -1, -1], 0, LudoPhase.Roll, 0, 0, [], null, 0));
+        Should.Throw<ArgumentOutOfRangeException>(() => new LudoState(LudoConfig.Default, colors, ok, 2, LudoPhase.Roll, 0, 0, [], null, 0));
+        Should.Throw<ArgumentOutOfRangeException>(() => new LudoState(LudoConfig.Default, colors, ok, 0, LudoPhase.Move, 0, 0, [], null, 0));
+        Should.Throw<ArgumentException>(() => new LudoState(LudoConfig.Default, colors, ok, 0, LudoPhase.Roll, 0, 0, [1, 1], null, 0));
+    }
+
+    /// <summary>Every one of the 8 safe squares protects, and none does with safe squares off.</summary>
+    [Theory]
+    [InlineData(0)]
+    [InlineData(8)]
+    [InlineData(13)]
+    [InlineData(21)]
+    [InlineData(26)]
+    [InlineData(34)]
+    [InlineData(39)]
+    [InlineData(47)]
+    public void Each_safe_square_protects_only_while_safe_squares_are_on(int square)
+    {
+        foreach (var safe in new[] { true, false })
+        {
+            // Seat 0 (colour 0) lands on the square: from base with a 6 for square 0, else from one square behind with a 1.
+            // Seat 1 (colour 1, absolute = 13 + relative) sits on it.
+            var positions = Enumerable.Repeat(LudoBoard.Base, 16).ToArray();
+            positions[0] = square == 0 ? LudoBoard.Base : square - 1;
+            positions[4] = ((square - 13) % 52 + 52) % 52;
+            var die = square == 0 ? 6 : 1;
+            var state = new LudoState(new LudoConfig(safeSquares: safe), LudoBoard.ColorsFor(4), positions, 0, LudoPhase.Move, die, die == 6 ? 1 : 0, [], null, 0);
+
+            var after = Engine.Apply(state, 0, LudoAction.Move(0)).State;
+
+            after.TokenAt(0, 0).ShouldBe(square);
+            after.TokenAt(1, 0).ShouldBe(safe ? positions[4] : LudoBoard.Base, $"square {square}, safe squares {safe}");
+        }
+    }
+
+    [Fact]
+    public void Forfeit_is_refused_for_seats_out_of_range()
+    {
+        var state = Engine.NewGame(LudoConfig.Default, Seats(2), 1);
+        Engine.Apply(state, 5, LudoAction.Forfeit).Error!.Code.ShouldBe("not_playing");
+        Engine.LegalActions(state, 0).ShouldNotContain(LudoAction.Forfeit, "always available, so never listed");
+    }
+
+    [Fact]
+    public void Random_games_with_forfeits_end_and_rank_leavers_last_latest_first()
+    {
+        for (var g = 0; g < 60; g++)
+        {
+            var teams = g % 4 == 3;
+            var players = teams ? 4 : 2 + (g % 3);
+            var state = Engine.NewGame(new LudoConfig(placings: 1 + (g % 3), teams: teams), Seats(players), (ulong)(7000 + g));
+            var rng = new Xoshiro256StarStar((ulong)(31 + g));
+            var leavers = new List<int>();
+            for (var i = 0; i < 50_000 && state.Phase != LudoPhase.Over; i++)
+            {
+                if (rng.NextInt(0, 200) == 0)
+                {
+                    var seat = rng.NextInt(0, players);
+                    var result = Engine.Apply(state, seat, LudoAction.Forfeit);
+                    if (result.IsOk)
+                    {
+                        leavers.Add(seat);
+                        result.State.Left.ShouldBe(leavers);
+                        state = result.State;
+                        continue;
+                    }
+
+                    result.Error!.Code.ShouldBe("not_playing");
+                }
+
+                state.Left.ShouldNotContain(state.CurrentSeat, "a leaver never gets a turn");
+                var legal = Engine.LegalActions(state, state.CurrentSeat);
+                state = Engine.Apply(state, state.CurrentSeat, legal[rng.NextInt(0, legal.Count)]).State;
+            }
+
+            state.Phase.ShouldBe(LudoPhase.Over, $"game {g}");
+            var outcome = Engine.Outcome(state)!;
+            outcome.Placements.OrderBy(s => s).ShouldBe(Enumerable.Range(0, players));
+            outcome.WinningSeats.ShouldAllBe(s => !leavers.Contains(s));
+            if (!teams && leavers.Count > 0)
+            {
+                outcome.Placements.TakeLast(leavers.Count).ShouldBe(Enumerable.Reverse(leavers), $"game {g}");
+            }
+        }
+    }
+
     public static TheoryData<int> GameBatches() => new(Enumerable.Range(0, 8));
 
     /// <summary>200 seeded random games (25 per batch) across player counts and every house-rule combination.</summary>

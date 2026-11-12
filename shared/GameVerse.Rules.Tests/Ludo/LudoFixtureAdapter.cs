@@ -64,16 +64,23 @@ public sealed class LudoFixtureAdapter : IFixtureAdapter<LudoState, LudoAction, 
             return LudoAction.Roll;
         }
 
+        if (action.TryGetProperty("forfeit", out var forfeit) && forfeit.GetBoolean())
+        {
+            return LudoAction.Forfeit;
+        }
+
         if (action.TryGetProperty("move", out var token))
         {
             return LudoAction.Move(token.GetInt32());
         }
 
-        throw new InvalidDataException("A Ludo action is {\"roll\": true} or {\"move\": token}.");
+        throw new InvalidDataException("A Ludo action is {\"roll\": true}, {\"move\": token} or {\"forfeit\": true}.");
     }
 
     public JsonNode ActionToJson(LudoAction action) =>
-        action.IsRoll ? new JsonObject { ["roll"] = true } : new JsonObject { ["move"] = action.Token };
+        action.IsRoll ? new JsonObject { ["roll"] = true }
+        : action.IsForfeit ? new JsonObject { ["forfeit"] = true }
+        : new JsonObject { ["move"] = action.Token };
 
     public JsonNode StateToJson(LudoState state)
     {
@@ -91,6 +98,7 @@ public sealed class LudoFixtureAdapter : IFixtureAdapter<LudoState, LudoAction, 
             ["lastRoll"] = state.LastRoll,
             ["sixesInRow"] = state.SixesInRow,
             ["finished"] = new JsonArray(state.Finished.Select(s => (JsonNode?)s).ToArray()),
+            ["left"] = new JsonArray(state.Left.Select(s => (JsonNode?)s).ToArray()),
             ["colors"] = new JsonArray(state.Colors.Select(c => (JsonNode?)c).ToArray()),
             ["hasDice"] = state.RngState != null,
             ["moveNumber"] = state.MoveNumber,
@@ -104,6 +112,7 @@ public sealed class LudoFixtureAdapter : IFixtureAdapter<LudoState, LudoAction, 
         var phase = state.TryGetProperty("phase", out var ph) ? Enum.Parse<LudoPhase>(ph.GetString()!, ignoreCase: true) : LudoPhase.Roll;
         int Int(string name) => state.TryGetProperty(name, out var v) ? v.GetInt32() : 0;
         var finished = state.TryGetProperty("finished", out var f) ? f.EnumerateArray().Select(x => x.GetInt32()).ToArray() : [];
+        var left = state.TryGetProperty("left", out var l) ? l.EnumerateArray().Select(x => x.GetInt32()).ToArray() : [];
         return new LudoState(
             config,
             LudoBoard.ColorsFor(seats.Count),
@@ -114,6 +123,7 @@ public sealed class LudoFixtureAdapter : IFixtureAdapter<LudoState, LudoAction, 
             Int("sixesInRow"),
             finished,
             new Xoshiro256StarStar(1).GetState(),
-            0);
+            0,
+            left);
     }
 }

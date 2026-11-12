@@ -3,7 +3,7 @@ GameVerse – A cross-platform gaming platform bringing together board, puzzle, 
 
 ## Status
 
-Phase 1 in progress (Ludo vertical slice): accounts and auth (Prompt 1.1, [ADR-0006](docs/architecture/adr-0006-accounts-and-auth.md)) and the game catalog and sessions (Prompt 1.2, [ADR-0007](docs/architecture/adr-0007-catalog-and-sessions.md)) are done. Phase 0 (foundation) is complete: shared rules and contracts libraries (`shared/`), the backend skeleton (`backend/`), design tokens (`packages/design-tokens/`), the web shell (`apps/web/`) and the Unity project (`apps/mobile/`) are in place. Stack: C# end to end (.NET 10 backend, Unity 6 client, shared `GameVerse.Rules` library), see [ADR-0001](docs/architecture/adr-0001-core-technology-stack.md).
+Phase 1 in progress (Ludo vertical slice): accounts and auth (Prompt 1.1, [ADR-0006](docs/architecture/adr-0006-accounts-and-auth.md)) the game catalog and sessions (Prompt 1.2, [ADR-0007](docs/architecture/adr-0007-catalog-and-sessions.md)) and the Ludo rules engine with AI and verifiable dice (Prompt 1.3, [ADR-0008](docs/architecture/adr-0008-ludo-rules-and-fairness.md)) are done. Phase 0 (foundation) is complete: shared rules and contracts libraries (`shared/`), the backend skeleton (`backend/`), design tokens (`packages/design-tokens/`), the web shell (`apps/web/`) and the Unity project (`apps/mobile/`) are in place. Stack: C# end to end (.NET 10 backend, Unity 6 client, shared `GameVerse.Rules` library), see [ADR-0001](docs/architecture/adr-0001-core-technology-stack.md).
 
 ## Build and test
 

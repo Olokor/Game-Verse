@@ -32,7 +32,8 @@ public class LudoSessionTests(StackFixture stack)
         var state = (await created.Content.ReadFromJsonAsync<SessionManifest<SessionConfig<Dictionary<string, string>>, LudoStateDto>>(ct)).ShouldNotBeNull().InitialState!;
         state.Rules.QuickMode.ShouldBeTrue();
         state.Rules.MustCapture.ShouldBeTrue();
-        state.Rules.Placings.ShouldBe(3);
+        state.Rules.Placings.ShouldBe(2, "placings 3 with 3 players is capped at players minus 1: the manifest shows what the engine plays to");
+        state.Left.ShouldBeEmpty();
         state.Rules.SafeSquares.ShouldBeTrue("unlisted rules keep the Classic Naija defaults");
         state.Tokens.ShouldAllBe(seat => seat.SequenceEqual(new[] { 0, -1, -1, -1 }));
     }
@@ -40,6 +41,7 @@ public class LudoSessionTests(StackFixture stack)
     [Theory]
     [InlineData("blocks", "true", 2)] // not a rule we have
     [InlineData("safeSquares", "yes", 2)]
+    [InlineData("safeSquares", "TRUE", 2)] // exactly "true" or "false"
     [InlineData("placings", "4", 4)]
     [InlineData("placings", "-1", 4)]
     [InlineData("teams", "true", 2)] // teams need 4 players

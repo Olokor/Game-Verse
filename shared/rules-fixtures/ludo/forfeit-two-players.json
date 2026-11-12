@@ -1,0 +1,15 @@
+{
+  "game": "ludo",
+  "name": "Forfeit: a player may resign at any time, even out of turn",
+  "description": "Seat 1 resigns while seat 0 is to roll. With one player left the game ends.",
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "steps": [
+    {"seat": 1, "action": {"forfeit": true}, "expect": {"state": {"left": [1], "phase": "over"}}},
+    {"seat": 0, "action": {"roll": true}, "expect": {"ok": false, "error": "game_over"}}
+  ],
+  "outcome": {"kind": "win", "winningSeats": [0], "placements": [0, 1], "reason": "opponents_left"}
+}

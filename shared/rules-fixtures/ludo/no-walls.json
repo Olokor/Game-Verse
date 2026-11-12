@@ -1,0 +1,17 @@
+{
+  "game": "ludo",
+  "name": "No blocks: two tokens on one square do not stop anyone passing",
+  "description": "Seat 1 has two tokens on absolute 36. Seat 0 moves 33 -> 38 straight past them.",
+  "config": {"dice": [5]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[33, -1, -1, -1], [10, 10, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"legalActions": [{"move": 0}], "state": {"tokens": [[38, -1, -1, -1], [10, 10, -1, -1]], "currentSeat": 1}}}
+  ],
+  "outcome": {"kind": "none"}
+}

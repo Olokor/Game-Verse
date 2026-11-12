@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace GameVerse.Rules.Ludo
@@ -24,7 +25,7 @@ namespace GameVerse.Rules.Ludo
         public const int Home = 56;
 
         /// <summary>Absolute track squares that are safe when <see cref="LudoConfig.SafeSquares"/> is on: 4 starts, 4 stars.</summary>
-        public static IReadOnlyList<int> SafeAbsoluteSquares { get; } = new[] { 0, 8, 13, 21, 26, 34, 39, 47 };
+        public static IReadOnlyList<int> SafeAbsoluteSquares { get; } = Array.AsReadOnly(new[] { 0, 8, 13, 21, 26, 34, 39, 47 });
 
         /// <summary>Board colours per seat count: two players sit at opposite corners.</summary>
         /// <param name="playerCount">2 to 4.</param>

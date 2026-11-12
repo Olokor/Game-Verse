@@ -13,6 +13,7 @@ namespace GameVerse.Rules.Ludo
     public sealed class LudoEngine : IGameEngine<LudoState, LudoAction, LudoConfig>
     {
         private const string ReasonAllHome = "all_tokens_home";
+        private const string ReasonOpponentsLeft = "opponents_left";
         private static readonly IReadOnlyList<LudoAction> NoActions = Array.Empty<LudoAction>();
         private static readonly IReadOnlyList<LudoAction> RollOnly = new[] { LudoAction.Roll };
 
@@ -113,6 +114,11 @@ namespace GameVerse.Rules.Ludo
                 return ApplyResult.Rejected<LudoState>("game_over", "The game has ended.");
             }
 
+            if (action.IsForfeit)
+            {
+                return ApplyForfeit(state, seat); // allowed out of turn
+            }
+
             if (seat != state.CurrentSeat)
             {
                 return ApplyResult.Rejected<LudoState>("not_your_turn", "Seat " + state.CurrentSeat + " is to act.");
@@ -142,7 +148,7 @@ namespace GameVerse.Rules.Ludo
                 winners.Sort();
             }
 
-            return new GameOutcome(OutcomeKind.Win, winners, placements, ReasonAllHome);
+            return new GameOutcome(OutcomeKind.Win, winners, placements, EndedByFinishing(state, ToArray(state.Finished)) ? ReasonAllHome : ReasonOpponentsLeft);
         }
 
         /// <summary>
@@ -243,9 +249,9 @@ namespace GameVerse.Rules.Ludo
             var captured = new List<int>();
             for (int other = 0; other < state.PlayerCount; other++)
             {
-                if (other == owner || (state.Config.Teams && other == Partner(owner)))
+                if (other == owner || (state.Config.Teams && other == Partner(owner)) || state.HasLeft(other))
                 {
-                    continue; // never your own tokens, never your partner's
+                    continue; // never your own tokens, never your partner's, and a leaver's tokens are inert
                 }
 
                 for (int t = 0; t < LudoBoard.TokensPerSeat; t++)
@@ -260,10 +266,45 @@ namespace GameVerse.Rules.Ludo
             return captured.ToArray();
         }
 
-        private static int EffectivePlacings(LudoState state) =>
-            state.Config.Teams ? 1 : System.Math.Min(state.Config.Placings, state.PlayerCount - 1);
+        /// <summary>How many players must finish to end the game: placings capped at players minus 1; teams ignore it.</summary>
+        /// <param name="config">House rules.</param>
+        /// <param name="playerCount">Seats in the game.</param>
+        /// <returns>1 to 3.</returns>
+        public static int EffectivePlacings(LudoConfig config, int playerCount)
+        {
+            if (config == null)
+            {
+                throw new ArgumentNullException(nameof(config));
+            }
 
-        private static bool IsOver(LudoState state, int[] finished)
+            return config.Teams ? 1 : System.Math.Max(1, System.Math.Min(config.Placings, playerCount - 1));
+        }
+
+        private static bool IsOver(LudoState state, int[] finished, int[] left)
+        {
+            if (state.Config.Teams && left.Length > 0)
+            {
+                return true; // a partner who leaves forfeits for the team (ADR-0008)
+            }
+
+            if (EndedByFinishing(state, finished))
+            {
+                return true;
+            }
+
+            int active = 0;
+            for (int seat = 0; seat < state.PlayerCount; seat++)
+            {
+                if (Array.IndexOf(finished, seat) < 0 && Array.IndexOf(left, seat) < 0)
+                {
+                    active++;
+                }
+            }
+
+            return !state.Config.Teams && active <= 1; // nobody left to play against
+        }
+
+        private static bool EndedByFinishing(LudoState state, int[] finished)
         {
             if (state.Config.Teams)
             {
@@ -278,17 +319,17 @@ namespace GameVerse.Rules.Ludo
                 return false;
             }
 
-            return finished.Length >= EffectivePlacings(state);
+            return finished.Length >= EffectivePlacings(state.Config, state.PlayerCount);
         }
 
-        private static int NextSeat(LudoState state, int[] finished, int from)
+        private static int NextSeat(LudoState state, int[] finished, int[] left, int from)
         {
             for (int k = 1; k <= state.PlayerCount; k++)
             {
                 int seat = (from + k) % state.PlayerCount;
-                if (state.Config.Teams || Array.IndexOf(finished, seat) < 0)
+                if (Array.IndexOf(left, seat) < 0 && (state.Config.Teams || Array.IndexOf(finished, seat) < 0))
                 {
-                    return seat; // finished players drop out, except in teams where they help their partner
+                    return seat; // leavers and finished players drop out, except in teams where finished ones help their partner
                 }
             }
 
@@ -322,11 +363,12 @@ namespace GameVerse.Rules.Ludo
 
         private static List<int> Placements(LudoState state)
         {
-            var order = new List<int>();
+            var winners = new List<int>();
+            var rest = new List<int>();
             if (state.Config.Teams)
             {
-                // The winning team first (in the order its members finished), then the other team.
-                int winner = -1;
+                // The winning team first: the team that did not leave, else the team with both partners home.
+                int winner = state.Left.Count > 0 ? (state.Left[0] + 1) % 4 : -1;
                 for (int i = 0; i < state.Finished.Count && winner < 0; i++)
                 {
                     if (Contains(state.Finished, Partner(state.Finished[i])))
@@ -335,42 +377,61 @@ namespace GameVerse.Rules.Ludo
                     }
                 }
 
-                int first = IndexOf(state.Finished, winner) <= IndexOf(state.Finished, Partner(winner)) ? winner : Partner(winner);
-                order.Add(first);
-                order.Add(Partner(first));
+                for (int seat = 0; seat < state.PlayerCount; seat++)
+                {
+                    (seat == winner || seat == Partner(winner) ? winners : rest).Add(seat);
+                }
             }
             else
             {
-                for (int i = 0; i < state.Finished.Count; i++)
-                {
-                    order.Add(state.Finished[i]);
-                }
-            }
-
-            var rest = new List<int>();
-            for (int seat = 0; seat < state.PlayerCount; seat++)
-            {
-                if (!order.Contains(seat))
+                for (int seat = 0; seat < state.PlayerCount; seat++)
                 {
                     rest.Add(seat);
                 }
             }
 
-            // Deterministic: tokens home, then total progress, then seat number.
-            rest.Sort((a, b) =>
-            {
-                int byHome = TokensHome(state, b).CompareTo(TokensHome(state, a));
-                if (byHome != 0)
-                {
-                    return byHome;
-                }
-
-                int byProgress = Progress(state, b).CompareTo(Progress(state, a));
-                return byProgress != 0 ? byProgress : a.CompareTo(b);
-            });
-            order.AddRange(rest);
-            return order;
+            Comparison<int> rank = (a, b) => RankCompare(state, a, b);
+            winners.Sort(rank);
+            rest.Sort(rank);
+            winners.AddRange(rest);
+            return winners;
         }
+
+        /// <summary>
+        /// Finished players in finishing order, then players still in the game by tokens home, total progress and seat,
+        /// then leavers (the latest to leave ranks highest).
+        /// </summary>
+        private static int RankCompare(LudoState state, int a, int b)
+        {
+            int groupA = Group(state, a);
+            int groupB = Group(state, b);
+            if (groupA != groupB)
+            {
+                return groupA.CompareTo(groupB);
+            }
+
+            if (groupA == 0)
+            {
+                return IndexOf(state.Finished, a).CompareTo(IndexOf(state.Finished, b));
+            }
+
+            if (groupA == 2)
+            {
+                return IndexOf(state.Left, b).CompareTo(IndexOf(state.Left, a));
+            }
+
+            int byHome = TokensHome(state, b).CompareTo(TokensHome(state, a));
+            if (byHome != 0)
+            {
+                return byHome;
+            }
+
+            int byProgress = Progress(state, b).CompareTo(Progress(state, a));
+            return byProgress != 0 ? byProgress : a.CompareTo(b);
+        }
+
+        private static int Group(LudoState state, int seat) =>
+            state.HasLeft(seat) ? 2 : Contains(state.Finished, seat) ? 0 : 1;
 
         private static bool Contains(IReadOnlyList<int> list, int value) => IndexOf(list, value) >= 0;
 
@@ -385,6 +446,44 @@ namespace GameVerse.Rules.Ludo
             }
 
             return -1;
+        }
+
+        private static ApplyResult<LudoState> ApplyForfeit(LudoState state, int seat)
+        {
+            bool playing = seat >= 0 && seat < state.PlayerCount && !state.HasLeft(seat)
+                && (state.Config.Teams || !Contains(state.Finished, seat));
+            if (!playing)
+            {
+                return ApplyResult.Rejected<LudoState>("not_playing", "Seat " + seat + " is not playing.");
+            }
+
+            var finished = ToArray(state.Finished);
+            var left = new int[state.Left.Count + 1];
+            for (int i = 0; i < state.Left.Count; i++)
+            {
+                left[i] = state.Left[i];
+            }
+
+            left[left.Length - 1] = seat;
+            if (IsOver(state, finished, left))
+            {
+                return ApplyResult.Ok(state.With(left: left, phase: LudoPhase.Over));
+            }
+
+            return seat == state.CurrentSeat
+                ? ApplyResult.Ok(state.With(left: left, currentSeat: NextSeat(state, finished, left, seat), phase: LudoPhase.Roll, sixesInRow: 0))
+                : ApplyResult.Ok(state.With(left: left));
+        }
+
+        private static int[] ToArray(IReadOnlyList<int> list)
+        {
+            var copy = new int[list.Count];
+            for (int i = 0; i < copy.Length; i++)
+            {
+                copy[i] = list[i];
+            }
+
+            return copy;
         }
 
         private ApplyResult<LudoState> ApplyRoll(LudoState state, int seat)
@@ -423,14 +522,14 @@ namespace GameVerse.Rules.Ludo
             if (state.Config.ThreeSixesForfeit && sixes >= 3)
             {
                 // Third six in a row: the turn is lost and the six is not moved.
-                return ApplyResult.Ok(state.With(currentSeat: NextSeat(state, finished, seat), phase: LudoPhase.Roll, lastRoll: die, sixesInRow: 0, rngState: nextRng));
+                return ApplyResult.Ok(state.With(currentSeat: NextSeat(state, finished, ToArray(state.Left), seat), phase: LudoPhase.Roll, lastRoll: die, sixesInRow: 0, rngState: nextRng));
             }
 
             if (Candidates(state, seat, die).Count == 0)
             {
                 return die == 6
                     ? ApplyResult.Ok(state.With(phase: LudoPhase.Roll, lastRoll: die, sixesInRow: sixes, rngState: nextRng)) // a six still rolls again
-                    : ApplyResult.Ok(state.With(currentSeat: NextSeat(state, finished, seat), phase: LudoPhase.Roll, lastRoll: die, sixesInRow: 0, rngState: nextRng));
+                    : ApplyResult.Ok(state.With(currentSeat: NextSeat(state, finished, ToArray(state.Left), seat), phase: LudoPhase.Roll, lastRoll: die, sixesInRow: 0, rngState: nextRng));
             }
 
             return ApplyResult.Ok(state.With(phase: LudoPhase.Move, lastRoll: die, sixesInRow: sixes, rngState: nextRng));
@@ -473,7 +572,7 @@ namespace GameVerse.Rules.Ludo
             }
 
             var finished = finishedList.ToArray();
-            if (IsOver(state, finished))
+            if (IsOver(state, finished, ToArray(state.Left)))
             {
                 return ApplyResult.Ok(state.With(positions: positions, finished: finished, phase: LudoPhase.Over));
             }
@@ -486,7 +585,7 @@ namespace GameVerse.Rules.Ludo
                 return ApplyResult.Ok(state.With(positions: positions, finished: finished, phase: LudoPhase.Roll, sixesInRow: sixes));
             }
 
-            return ApplyResult.Ok(state.With(positions: positions, finished: finished, currentSeat: NextSeat(state, finished, seat), phase: LudoPhase.Roll, sixesInRow: 0));
+            return ApplyResult.Ok(state.With(positions: positions, finished: finished, currentSeat: NextSeat(state, finished, ToArray(state.Left), seat), phase: LudoPhase.Roll, sixesInRow: 0));
         }
     }
 
