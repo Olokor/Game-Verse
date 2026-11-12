@@ -655,6 +655,89 @@ export interface paths {
         };
         trace?: never;
     };
+    "/catalog/games": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every listed game with its modes (playable and coming soon) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GameInfo"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/catalog/games/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One game with its modes */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GameInfo"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -705,6 +788,39 @@ export interface components {
         ForgotPasswordRequest: {
             /** @description Gets or sets the email address. */
             email?: string;
+        };
+        /** @description A game in the catalog (Prompt 1.2, ADR-0007). Shared by the web and Unity game lists. */
+        GameInfo: {
+            /** @description Gets or sets the game id (slug), e.g. "ludo". Also the SessionManifest gameId. */
+            id?: string;
+            /** @description Gets or sets the display title. */
+            title?: string;
+            /** @description Gets or sets the one-line pitch shown on cards. */
+            tagline?: string;
+            /** @description Gets or sets the category: board, cards, brain, arcade, adventure, racing or fight. */
+            category?: string;
+            /**
+             * @description Gets or sets the accent as a design-token path (e.g. "color.category.board"), never a color value: each
+             *     client resolves it with its own generated tokens.
+             */
+            accentToken?: string;
+            /** @description Gets or sets the current game version (SessionManifest gameVersion). */
+            version?: string;
+            /** @description Gets or sets the availability, one of GameStatuses. */
+            status?: string;
+            /** @description Gets or sets the ways to play, in display order. */
+            modes?: components["schemas"]["GameModeInfo"][];
+        };
+        /** @description One way to play a game. */
+        GameModeInfo: {
+            /** @description Gets or sets the mode key, unique within the game (e.g. "blitz-3-2"). */
+            key?: string;
+            /** @description Gets or sets the kind: local, vs_ai, online_ranked, online_private or solo (CLAUDE.md 4.2). */
+            kind?: string;
+            /** @description Gets or sets the display label, e.g. "Quick match". */
+            label?: string;
+            /** @description Gets or sets the allowed player counts, humans and AI together (e.g. 2 and 4 for Ludo quick match). */
+            playerCounts?: (number | string)[];
         };
         /**
          * @description Response to creating a guest. string GuestCreatedResponse.DeviceSecret is shown exactly once; the client stores it in secure

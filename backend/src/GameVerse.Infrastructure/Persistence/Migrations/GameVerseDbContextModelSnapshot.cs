@@ -263,6 +263,97 @@ namespace GameVerse.Infrastructure.Persistence.Migrations
                     b.ToTable("refresh_tokens", "accounts");
                 });
 
+            modelBuilder.Entity("GameVerse.Platform.Catalog.Game", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AccentToken")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("accent_token");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("category");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Tagline")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("tagline");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("title");
+
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_games");
+
+                    b.ToTable("games", "catalog");
+                });
+
+            modelBuilder.Entity("GameVerse.Platform.Catalog.GameMode", b =>
+                {
+                    b.Property<string>("GameId")
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("game_id");
+
+                    b.Property<string>("Key")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("key");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("kind");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("label");
+
+                    b.PrimitiveCollection<int[]>("PlayerCounts")
+                        .IsRequired()
+                        .HasColumnType("integer[]")
+                        .HasColumnName("player_counts");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.HasKey("GameId", "Key")
+                        .HasName("pk_game_modes");
+
+                    b.ToTable("game_modes", "catalog");
+                });
+
             modelBuilder.Entity("GameVerse.Platform.Profiles.Profile", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -484,6 +575,16 @@ namespace GameVerse.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_refresh_tokens_users_user_id");
                 });
 
+            modelBuilder.Entity("GameVerse.Platform.Catalog.GameMode", b =>
+                {
+                    b.HasOne("GameVerse.Platform.Catalog.Game", null)
+                        .WithMany("Modes")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_modes_games_game_id");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -539,6 +640,11 @@ namespace GameVerse.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_user_tokens_users_user_id");
+                });
+
+            modelBuilder.Entity("GameVerse.Platform.Catalog.Game", b =>
+                {
+                    b.Navigation("Modes");
                 });
 #pragma warning restore 612, 618
         }

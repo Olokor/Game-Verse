@@ -94,6 +94,8 @@ public static class InfrastructureServices
         await using var scope = services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<GameVerseDbContext>();
         await db.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
+        // Reference data that must exist for the API to work (ADR-0007). Inserts missing rows only.
+        await Platform.Catalog.CatalogModule.SeedAsync(db, cancellationToken).ConfigureAwait(false);
     }
 
     internal static void ConfigureNpgsql(DbContextOptionsBuilder options, string connectionString) =>
