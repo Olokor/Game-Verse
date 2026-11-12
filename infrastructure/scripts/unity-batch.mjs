@@ -2,8 +2,8 @@
 // Runs a Unity batch-mode command and returns reliably.
 //
 // Why: Unity 6000.6.8f1 on Windows sometimes hangs during shutdown ("Killing ADB server ...") after an Android build
-// or setup has finished and called EditorApplication.Exit. Our editor scripts log a completion marker (GV_SETUP,
-// GV_BUILD); once it appears, Unity gets GRACE_MS to exit by itself, then the process tree (editor + import workers) is
+// or setup has finished and called EditorApplication.Exit, and after -runTests. Our editor scripts log a completion marker
+// (GV_SETUP, GV_BUILD; for tests Unity's own "Test run completed. Exiting with code N"); once it appears, Unity gets GRACE_MS to exit by itself, then the process tree (editor + import workers) is
 // ended. The exit code comes from the marker, never from the kill. If no marker appears, Unity's own exit code is used.
 //
 // Usage: node unity-batch.mjs <log file> <marker prefix> <success text> -- <unity exe> <args...>

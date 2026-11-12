@@ -31,7 +31,12 @@ namespace GameVerse.Editor
                 options = BuildOptions.Development,
             };
 
-            var report = BuildPipeline.BuildPlayer(options);
+            BuildReport report;
+            using (ErrorReportingDsn.ForBuild())
+            {
+                report = BuildPipeline.BuildPlayer(options);
+            }
+
             var summary = report.summary;
             Debug.Log($"GV_BUILD android result={summary.result} size={summary.totalSize} time={summary.totalTime} errors={summary.totalErrors} path={Path.GetFullPath(AndroidOutput)}");
 
@@ -85,6 +90,37 @@ namespace GameVerse.Editor
             {
                 throw new InvalidOperationException(failure);
             }
+        }
+    }
+
+    /// <summary>
+    /// Puts UNITY_ERROR_DSN (environment variable, set by `make` from .env) into the Sentry options asset for the
+    /// duration of a build and clears it afterwards, so the committed asset never carries a DSN (ADR-0005). An empty
+    /// variable builds with reporting off; the device self-check then logs "GV_ERRORCHECK disabled".
+    /// </summary>
+    internal sealed class ErrorReportingDsn : IDisposable
+    {
+        private ErrorReportingDsn()
+        {
+        }
+
+        public static ErrorReportingDsn ForBuild()
+        {
+            var dsn = Environment.GetEnvironmentVariable("UNITY_ERROR_DSN") ?? string.Empty;
+            var options = ProjectSetup.ConfigureErrorReporting();
+            options.Dsn = dsn.Trim();
+            options.Debug = false;
+            EditorUtility.SetDirty(options);
+            AssetDatabase.SaveAssets();
+            Debug.Log("GV_BUILD error-reporting " + (options.Dsn.Length > 0 ? "on" : "off (UNITY_ERROR_DSN empty)"));
+            return new ErrorReportingDsn();
+        }
+
+        public void Dispose()
+        {
+            var options = ProjectSetup.ConfigureErrorReporting(); // resets the DSN to empty
+            EditorUtility.SetDirty(options);
+            AssetDatabase.SaveAssets();
         }
     }
 }
