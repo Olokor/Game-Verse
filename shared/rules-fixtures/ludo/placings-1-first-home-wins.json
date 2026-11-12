@@ -1,0 +1,19 @@
+{
+  "game": "ludo",
+  "name": "Placings 1 (default): the first player home wins and the game ends",
+  "description": "The others are ranked by tokens home, then total progress, then seat. Seat 2 has 1 token home, seat 1 none.",
+  "config": {"dice": [1]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"},
+    {"seat": 2, "playerId": "p2"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[56, 56, 56, 55], [40, 40, 40, 40], [56, -1, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 3}, "expect": {"state": {"phase": "over", "finished": [0]}}},
+    {"seat": 1, "action": {"roll": true}, "expect": {"ok": false, "error": "game_over", "legalActions": []}}
+  ],
+  "outcome": {"kind": "win", "winningSeats": [0], "placements": [0, 2, 1], "reason": "all_tokens_home"}
+}

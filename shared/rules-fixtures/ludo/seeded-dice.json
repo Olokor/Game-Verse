@@ -1,0 +1,16 @@
+{
+  "game": "ludo",
+  "name": "Dice come from the seeded PRNG: the same seed always gives the same rolls",
+  "description": "No scripted dice here. Seed 42 is the golden value; after the match the revealed seed lets anyone replay these rolls.",
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 42,
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"lastRoll": 1}}},
+    {"seat": 1, "action": {"roll": true}, "expect": {"state": {"lastRoll": 1}}},
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"lastRoll": 6}}}
+  ],
+  "outcome": {"kind": "none"}
+}

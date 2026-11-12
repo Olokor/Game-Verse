@@ -132,6 +132,11 @@ public static class FixtureRunner
             throw Fail(fixture, "outcome", "expected winning seats [" + string.Join(",", expected.WinningSeats) + "], got [" + string.Join(",", outcome.WinningSeats) + "].");
         }
 
+        if (expected.Placements != null && !expected.Placements.SequenceEqual(outcome.Placements))
+        {
+            throw Fail(fixture, "outcome", "expected placements [" + string.Join(",", expected.Placements) + "], got [" + string.Join(",", outcome.Placements) + "].");
+        }
+
         if (expected.Reason != null && expected.Reason != outcome.Reason)
         {
             throw Fail(fixture, "outcome", "expected reason '" + expected.Reason + "', got '" + outcome.Reason + "'.");

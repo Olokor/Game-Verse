@@ -1,6 +1,6 @@
 import { useId } from 'react';
 import { Link } from 'react-router';
-import { ChevronRight, Hourglass, Play } from 'lucide-react';
+import { ChevronRight, Clock, Hourglass, Play } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { formatCompact } from '../../lib/format';
 import type { GameSummary } from '../../data/types';
@@ -50,6 +50,16 @@ function LiveCount({ count }: { count: number }) {
   );
 }
 
+function ComingSoonChip() {
+  return (
+    <span className="inline-flex items-center gap-4 whitespace-nowrap rounded-pill bg-bg-elevated px-8 py-4 type-label text-text-secondary">
+      {/* The clock is decoration; narrow phone cards drop it so the label stays on one line. */}
+      <Clock className="hidden size-12 sm:block" aria-hidden="true" />
+      Coming soon
+    </span>
+  );
+}
+
 function YourTurn() {
   return (
     <span className="inline-flex items-center gap-4 rounded-pill bg-accent-sky px-8 py-4 type-label text-brand-volt-ink">
@@ -60,6 +70,49 @@ function YourTurn() {
 }
 
 const cardFrame = 'group pressable block overflow-hidden border border-border-subtle bg-bg-surface hover:border-border-strong';
+// Coming-soon cards are not interactive: no pressable feedback, no hover, art muted.
+const staticFrame = 'block overflow-hidden border border-border-subtle bg-bg-surface';
+const mutedArt = 'opacity-60 grayscale';
+
+/**
+ * A listed game that cannot be played yet (catalog status coming_soon): same shape as a standard or compact card, but a
+ * plain block with a "Coming soon" chip instead of a link, so nothing invites a tap that leads nowhere.
+ */
+function ComingSoonCard({ game, variant, className }: { game: GameSummary; variant: 'standard' | 'compact'; className?: string }) {
+  if (variant === 'compact') {
+    return (
+      <div className={cn(staticFrame, 'flex min-h-72 items-center gap-12 rounded-md p-8 pr-12', className)} aria-label={`${game.title}, coming soon`}>
+        <GameArt category={game.category} title={game.title} size="icon" decorative className={cn('size-56 shrink-0 rounded-sm', mutedArt)} />
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
+          <span className="flex items-center gap-8">
+            <span className="truncate text-body font-bold text-text-secondary">{game.title}</span>
+            <ComingSoonChip />
+          </span>
+          <span className="line-clamp-2 text-body-sm text-text-muted">{game.tagline}</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn(staticFrame, 'flex flex-col rounded-lg', className)} aria-label={`${game.title}, coming soon`}>
+      <div className="relative">
+        <GameArt category={game.category} title={game.title} decorative className={cn('aspect-3/4', mutedArt)} />
+        <div className="absolute inset-x-0 top-0 flex items-center gap-4 p-12">
+          <CategoryChip game={game} />
+        </div>
+        {/* Bottom of the art, like "Your turn": narrow phone cards have no room for two chips side by side. */}
+        <div className="absolute inset-x-0 bottom-0 p-12">
+          <ComingSoonChip />
+        </div>
+      </div>
+      <div className="flex flex-col gap-4 p-12">
+        <span className="type-display truncate text-title-sm font-bold text-text-secondary">{game.title}</span>
+        <span className="line-clamp-2 text-body-sm text-text-muted">{game.tagline}</span>
+      </div>
+    </div>
+  );
+}
 
 /**
  * Game card. hero: wide, featured, one soft glow. standard: portrait 3:4. compact: row.
@@ -69,6 +122,10 @@ const cardFrame = 'group pressable block overflow-hidden border border-border-su
 export function GameCard({ game, variant = 'standard', subtitle, yourTurn = false, className }: GameCardProps) {
   const to = `/games/${game.id}`;
   const descriptionId = useId();
+
+  if (!game.playable) {
+    return <ComingSoonCard game={game} variant={variant === 'compact' ? 'compact' : 'standard'} className={className} />;
+  }
 
   if (variant === 'hero') {
     return (
@@ -98,7 +155,7 @@ export function GameCard({ game, variant = 'standard', subtitle, yourTurn = fals
                 <Play className="size-20 fill-current" aria-hidden="true" />
                 Play now
               </span>
-              <LiveCount count={game.livePlayers} />
+              {game.livePlayers !== undefined && <LiveCount count={game.livePlayers} />}
             </div>
           </div>
         </div>

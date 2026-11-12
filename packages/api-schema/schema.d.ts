@@ -3,10 +3,1248 @@
  * Do not make direct changes to the file.
  */
 
-export type paths = Record<string, never>;
+export interface paths {
+    "/accounts/me/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Delete the signed-in account (email accounts confirm with their password); signs out everywhere */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["DeleteAccountRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The signed-in account */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AccountResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/guest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a device-bound guest account */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GuestCreatedResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/guest/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign a guest back in with its device secret */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["GuestLoginRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AuthTokensResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Exchange a refresh token for new tokens (rotates the refresh token) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": null | components["schemas"]["RefreshRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AuthTokensResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** End the session the refresh token belongs to */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": null | components["schemas"]["RefreshRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/upgrade": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Turn the signed-in guest into an email account (same account id); mails a verification code */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpgradeRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AuthTokensResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/email/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm the email of the signed-in account with the mailed 6-digit code */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["VerifyEmailRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/email/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mail a new verification code */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Accepted */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign in with email and password */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["LoginRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AuthTokensResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/password/forgot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mail a password-reset code (always 202, whether or not the email has an account) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ForgotPasswordRequest"];
+                };
+            };
+            responses: {
+                /** @description Accepted */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/password/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set a new password with the mailed code; signs out every session */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ResetPasswordRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/profiles/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The signed-in player's profile */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProfileResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change display name and/or avatar */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateProfileRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProfileResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/catalog/games": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every listed game with its modes (playable and coming soon) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GameInfo"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/catalog/games/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One game with its modes */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GameInfo"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start a single-owner session (pass and play, vs AI, solo); returns its manifest */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateSessionRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionManifestOfSessionConfigOfDictionaryOfstringAndstringAndObject"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sessions/{sessionId}/manifest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The SessionManifest a game loads with (participants only) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    sessionId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionManifestOfSessionConfigOfDictionaryOfstringAndstringAndObject"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sessions/{sessionId}/fairness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Dice commit-reveal: the seed commitment always, the secret and seed once the session has ended (participants only) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    sessionId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionFairness"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sessions/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The signed-in player's recent sessions, optionally filtered by status */
+        get: {
+            parameters: {
+                query?: {
+                    status?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionSummary"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+}
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: never;
+    schemas: {
+        /** @description The signed-in account. */
+        AccountResponse: {
+            /** @description Gets or sets the account id (UUID). */
+            userId: string;
+            /** @description Gets or sets a value indicating whether the account is a guest. */
+            isGuest: boolean;
+            /** @description Gets or sets the email, or null for guests. */
+            email?: null | string;
+            /** @description Gets or sets a value indicating whether the email has been verified. */
+            emailVerified: boolean;
+            /**
+             * @description Gets or sets a value indicating whether the player counts as under 18 (guests always do, CLAUDE.md
+             *     section 7: chat is off for minors).
+             */
+            isMinor: boolean;
+            /** @description Gets or sets when the account was created (ISO 8601, UTC). */
+            createdAt: string;
+        };
+        /**
+         * @description Tokens returned by every sign-in style call (ADR-0006). The access token is a short-lived JWT for the
+         *     Authorization header. The refresh token is in this body for Unity and other clients; web clients
+         *     (header `X-GameVerse-Client: web`) get it as an httpOnly cookie instead and see `null` here.
+         */
+        AuthTokensResponse: {
+            /** @description Gets or sets the account id (UUID). */
+            userId: string;
+            /** @description Gets or sets a value indicating whether the account is a guest (device-bound, no email). */
+            isGuest: boolean;
+            /** @description Gets or sets the access token (JWT, about 15 minutes). */
+            accessToken: string;
+            /** @description Gets or sets when the access token expires (ISO 8601, UTC). */
+            accessTokenExpiresAt: string;
+            /** @description Gets or sets the refresh token, or null when it was set as a cookie (web). */
+            refreshToken?: null | string;
+            /** @description Gets or sets when the refresh token expires (ISO 8601, UTC). */
+            refreshTokenExpiresAt: string;
+        };
+        /**
+         * @description Starts a single-owner session (local pass-and-play, vs AI, solo) for the signed-in player, who takes seat 0. Online
+         *     sessions are created by private rooms and matchmaking instead (Prompts 1.4, 1.5).
+         */
+        CreateSessionRequest: {
+            /** @description Gets or sets the catalog game id, e.g. "ludo". */
+            gameId: string;
+            /** @description Gets or sets the catalog mode key, e.g. "vs-ai". */
+            mode: string;
+            /**
+             * Format: int32
+             * @description Gets or sets the number of seats (humans and AI), one of the mode's player counts.
+             */
+            playerCount: number | string;
+            /**
+             * Format: int32
+             * @description Gets or sets the AI level 1 to 3 for vs AI modes (default 1).
+             */
+            aiLevel?: null | number | string;
+            /** @description Gets or sets the rules variant, when the game has several. */
+            variant?: null | string;
+            /**
+             * @description Gets or sets house-rule toggles as strings (e.g. "sixToLeaveBase": "true"). Each game's engine parses and
+             *     validates its own; Ludo's keys are in `GameVerse.Contracts.Ludo.LudoHouseRules`.
+             */
+            houseRules: {
+                [key: string]: string;
+            };
+        };
+        /** @description Deletes the signed-in account. Email accounts confirm with their password; guests leave it empty. */
+        DeleteAccountRequest: {
+            /** @description Gets or sets the current password (email accounts only). */
+            password?: null | string;
+        };
+        /** @description Asks for a password-reset code. Always accepted (202), whether or not the email has an account. */
+        ForgotPasswordRequest: {
+            /** @description Gets or sets the email address. */
+            email: string;
+        };
+        /** @description A game in the catalog (Prompt 1.2, ADR-0007). Shared by the web and Unity game lists. */
+        GameInfo: {
+            /** @description Gets or sets the game id (slug), e.g. "ludo". Also the SessionManifest gameId. */
+            id: string;
+            /** @description Gets or sets the display title. */
+            title: string;
+            /** @description Gets or sets the one-line pitch shown on cards. */
+            tagline: string;
+            /** @description Gets or sets the category: board, cards, brain, arcade, adventure, racing or fight. */
+            category: string;
+            /**
+             * @description Gets or sets the accent as a design-token path (e.g. "color.category.board"), never a color value: each
+             *     client resolves it with its own generated tokens.
+             */
+            accentToken: string;
+            /** @description Gets or sets the current game version (SessionManifest gameVersion). */
+            version: string;
+            /** @description Gets or sets the availability, one of GameStatuses. */
+            status: string;
+            /** @description Gets or sets the ways to play, in display order. */
+            modes: components["schemas"]["GameModeInfo"][];
+        };
+        /** @description One way to play a game. */
+        GameModeInfo: {
+            /** @description Gets or sets the mode key, unique within the game (e.g. "blitz-3-2"). */
+            key: string;
+            /** @description Gets or sets the kind: local, vs_ai, online_ranked, online_private or solo (CLAUDE.md 4.2). */
+            kind: string;
+            /** @description Gets or sets the display label, e.g. "Quick match". */
+            label: string;
+            /** @description Gets or sets the allowed player counts, humans and AI together (e.g. 2 and 4 for Ludo quick match). */
+            playerCounts: (number | string)[];
+        };
+        /**
+         * @description Response to creating a guest. string GuestCreatedResponse.DeviceSecret is shown exactly once; the client stores it in secure
+         *     storage and signs back in with it (GuestLoginRequest). The server keeps only a hash.
+         */
+        GuestCreatedResponse: {
+            /** @description Gets or sets the device secret. Never sent again. */
+            deviceSecret: string;
+            /** @description Gets or sets the account id (UUID). */
+            userId: string;
+            /** @description Gets or sets a value indicating whether the account is a guest (device-bound, no email). */
+            isGuest: boolean;
+            /** @description Gets or sets the access token (JWT, about 15 minutes). */
+            accessToken: string;
+            /** @description Gets or sets when the access token expires (ISO 8601, UTC). */
+            accessTokenExpiresAt: string;
+            /** @description Gets or sets the refresh token, or null when it was set as a cookie (web). */
+            refreshToken?: null | string;
+            /** @description Gets or sets when the refresh token expires (ISO 8601, UTC). */
+            refreshTokenExpiresAt: string;
+        };
+        /** @description Signs a guest back in on the device that created it. */
+        GuestLoginRequest: {
+            /** @description Gets or sets the guest's account id. */
+            guestId: string;
+            /** @description Gets or sets the device secret returned when the guest was created. */
+            deviceSecret: string;
+        };
+        HttpValidationProblemDetails: {
+            type?: null | string;
+            title?: null | string;
+            /** Format: int32 */
+            status?: null | number | string;
+            detail?: null | string;
+            instance?: null | string;
+            errors: {
+                [key: string]: string[];
+            };
+        };
+        /** @description Signs in with email and password. */
+        LoginRequest: {
+            /** @description Gets or sets the email address. */
+            email: string;
+            /** @description Gets or sets the password. */
+            password: string;
+        };
+        /** @description A seated player as the platform sees them. */
+        PlayerSlot: {
+            /** @description Gets or sets the player id (UUID). */
+            id: string;
+            /** @description Gets or sets the display name. */
+            displayName: string;
+            /**
+             * Format: int32
+             * @description Gets or sets the zero-based seat.
+             */
+            seat: number | string;
+            /** @description Gets or sets equipped cosmetics, slot to cosmetic id (e.g. "diceSkin": "dice_neon"). */
+            cosmetics: {
+                [key: string]: string;
+            };
+            /** @description Gets or sets a value indicating whether an AI controls this seat. */
+            isAI: boolean;
+        };
+        ProblemDetails: {
+            type?: null | string;
+            title?: null | string;
+            /** Format: int32 */
+            status?: null | number | string;
+            detail?: null | string;
+            instance?: null | string;
+        };
+        /** @description A player's public profile basics (Prompt 1.1). Frames, titles and stats come with Progression. */
+        ProfileResponse: {
+            /** @description Gets or sets the account id (UUID). */
+            userId: string;
+            /** @description Gets or sets the display name shown to other players. */
+            displayName: string;
+            /** @description Gets or sets the avatar id, one of IReadOnlyList&lt;string&gt; ProfileAvatars.All. */
+            avatarId: string;
+        };
+        /** @description Where and how to open the realtime socket. */
+        RealtimeInfo: {
+            /** @description Gets or sets the WebSocket URL, e.g. wss://api.gameverse.app/ws/play/{sessionId}. */
+            wsUrl: string;
+            /** @description Gets or sets the single-use ticket, valid for 30 seconds. Never the JWT. */
+            ticket: string;
+        };
+        /**
+         * @description Exchanges a refresh token for new tokens (the old one stops working). Web clients leave
+         *     string? RefreshRequest.RefreshToken empty; the cookie is used instead. Also the body of a logout.
+         */
+        RefreshRequest: {
+            /** @description Gets or sets the refresh token, or null for web clients. */
+            refreshToken?: null | string;
+        };
+        /** @description Sets a new password with the 6-digit code from the reset email. Signs out every session. */
+        ResetPasswordRequest: {
+            /** @description Gets or sets the email address. */
+            email: string;
+            /** @description Gets or sets the 6-digit code. */
+            code: string;
+            /** @description Gets or sets the new password (at least 10 characters). */
+            newPassword: string;
+        };
+        /** @description The common config shape from CLAUDE.md 4.2. */
+        SessionConfigOfDictionaryOfstringAndstring: {
+            /** @description Gets or sets the variant id, e.g. "international_10x10". */
+            variant?: null | string;
+            /** @description Gets or sets the house rules. */
+            houseRules?: null | {
+                [key: string]: string;
+            };
+            /**
+             * Format: int32
+             * @description Gets or sets the AI difficulty for vs AI modes.
+             */
+            aiLevel?: null | number | string;
+        };
+        /**
+         * @description Dice fairness by commit-reveal (ADR-0008). The commitment (SHA-256 of a 32-byte server secret) is published when the
+         *     session is created; the secret and the seed derived from it are revealed only once the session has ended, so anyone
+         *     can check the commitment and replay every roll with GameVerse.Rules.
+         */
+        SessionFairness: {
+            /** @description Gets or sets the session id. */
+            sessionId: string;
+            /** @description Gets or sets the commitment as lowercase hex, or null for games without server randomness. */
+            commitment?: null | string;
+            /** @description Gets or sets a value indicating whether the secret is revealed (the session has ended). */
+            revealed: boolean;
+            /** @description Gets or sets the secret as lowercase hex, once revealed. */
+            secret?: null | string;
+            /** @description Gets or sets the PRNG seed derived from the secret, as a decimal string (it exceeds JSON's safe integers). */
+            seed?: null | string;
+        };
+        /** @description The full manifest a game module reads, with its own config and state types. */
+        SessionManifestOfSessionConfigOfDictionaryOfstringAndstringAndObject: {
+            config?: null | components["schemas"]["SessionConfigOfDictionaryOfstringAndstring"];
+            /** @description Gets or sets the initial state; may be absent when the game builds it from the config. */
+            initialState?: unknown;
+            /** @description Gets or sets the catalog game id, e.g. "ludo". */
+            gameId: string;
+            /** @description Gets or sets the game build version the session was created for. */
+            gameVersion: string;
+            /** @description Gets or sets the session id (UUID). */
+            sessionId: string;
+            /** @description Gets or sets the mode, one of GameModes. */
+            mode: string;
+            /** @description Gets or sets the id of the player on this device. */
+            localPlayerId: string;
+            /** @description Gets or sets the seated players. */
+            players: components["schemas"]["PlayerSlot"][];
+            realtime?: null | components["schemas"]["RealtimeInfo"];
+        };
+        /** @description One of the player's sessions. */
+        SessionSummary: {
+            /** @description Gets or sets the session id. */
+            sessionId: string;
+            /** @description Gets or sets the game id. */
+            gameId: string;
+            /** @description Gets or sets the mode key. */
+            mode: string;
+            /** @description Gets or sets the status, one of SessionStatuses. */
+            status: string;
+            /** @description Gets or sets when the session was created (ISO 8601, UTC). */
+            createdAt: string;
+        };
+        /** @description Changes the signed-in player's profile. Fields left null stay as they are. */
+        UpdateProfileRequest: {
+            /** @description Gets or sets the new display name: 3 to 20 letters, digits, spaces or underscores. */
+            displayName?: null | string;
+            /** @description Gets or sets the new avatar id, one of IReadOnlyList&lt;string&gt; ProfileAvatars.All. */
+            avatarId?: null | string;
+        };
+        /**
+         * @description Turns the signed-in guest into an email account. The account id stays the same, so everything the guest earned
+         *     stays attached. Only the birth year is asked, to decide whether the player is a minor (ADR-0006).
+         */
+        UpgradeRequest: {
+            /** @description Gets or sets the email address. A 6-digit verification code is sent to it. */
+            email: string;
+            /** @description Gets or sets the password: at least 10 characters, no other composition rules. */
+            password: string;
+            /**
+             * Format: int32
+             * @description Gets or sets the birth year (four digits).
+             */
+            birthYear: number | string;
+        };
+        /** @description Confirms the signed-in account's email with the 6-digit code that was mailed to it. */
+        VerifyEmailRequest: {
+            /** @description Gets or sets the 6-digit code. */
+            code: string;
+        };
+    };
     responses: never;
     parameters: never;
     requestBodies: never;

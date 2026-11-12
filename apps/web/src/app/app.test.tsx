@@ -49,6 +49,24 @@ describe('Home', () => {
     expect(screen.getByText('Play with friends')).toBeInTheDocument();
   });
 
+  it('features the first playable catalog game and lists the rest as coming soon', async () => {
+    renderApp('/');
+    expect(await screen.findByRole('link', { name: 'Play Ludo' })).toBeInTheDocument();
+    const coming = screen.getByRole('region', { name: 'More games coming' });
+    expect(within(coming).getByText('10 on the way')).toBeInTheDocument();
+    expect(within(coming).getByLabelText('Whot, coming soon')).toBeInTheDocument();
+    expect(within(coming).queryAllByRole('link', { name: /Whot/ })).toHaveLength(0);
+    const categories = screen.getByRole('region', { name: 'Categories' });
+    expect(within(categories).getByRole('link', { name: /^Board\s*2 games$/ })).toBeInTheDocument(); // Ludo + Draughts
+    expect(within(categories).getByRole('link', { name: /^Cards\s*1 game$/ })).toBeInTheDocument();
+  });
+
+  it('shows the error state when the catalog API fails', async () => {
+    vi.stubGlobal('fetch', async () => new Response('{}', { status: 503 }));
+    renderApp('/');
+    expect(await screen.findByText("Couldn't load your home feed")).toBeInTheDocument();
+  });
+
   it('shows an error state that retries', async () => {
     const spy = vi.spyOn(api.homeApi, 'getHomeFeed').mockRejectedValueOnce(new Error('offline'));
     renderApp('/');
@@ -59,9 +77,27 @@ describe('Home', () => {
   });
 });
 
+describe('Games page', () => {
+  it('lists playable games first, then coming soon, from the catalog', async () => {
+    renderApp('/games');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Games' })).toBeInTheDocument();
+    const playable = await screen.findByRole('region', { name: 'Play now' });
+    expect(within(playable).getAllByRole('link').map((l) => l.getAttribute('href'))).toEqual(['/games/ludo']);
+    const coming = screen.getByRole('region', { name: 'Coming soon' });
+    expect(within(coming).getAllByLabelText(/coming soon$/)).toHaveLength(10);
+  });
+
+  it('filters by category from the query string', async () => {
+    renderApp('/games?category=fight');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Fight games' })).toBeInTheDocument();
+    expect(await screen.findByLabelText('Stickman Combat, coming soon')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Whot, coming soon')).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Play now' })).toBeNull();
+  });
+});
+
 describe('Routes and shell', () => {
   it.each([
-    ['/games', 'Games'],
     ['/play', 'Play'],
     ['/social', 'Social'],
     ['/profile', 'Profile'],

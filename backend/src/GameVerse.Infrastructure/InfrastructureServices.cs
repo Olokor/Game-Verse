@@ -1,6 +1,9 @@
+using GameVerse.Infrastructure.Email;
 using GameVerse.Infrastructure.Persistence;
+using GameVerse.Platform;
 using Hangfire;
 using Hangfire.PostgreSql;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
@@ -33,6 +36,8 @@ public static class InfrastructureServices
         }
 
         services.AddDbContext<GameVerseDbContext>(options => ConfigureNpgsql(options, connections.Postgres));
+        // Modules depend on the plain DbContext type: GameVerse.Platform cannot reference this assembly.
+        services.AddScoped<DbContext>(sp => sp.GetRequiredService<GameVerseDbContext>());
 
         // One multiplexer per process, as StackExchange.Redis recommends. Connects lazily and retries.
         services.AddSingleton<IConnectionMultiplexer>(_ =>
@@ -62,12 +67,35 @@ public static class InfrastructureServices
         return services;
     }
 
+    /// <summary>SMTP email (MailKit) when a host is configured; otherwise a sender that drops messages with a warning.</summary>
+    public static IServiceCollection AddGameVerseEmail(this IServiceCollection services, EmailOptions email)
+    {
+        ArgumentNullException.ThrowIfNull(email);
+        services.AddSingleton(email);
+        if (email.IsConfigured)
+        {
+            services.AddSingleton<IEmailSender, SmtpEmailSender>();
+        }
+        else
+        {
+            services.AddSingleton<IEmailSender, UnconfiguredEmailSender>();
+        }
+
+        return services;
+    }
+
+    /// <summary>EF Core stores and token providers (email codes, password reset) for the Accounts module's Identity.</summary>
+    public static IdentityBuilder AddGameVerseIdentityStores(this IdentityBuilder identity) =>
+        identity.AddEntityFrameworkStores<GameVerseDbContext>().AddDefaultTokenProviders();
+
     /// <summary>Applies pending EF Core migrations. Used by the API's `migrate` command and by tests.</summary>
     public static async Task MigrateDatabaseAsync(this IServiceProvider services, CancellationToken cancellationToken = default)
     {
         await using var scope = services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<GameVerseDbContext>();
         await db.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
+        // Reference data that must exist for the API to work (ADR-0007). Inserts missing rows only.
+        await Platform.Catalog.CatalogModule.SeedAsync(db, cancellationToken).ConfigureAwait(false);
     }
 
     internal static void ConfigureNpgsql(DbContextOptionsBuilder options, string connectionString) =>

@@ -3,7 +3,7 @@ GameVerse – A cross-platform gaming platform bringing together board, puzzle, 
 
 ## Status
 
-Phase 0 (foundation). Shared rules and contracts libraries (`shared/`), the backend skeleton (`backend/`), design tokens (`packages/design-tokens/`), the web shell (`apps/web/`) and the Unity project (`apps/mobile/`) are in place. Stack: C# end to end (.NET 10 backend, Unity 6 client, shared `GameVerse.Rules` library), see [ADR-0001](docs/architecture/adr-0001-core-technology-stack.md).
+Phase 1 in progress (Ludo vertical slice): accounts and auth (Prompt 1.1, [ADR-0006](docs/architecture/adr-0006-accounts-and-auth.md)) the game catalog and sessions (Prompt 1.2, [ADR-0007](docs/architecture/adr-0007-catalog-and-sessions.md)) and the Ludo rules engine with AI and verifiable dice (Prompt 1.3, [ADR-0008](docs/architecture/adr-0008-ludo-rules-and-fairness.md)) are done. Phase 0 (foundation) is complete: shared rules and contracts libraries (`shared/`), the backend skeleton (`backend/`), design tokens (`packages/design-tokens/`), the web shell (`apps/web/`) and the Unity project (`apps/mobile/`) are in place. Stack: C# end to end (.NET 10 backend, Unity 6 client, shared `GameVerse.Rules` library), see [ADR-0001](docs/architecture/adr-0001-core-technology-stack.md).
 
 ## Build and test
 
@@ -26,7 +26,7 @@ make web-test  # typecheck + Vitest
 make e2e       # Playwright smoke + screenshots at 360x800 and 1440x900 (first run: pnpm --filter @gameverse/web exec playwright install chromium)
 ```
 
-React 19, TypeScript, Vite, Tailwind v4 on the generated design tokens, Radix, Motion, TanStack Query, Zustand and React Router. Home runs on mock data until the API exists; every mock is marked `TODO(gameverse)`.
+React 19, TypeScript, Vite, Tailwind v4 on the generated design tokens, Radix, Motion, TanStack Query, Zustand and React Router. Home and `/games` read the game catalog from the API (`GET /catalog/games` through the typed client in `src/lib/api.ts`; run `make up` first, or set `VITE_API_URL`). Quests, friends and Continue playing are still mock until their prompts; every mock is marked `TODO(gameverse)`. Tests stub the API with `src/test/catalogFixture.ts`.
 
 ## Unity app
 
@@ -54,8 +54,9 @@ make migrate            # apply EF Core migrations on demand
 | `postgres` | PostgreSQL 16, `127.0.0.1:5432` |
 | `redis` | Redis 7, `127.0.0.1:6379` |
 | `migrate` | one-shot container from the API image that applies migrations and exits |
-| `api` | ASP.NET Core API (`GameVerse__Role=api`) at `127.0.0.1:8080`: `/health`, `/ws/echo`, `/openapi/v1.json` |
+| `api` | ASP.NET Core API (`GameVerse__Role=api`) at `127.0.0.1:8080`: `/health`, `/auth/*`, `/accounts/me`, `/profiles/me` (ADR-0006), `/ws/echo`, `/openapi/v1.json` |
 | `worker` | same image as `api` with `GameVerse__Role=worker`: runs the Hangfire job server |
+| `mailpit` | catches every email the API sends: inbox at http://127.0.0.1:8025 (codes for verification and password reset). Set `GAMEVERSE_EMAIL_*` in `.env` to send real mail instead |
 
 To run the API on the host instead (Scalar UI at `/scalar`, Hangfire dashboard at `/hangfire`, both Development and localhost only), start `postgres` and `redis` with `docker compose up -d postgres redis`, then `dotnet run --project backend/src/GameVerse.Api`.
 

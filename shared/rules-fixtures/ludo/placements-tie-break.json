@@ -1,0 +1,19 @@
+{
+  "game": "ludo",
+  "name": "Unfinished players rank by tokens home, then progress, then seat",
+  "description": "Seat 3 and seat 1 both have one token home; seat 3 is further along. Seat 2 has none home despite more progress.",
+  "config": {"dice": [1]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"},
+    {"seat": 2, "playerId": "p2"},
+    {"seat": 3, "playerId": "p3"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[56, 56, 56, 55], [56, -1, -1, -1], [50, 50, 50, 50], [56, 0, 0, 0]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 3}, "expect": {"state": {"phase": "over"}}}
+  ],
+  "outcome": {"kind": "win", "winningSeats": [0], "placements": [0, 3, 1, 2], "reason": "all_tokens_home"}
+}

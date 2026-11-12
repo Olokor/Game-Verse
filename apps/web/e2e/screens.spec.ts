@@ -1,14 +1,20 @@
 import { expect, test } from '@playwright/test';
+import { catalogFixture } from '../src/test/catalogFixture';
 
 // Smoke test and screenshots at 360x800 (phone) and 1440x900 (desktop), per CLAUDE.md section 9.
 // Screenshots land in test-results/ for review; they are not pixel-compared (yet).
 
 test.use({ reducedMotion: 'reduce' });
 
+// No backend in e2e: the catalog API answers with the launch-library fixture (same data the Vitest suite uses).
+test.beforeEach(async ({ page }) => {
+  await page.route('**/catalog/games', (route) => route.fulfill({ json: catalogFixture }));
+});
+
 test('home renders every section without horizontal scroll', async ({ page }, info) => {
   await page.goto('/');
   await expect(page.getByRole('link', { name: 'Play Ludo' })).toBeVisible();
-  for (const name of ['Continue playing', 'Daily quests', 'Categories', 'Friends online']) {
+  for (const name of ['Continue playing', 'Daily quests', 'More games coming', 'Categories', 'Friends online']) {
     await expect(page.getByRole('heading', { name })).toBeVisible();
   }
   await page.evaluate(() => document.fonts.ready);
@@ -30,9 +36,19 @@ test('fonts are the self-hosted OFL families', async ({ page }) => {
 });
 
 test('home loading skeleton', async ({ page }, info) => {
+  // Hold the catalog response so the skeleton is on screen for the assertion (the stub otherwise answers instantly).
+  let release: () => void = () => {};
+  const held = new Promise<void>((resolve) => (release = resolve));
+  await page.unroute('**/catalog/games');
+  await page.route('**/catalog/games', async (route) => {
+    await held;
+    await route.fulfill({ json: catalogFixture });
+  });
   await page.goto('/');
   await expect(page.getByLabel('Loading home')).toBeVisible();
   await page.screenshot({ path: info.outputPath('home-loading.png') });
+  release();
+  await expect(page.getByRole('link', { name: 'Play Ludo' })).toBeVisible();
 });
 
 test('component gallery', async ({ page }, info) => {
@@ -61,4 +77,15 @@ test('error screen (ADR-0005)', async ({ page }, info) => {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBe(0);
   await page.screenshot({ path: info.outputPath('error-screen.png') });
+});
+
+test('games list: playable first, then coming soon', async ({ page }, info) => {
+  await page.goto('/games');
+  await expect(page.getByRole('heading', { level: 1, name: 'Games' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Ludo' }).first()).toBeVisible();
+  await expect(page.getByLabel('Chess, coming soon')).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow).toBe(0);
+  await page.screenshot({ path: info.outputPath('games-full.png'), fullPage: true });
 });

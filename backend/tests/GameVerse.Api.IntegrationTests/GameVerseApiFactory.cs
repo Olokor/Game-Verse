@@ -19,6 +19,8 @@ public sealed class GameVerseApiFactory(
         builder.UseSetting("GameVerse:ConnectionStrings:Postgres", stack.PostgresConnectionString);
         builder.UseSetting("GameVerse:ConnectionStrings:Redis", stack.RedisConnectionString);
         builder.UseSetting("GameVerse:Log:Pretty", "true");
+        builder.UseSetting("GameVerse:Email:Host", stack.MailpitHost);
+        builder.UseSetting("GameVerse:Email:Port", stack.MailpitSmtpPort.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
         foreach (var (key, value) in overrides ?? new Dictionary<string, string?>())
         {

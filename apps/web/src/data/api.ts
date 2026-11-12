@@ -1,20 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import type { HomeFeed } from './types';
-import { mockHomeFeed } from './mock/homeFeed';
+import { buildHomeFeed, catalogApi } from './catalog';
 
-// TODO(gameverse): mock latency so loading skeletons are visible in development. Remove with the mocks.
-const MOCK_LATENCY_MS = import.meta.env.MODE === 'test' ? 0 : 450;
-
-const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-/**
- * Data access for the shell. Hooks call through this object so tests can substitute a call.
- * TODO(gameverse): replace the mock with the real home feed call (openapi-fetch client from packages/api-schema).
- */
+/** Data access for the shell. Hooks call through this object so tests can substitute a call. */
 export const homeApi = {
+  /** Home from the real catalog (GET /catalog/games); quests and friends are still mock (src/data/catalog.ts). */
   async getHomeFeed(): Promise<HomeFeed> {
-    await delay(MOCK_LATENCY_MS);
-    return structuredClone(mockHomeFeed);
+    return buildHomeFeed(await catalogApi.getGames());
   },
 };
 
@@ -22,4 +14,10 @@ export const homeFeedKey = ['home-feed'] as const;
 
 export function useHomeFeed() {
   return useQuery({ queryKey: homeFeedKey, queryFn: () => homeApi.getHomeFeed() });
+}
+
+export const catalogKey = ['catalog'] as const;
+
+export function useCatalog() {
+  return useQuery({ queryKey: catalogKey, queryFn: () => catalogApi.getGames() });
 }

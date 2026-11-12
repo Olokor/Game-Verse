@@ -1,0 +1,20 @@
+{
+  "game": "ludo",
+  "name": "Three sixes in a row forfeit the turn",
+  "description": "The first two sixes are moved as normal. The third six is not moved and the turn passes.",
+  "config": {"dice": [6, 6, 6]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[10, -1, -1, -1], [-1, -1, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"sixesInRow": 1}}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"state": {"tokens": [[16, -1, -1, -1], [-1, -1, -1, -1]], "currentSeat": 0}}},
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"sixesInRow": 2}}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"legalActions": [{"move": 0}, {"move": 1}, {"move": 2}, {"move": 3}], "state": {"tokens": [[22, -1, -1, -1], [-1, -1, -1, -1]], "currentSeat": 0}}},
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"tokens": [[22, -1, -1, -1], [-1, -1, -1, -1]], "currentSeat": 1, "phase": "roll", "lastRoll": 6, "sixesInRow": 0}}}
+  ],
+  "outcome": {"kind": "none"}
+}

@@ -1,0 +1,19 @@
+{
+  "game": "ludo",
+  "name": "Placings 3 with 4 players: the game ends when the third player finishes",
+  "description": "Seats 0 and 1 are already home; seat 2 finishes third and the game ends with seat 3 last.",
+  "config": {"placings": 3, "dice": [1]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"},
+    {"seat": 2, "playerId": "p2"},
+    {"seat": 3, "playerId": "p3"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[56, 56, 56, 56], [56, 56, 56, 56], [56, 56, 56, 55], [-1, -1, -1, -1]], "currentSeat": 2, "finished": [0, 1]},
+  "steps": [
+    {"seat": 2, "action": {"roll": true}, "expect": {}},
+    {"seat": 2, "action": {"move": 3}, "expect": {"state": {"finished": [0, 1, 2], "phase": "over"}}}
+  ],
+  "outcome": {"kind": "win", "winningSeats": [0], "placements": [0, 1, 2, 3], "reason": "all_tokens_home"}
+}

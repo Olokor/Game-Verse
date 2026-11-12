@@ -1,0 +1,21 @@
+{
+  "game": "ludo",
+  "name": "Three-sixes-forfeit off: a third six is played like any six",
+  "description": "The streak keeps counting and the player moves the third six.",
+  "config": {"threeSixesForfeit": false, "dice": [6, 6, 6]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[10, -1, -1, -1], [-1, -1, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 0}, "expect": {}},
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 0}, "expect": {}},
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"phase": "move", "sixesInRow": 3}}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"state": {"tokens": [[28, -1, -1, -1], [-1, -1, -1, -1]], "currentSeat": 0, "phase": "roll"}}}
+  ],
+  "outcome": {"kind": "none"}
+}

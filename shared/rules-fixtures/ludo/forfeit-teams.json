@@ -1,0 +1,17 @@
+{
+  "game": "ludo",
+  "name": "Teams: a partner who leaves forfeits for the team",
+  "description": "Seat 1 resigns; team 0+2 wins straight away and seat 1 ranks last.",
+  "config": {"teams": true},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"},
+    {"seat": 2, "playerId": "p2"},
+    {"seat": 3, "playerId": "p3"}
+  ],
+  "seed": 1,
+  "steps": [
+    {"seat": 1, "action": {"forfeit": true}, "expect": {"state": {"left": [1], "phase": "over"}}}
+  ],
+  "outcome": {"kind": "win", "winningSeats": [0, 2], "placements": [0, 2, 3, 1], "reason": "opponents_left"}
+}

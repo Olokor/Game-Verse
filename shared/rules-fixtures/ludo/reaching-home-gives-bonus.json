@@ -1,0 +1,18 @@
+{
+  "game": "ludo",
+  "name": "A token reaching home gives another roll",
+  "description": "Token 0 at 53 rolls exactly 3 and reaches home (56). Seat 0 rolls again; a 2 has no move, so the turn passes.",
+  "config": {"dice": [3, 2]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[53, -1, -1, -1], [-1, -1, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"legalActions": [{"move": 0}], "state": {"tokens": [[56, -1, -1, -1], [-1, -1, -1, -1]], "currentSeat": 0, "phase": "roll"}}},
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"currentSeat": 1}}}
+  ],
+  "outcome": {"kind": "none"}
+}

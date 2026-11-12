@@ -1,0 +1,17 @@
+{
+  "game": "ludo",
+  "name": "Landing on an opponent sends it back to base and gives a bonus roll",
+  "description": "Seat 1's token at relative 10 is on absolute square 36. Seat 0 moves 33 -> 36 with a 3, captures it and rolls again.",
+  "config": {"dice": [3]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[33, -1, -1, -1], [10, 20, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"state": {"tokens": [[36, -1, -1, -1], [-1, 20, -1, -1]], "currentSeat": 0, "phase": "roll"}}}
+  ],
+  "outcome": {"kind": "none"}
+}
