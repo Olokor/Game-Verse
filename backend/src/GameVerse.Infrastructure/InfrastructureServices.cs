@@ -1,6 +1,7 @@
 using GameVerse.Infrastructure.Persistence;
 using Hangfire;
 using Hangfire.PostgreSql;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
@@ -33,6 +34,8 @@ public static class InfrastructureServices
         }
 
         services.AddDbContext<GameVerseDbContext>(options => ConfigureNpgsql(options, connections.Postgres));
+        // Modules depend on the plain DbContext type: GameVerse.Platform cannot reference this assembly.
+        services.AddScoped<DbContext>(sp => sp.GetRequiredService<GameVerseDbContext>());
 
         // One multiplexer per process, as StackExchange.Redis recommends. Connects lazily and retries.
         services.AddSingleton<IConnectionMultiplexer>(_ =>
@@ -61,6 +64,10 @@ public static class InfrastructureServices
 
         return services;
     }
+
+    /// <summary>EF Core stores and token providers (email codes, password reset) for the Accounts module's Identity.</summary>
+    public static IdentityBuilder AddGameVerseIdentityStores(this IdentityBuilder identity) =>
+        identity.AddEntityFrameworkStores<GameVerseDbContext>().AddDefaultTokenProviders();
 
     /// <summary>Applies pending EF Core migrations. Used by the API's `migrate` command and by tests.</summary>
     public static async Task MigrateDatabaseAsync(this IServiceProvider services, CancellationToken cancellationToken = default)

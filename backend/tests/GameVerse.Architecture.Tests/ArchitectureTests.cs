@@ -55,6 +55,19 @@ public class ArchitectureTests
     }
 
     [Fact]
+    public void Only_Accounts_uses_the_Identity_user_type()
+    {
+        // AccountUser is public only because the shared Identity DbContext needs it (see its doc comment). Other modules
+        // ask about accounts through IAccountDirectory.
+        var result = Types.InAssembly(Platform)
+            .That().DoNotResideInNamespace("GameVerse.Platform.Accounts")
+            .ShouldNot().HaveDependencyOn(typeof(GameVerse.Platform.Accounts.AccountUser).FullName)
+            .GetResult();
+
+        result.IsSuccessful.ShouldBeTrue(Describe(result));
+    }
+
+    [Fact]
     public void Boundary_check_catches_a_real_violation()
     {
         var violations = ModuleBoundaries.FindViolations(

@@ -4,5 +4,408 @@
     "title": "GameVerse.Api | v1",
     "version": "1.0.0"
   },
-  "paths": { }
+  "paths": {
+    "/accounts/me": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "The signed-in account",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/guest": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Create a device-bound guest account",
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestCreatedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/guest/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Sign a guest back in with its device secret",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuestLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthTokensResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Exchange a refresh token for new tokens (rotates the refresh token)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RefreshRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthTokensResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "End the session the refresh token belongs to",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RefreshRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AccountResponse": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "Gets or sets the account id (UUID)."
+          },
+          "isGuest": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether the account is a guest."
+          },
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the email, or null for guests."
+          },
+          "emailVerified": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether the email has been verified."
+          },
+          "isMinor": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether the player counts as under 18 (guests always do, CLAUDE.md\r\nsection 7: chat is off for minors)."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Gets or sets when the account was created (ISO 8601, UTC)."
+          }
+        },
+        "description": "The signed-in account."
+      },
+      "AuthTokensResponse": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "Gets or sets the account id (UUID)."
+          },
+          "isGuest": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether the account is a guest (device-bound, no email)."
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "Gets or sets the access token (JWT, about 15 minutes)."
+          },
+          "accessTokenExpiresAt": {
+            "type": "string",
+            "description": "Gets or sets when the access token expires (ISO 8601, UTC)."
+          },
+          "refreshToken": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the refresh token, or null when it was set as a cookie (web)."
+          },
+          "refreshTokenExpiresAt": {
+            "type": "string",
+            "description": "Gets or sets when the refresh token expires (ISO 8601, UTC)."
+          }
+        },
+        "description": "Tokens returned by every sign-in style call (ADR-0006). The access token is a short-lived JWT for the\r\nAuthorization header. The refresh token is in this body for Unity and other clients; web clients\r\n(header `X-GameVerse-Client: web`) get it as an httpOnly cookie instead and see `null` here."
+      },
+      "GuestCreatedResponse": {
+        "type": "object",
+        "properties": {
+          "deviceSecret": {
+            "type": "string",
+            "description": "Gets or sets the device secret. Never sent again."
+          },
+          "userId": {
+            "type": "string",
+            "description": "Gets or sets the account id (UUID)."
+          },
+          "isGuest": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether the account is a guest (device-bound, no email)."
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "Gets or sets the access token (JWT, about 15 minutes)."
+          },
+          "accessTokenExpiresAt": {
+            "type": "string",
+            "description": "Gets or sets when the access token expires (ISO 8601, UTC)."
+          },
+          "refreshToken": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the refresh token, or null when it was set as a cookie (web)."
+          },
+          "refreshTokenExpiresAt": {
+            "type": "string",
+            "description": "Gets or sets when the refresh token expires (ISO 8601, UTC)."
+          }
+        },
+        "description": "Response to creating a guest. string GuestCreatedResponse.DeviceSecret is shown exactly once; the client stores it in secure\r\nstorage and signs back in with it (GuestLoginRequest). The server keeps only a hash."
+      },
+      "GuestLoginRequest": {
+        "type": "object",
+        "properties": {
+          "guestId": {
+            "type": "string",
+            "description": "Gets or sets the guest's account id."
+          },
+          "deviceSecret": {
+            "type": "string",
+            "description": "Gets or sets the device secret returned when the guest was created."
+          }
+        },
+        "description": "Signs a guest back in on the device that created it."
+      },
+      "HttpValidationProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "RefreshRequest": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the refresh token, or null for web clients."
+          }
+        },
+        "description": "Exchanges a refresh token for new tokens (the old one stops working). Web clients leave\r\nstring? RefreshRequest.RefreshToken empty; the cookie is used instead. Also the body of a logout."
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Accounts"
+    },
+    {
+      "name": "Auth"
+    }
+  ]
 }

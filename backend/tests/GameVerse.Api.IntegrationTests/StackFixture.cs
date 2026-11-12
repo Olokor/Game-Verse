@@ -1,3 +1,4 @@
+using GameVerse.Infrastructure;
 using Testcontainers.PostgreSql;
 using Testcontainers.Redis;
 
@@ -25,6 +26,11 @@ public sealed class StackFixture : IAsyncLifetime
     public async ValueTask InitializeAsync()
     {
         await Task.WhenAll(postgres.StartAsync(), redis.StartAsync());
+
+        // Migrate once for the whole assembly. Tests that each migrated in parallel raced on Postgres's catalog
+        // ("duplicate key value violates unique constraint pg_namespace_nspname_index").
+        await using var factory = new GameVerseApiFactory(this);
+        await factory.Services.MigrateDatabaseAsync();
     }
 
     public async ValueTask DisposeAsync()
