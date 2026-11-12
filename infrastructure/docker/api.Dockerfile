@@ -4,10 +4,14 @@
 # RUNTIME_IMAGE defaults to the regular aspnet image so local dev has a shell for debugging.
 # Production builds pass the chiseled variant (no shell, no package manager, non-root by default):
 #   --build-arg RUNTIME_IMAGE=mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled
-ARG RUNTIME_IMAGE=mcr.microsoft.com/dotnet/aspnet:10.0
+#
+# Base images are pinned by digest: a rebuild never silently pulls a new upstream image (a fresh 1.3 GB SDK pull over a
+# slow link made `make up` time out on 2026-11-12). Update deliberately: `docker pull <image>:10.0`, then copy the
+# digest from `docker images --digests` here.
+ARG RUNTIME_IMAGE=mcr.microsoft.com/dotnet/aspnet:10.0@sha256:bfd912c83295ce66d4b706ebb8541b9f14259b0e76fbb88b2751f58ce2399d2e
 
 # ---- build ----
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:fe0fd4e93bd2fbb47c883b7a6369e5c8d3db8bf01cdc5981f6ee35fbdf3ff4fb AS build
 WORKDIR /src
 
 # Restore first, from project files only, so the package layer is cached until a project file changes.
