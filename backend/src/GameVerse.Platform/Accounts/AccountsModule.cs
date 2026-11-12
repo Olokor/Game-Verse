@@ -1,5 +1,4 @@
 using System.Threading.RateLimiting;
-using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -25,8 +24,8 @@ public static class AccountsModule
         services.AddScoped<AuthService>();
         services.AddScoped<EmailCodes>();
         services.AddScoped<EmailAccountService>();
+        services.AddScoped<AccountDeletion>();
         services.AddScoped<IAccountDirectory, AccountDirectory>();
-        services.AddValidatorsFromAssemblyContaining<AccountsOptions>(includeInternalTypes: true);
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(jwt =>
         {

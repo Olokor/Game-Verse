@@ -202,6 +202,29 @@ public class GuestAndSessionTests(StackFixture stack)
         limited.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
     }
 
+    [Fact]
+    public async Task Only_configured_browser_origins_may_call_with_credentials()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var api = AccountsApi.Start(stack, new Dictionary<string, string?> { ["GameVerse:CorsOrigins:0"] = "https://gameverse.app" });
+
+        async Task<HttpResponseMessage> PreflightAsync(string origin)
+        {
+            using var preflight = new HttpRequestMessage(HttpMethod.Options, new Uri("/auth/refresh", UriKind.Relative));
+            preflight.Headers.Add("Origin", origin);
+            preflight.Headers.Add("Access-Control-Request-Method", "POST");
+            preflight.Headers.Add("Access-Control-Request-Headers", "content-type,x-gameverse-client");
+            return await api.Client.SendAsync(preflight, ct);
+        }
+
+        using var allowed = await PreflightAsync("https://gameverse.app");
+        allowed.Headers.GetValues("Access-Control-Allow-Origin").ShouldHaveSingleItem().ShouldBe("https://gameverse.app");
+        allowed.Headers.GetValues("Access-Control-Allow-Credentials").ShouldHaveSingleItem().ShouldBe("true");
+
+        using var other = await PreflightAsync("https://evil.example");
+        other.Headers.Contains("Access-Control-Allow-Origin").ShouldBeFalse();
+    }
+
     private static async Task<string> ProblemTextAsync(HttpResponseMessage response, CancellationToken ct)
     {
         using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct));

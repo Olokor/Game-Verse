@@ -5,6 +5,39 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/accounts/me/delete": {
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Delete the signed-in account (email accounts confirm with their password); signs out everywhere",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteAccountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/accounts/me": {
       "get": {
         "tags": [
@@ -401,6 +434,74 @@
           }
         }
       }
+    },
+    "/profiles/me": {
+      "get": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "The signed-in player's profile",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "Change display name and/or avatar",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -470,6 +571,19 @@
           }
         },
         "description": "Tokens returned by every sign-in style call (ADR-0006). The access token is a short-lived JWT for the\r\nAuthorization header. The refresh token is in this body for Unity and other clients; web clients\r\n(header `X-GameVerse-Client: web`) get it as an httpOnly cookie instead and see `null` here."
+      },
+      "DeleteAccountRequest": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the current password (email accounts only)."
+          }
+        },
+        "description": "Deletes the signed-in account. Email accounts confirm with their password; guests leave it empty."
       },
       "ForgotPasswordRequest": {
         "type": "object",
@@ -631,6 +745,24 @@
           }
         }
       },
+      "ProfileResponse": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "Gets or sets the account id (UUID)."
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Gets or sets the display name shown to other players."
+          },
+          "avatarId": {
+            "type": "string",
+            "description": "Gets or sets the avatar id, one of IReadOnlyList&lt;string&gt; ProfileAvatars.All."
+          }
+        },
+        "description": "A player's public profile basics (Prompt 1.1). Frames, titles and stats come with Progression."
+      },
       "RefreshRequest": {
         "type": "object",
         "properties": {
@@ -661,6 +793,26 @@
           }
         },
         "description": "Sets a new password with the 6-digit code from the reset email. Signs out every session."
+      },
+      "UpdateProfileRequest": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the new display name: 3 to 20 letters, digits, spaces or underscores."
+          },
+          "avatarId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the new avatar id, one of IReadOnlyList&lt;string&gt; ProfileAvatars.All."
+          }
+        },
+        "description": "Changes the signed-in player's profile. Fields left null stay as they are."
       },
       "UpgradeRequest": {
         "type": "object",
@@ -703,6 +855,9 @@
     },
     {
       "name": "Auth"
+    },
+    {
+      "name": "Profiles"
     }
   ]
 }

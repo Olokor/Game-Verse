@@ -41,6 +41,10 @@ public static class PlatformHttp
             return await next(context).ConfigureAwait(false);
         }).ProducesValidationProblem();
 
+    /// <summary>Registers every module's FluentValidation validators (one scan of this assembly, internal ones too).</summary>
+    public static IServiceCollection AddPlatformValidators(this IServiceCollection services) =>
+        services.AddValidatorsFromAssemblyContaining(typeof(PlatformHttp), includeInternalTypes: true);
+
     /// <summary>401 with a deliberately vague message: never say which part of a credential was wrong.</summary>
     public static IResult InvalidCredentials() =>
         Results.Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Sign-in failed", detail: "The credentials are not valid.");

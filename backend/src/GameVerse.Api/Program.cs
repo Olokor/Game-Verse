@@ -3,7 +3,9 @@ using GameVerse.Api.Endpoints;
 using GameVerse.Api.Hosting;
 using GameVerse.Infrastructure;
 using GameVerse.Infrastructure.Email;
+using GameVerse.Platform;
 using GameVerse.Platform.Accounts;
+using GameVerse.Platform.Profiles;
 using Hangfire;
 using Scalar.AspNetCore;
 using Serilog;
@@ -57,6 +59,13 @@ if (options.ErrorReporting.IsEnabled)
     builder.WebHost.UseSentry(sentry => ErrorReporting.ConfigureSdk(sentry, options.ErrorReporting));
 }
 
+// The web app calls the API from its own origin with credentials (refresh cookie, ADR-0006).
+builder.Services.AddCors(cors => cors.AddDefaultPolicy(policy => policy
+    .WithOrigins(options.CorsOrigins)
+    .AllowCredentials()
+    .WithHeaders("Authorization", "Content-Type", GameVerse.Contracts.Accounts.AuthHeaders.Client)
+    .WithMethods("GET", "POST", "PATCH", "DELETE")));
+
 // Unhandled exceptions become RFC 7807 problem+json with a traceId; the body never carries exception details.
 builder.Services.AddProblemDetails();
 
@@ -66,6 +75,8 @@ builder.Services.AddGameVerseInfrastructure(options.ConnectionStrings, runJobSer
 var accountsOptions = builder.Configuration.GetSection(AccountsOptions.Section).Get<AccountsOptions>() ?? new AccountsOptions();
 var signingKey = AccountsSigningKey.Create(accountsOptions.SigningKey, allowEphemeral: builder.Environment.IsDevelopment() || BuildTimeOpenApi.IsRunning);
 builder.Services.AddAccountsModule(accountsOptions, signingKey).AddGameVerseIdentityStores();
+builder.Services.AddProfilesModule();
+builder.Services.AddPlatformValidators();
 builder.Services.AddGameVerseEmail(builder.Configuration.GetSection(EmailOptions.Section).Get<EmailOptions>() ?? new EmailOptions());
 builder.Services.AddRateLimiter(limiter =>
 {
@@ -108,6 +119,7 @@ app.UseSerilogRequestLogging(requestLog =>
 });
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+app.UseCors();
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -118,6 +130,7 @@ if (!options.IsWorker)
     app.UseWebSockets(new WebSocketOptions { KeepAliveInterval = TimeSpan.FromSeconds(15) });
     app.MapEchoSocket();
     app.MapAccounts();
+    app.MapProfiles();
     app.MapOpenApi();
 
     if (app.Environment.IsDevelopment())

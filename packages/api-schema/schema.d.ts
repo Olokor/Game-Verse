@@ -4,6 +4,53 @@
  */
 
 export interface paths {
+    "/accounts/me/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Delete the signed-in account (email accounts confirm with their password); signs out everywhere */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["DeleteAccountRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/accounts/me": {
         parameters: {
             query?: never;
@@ -530,6 +577,84 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/profiles/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The signed-in player's profile */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProfileResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change display name and/or avatar */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateProfileRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProfileResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -570,6 +695,11 @@ export interface components {
             refreshToken?: null | string;
             /** @description Gets or sets when the refresh token expires (ISO 8601, UTC). */
             refreshTokenExpiresAt?: string;
+        };
+        /** @description Deletes the signed-in account. Email accounts confirm with their password; guests leave it empty. */
+        DeleteAccountRequest: {
+            /** @description Gets or sets the current password (email accounts only). */
+            password?: null | string;
         };
         /** @description Asks for a password-reset code. Always accepted (202), whether or not the email has an account. */
         ForgotPasswordRequest: {
@@ -629,6 +759,15 @@ export interface components {
             detail?: null | string;
             instance?: null | string;
         };
+        /** @description A player's public profile basics (Prompt 1.1). Frames, titles and stats come with Progression. */
+        ProfileResponse: {
+            /** @description Gets or sets the account id (UUID). */
+            userId?: string;
+            /** @description Gets or sets the display name shown to other players. */
+            displayName?: string;
+            /** @description Gets or sets the avatar id, one of IReadOnlyList&lt;string&gt; ProfileAvatars.All. */
+            avatarId?: string;
+        };
         /**
          * @description Exchanges a refresh token for new tokens (the old one stops working). Web clients leave
          *     string? RefreshRequest.RefreshToken empty; the cookie is used instead. Also the body of a logout.
@@ -645,6 +784,13 @@ export interface components {
             code?: string;
             /** @description Gets or sets the new password (at least 10 characters). */
             newPassword?: string;
+        };
+        /** @description Changes the signed-in player's profile. Fields left null stay as they are. */
+        UpdateProfileRequest: {
+            /** @description Gets or sets the new display name: 3 to 20 letters, digits, spaces or underscores. */
+            displayName?: null | string;
+            /** @description Gets or sets the new avatar id, one of IReadOnlyList&lt;string&gt; ProfileAvatars.All. */
+            avatarId?: null | string;
         };
         /**
          * @description Turns the signed-in guest into an email account. The account id stays the same, so everything the guest earned

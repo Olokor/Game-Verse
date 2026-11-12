@@ -1,6 +1,6 @@
 # ADR-0006: Accounts and auth
 
-- **Status:** Accepted (increments 1 and 2 of Prompt 1.1; the profiles and deletion sections land with increment 3)
+- **Status:** Accepted (Prompt 1.1 complete)
 - **Date:** 2026-11-12
 - **Deciders:** Wisdom (owner: email, age, deletion), Claude Code (tech lead: everything technical below)
 
@@ -75,6 +75,32 @@ Players are mostly on Android phones with unreliable mobile data, and many will 
 - **A failed send never fails the request** (the player can ask again). It is logged at Error, which reaches GlitchTip.
 - Emails are plain text plus minimal HTML, with no tracking and no external content.
 
+### Profiles
+- The **Profiles** module owns the display name and avatar. Accounts creates the default profile when a guest is created: "Player" plus 4 digits, with `avatar_01`.
+- Accounts talks to Profiles only through `IProfileService`, and the profile table has no foreign key into `accounts`. Modules don't couple through each other's tables.
+- `GET /profiles/me` and `PATCH /profiles/me`. Fields left null stay unchanged.
+- **Display names:** 3 to 20 letters, digits, single spaces or underscores, with no leading or trailing space. A profanity filter comes with the Moderation module.
+- **Avatar ids:** a fixed list in `GameVerse.Contracts` (`ProfileAvatars.All`), so Unity and the web offer the same choices.
+
+### Account deletion
+- **Owner decision:** in-app deletion, a Google Play requirement.
+- `POST /accounts/me/delete {password?}`. A POST, because Unity's `DELETE` requests can't carry a body. Email accounts confirm with their password; guests just need their session.
+- **The account row stays, anonymised**, so ledger entries and match history keep their references (CLAUDE.md section 7):
+  - email, username, password, birth year and phone are cleared;
+  - device secrets and email codes are deleted;
+  - every session is revoked;
+  - the profile becomes "Deleted player".
+- The email address is free for a new account straight away.
+
+### Web client and CORS
+- The browser app calls the API from its own origin with credentials, so the API allows exactly the origins in `GameVerse__CorsOrigins` (never `*`): `http://localhost:5173` and `:4173` in development.
+- In production, the web app and API on the same site (`gameverse.app` and `api.gameverse.app`) keep the `SameSite=Strict` refresh cookie working.
+- `apps/web/src/lib/api.ts` is a typed `openapi-fetch` client generated from the OpenAPI document (`make schema`). It:
+  - sends `X-GameVerse-Client: web`;
+  - keeps the access token in memory only;
+  - on a 401, refreshes once (one shared refresh for parallel requests) and retries;
+  - signs the player out if the refresh fails.
+
 ### Passwords
 - Minimum 10 characters with no composition rules (NIST 800-63B).
 - Identity lockout after 5 failures, for 15 minutes.
@@ -101,4 +127,4 @@ Limits are configurable (`GameVerse__Auth__RateLimits__*`). Behind Traefik and C
 - Access tokens can't be revoked before they expire (15 minutes). Logout and reuse detection revoke refresh tokens, so a stolen access token is useful for at most 15 minutes.
 - A future game server only needs the public key.
 - **Before deploy:** choose a transactional email provider (cost, deliverability). Gmail suits development only, because of its daily send limits.
-- Increment 3 adds profiles and account deletion.
+- **Deploy TODOs:** a production signing key in the secret store; trusted-proxy client IPs for rate limits; the transactional email provider; `GameVerse__CorsOrigins` set to the production web origin.

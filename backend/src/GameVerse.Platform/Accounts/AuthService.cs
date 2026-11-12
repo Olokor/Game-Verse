@@ -1,3 +1,4 @@
+using GameVerse.Platform.Profiles;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -15,6 +16,7 @@ internal sealed record IssuedTokens(
 internal sealed partial class AuthService(
     UserManager<AccountUser> users,
     DbContext db,
+    IProfileService profiles,
     AccessTokenIssuer accessTokens,
     AccountsOptions options,
     TimeProvider time,
@@ -36,6 +38,7 @@ internal sealed partial class AuthService(
             throw new InvalidOperationException("Guest creation failed: " + string.Join("; ", created.Errors.Select(e => e.Code)));
         }
 
+        await profiles.CreateDefaultAsync(user.Id, ct).ConfigureAwait(false);
         var secret = AuthSecrets.New(AuthSecrets.DevicePrefix);
         db.Set<GuestDevice>().Add(new GuestDevice { Id = Guid.CreateVersion7(now), UserId = user.Id, SecretHash = AuthSecrets.Hash(secret), CreatedAt = now });
         var tokens = await StartSessionAsync(user, ct).ConfigureAwait(false);

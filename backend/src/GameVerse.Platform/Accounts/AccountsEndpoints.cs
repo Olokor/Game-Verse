@@ -78,6 +78,14 @@ public static class AccountsEndpoints
             .WithSummary("Set a new password with the mailed code; signs out every session")
             .Produces(StatusCodes.Status204NoContent);
 
+        app.MapPost("/accounts/me/delete", DeleteMeAsync)
+            .RequireAuthorization()
+            .RequireRateLimiting(RateLimits.SignIn)
+            .WithTags("Accounts")
+            .WithSummary("Delete the signed-in account (email accounts confirm with their password); signs out everywhere")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status401Unauthorized);
+
         app.MapGet("/accounts/me", MeAsync)
             .RequireAuthorization()
             .WithTags("Accounts")
@@ -201,6 +209,19 @@ public static class AccountsEndpoints
         CodeCheck.TooManyAttempts => Results.ValidationProblem(new Dictionary<string, string[]> { [field] = ["Too many wrong attempts. Ask for a new code."] }),
         _ => Results.ValidationProblem(new Dictionary<string, string[]> { [field] = ["The code is not valid."] }),
     };
+
+    private static async Task<IResult> DeleteMeAsync(DeleteAccountRequest request, HttpContext http, AccountDeletion deletion)
+    {
+        var deleted = AccountClaims.UserId(http.User) is { } userId
+            && await deletion.DeleteAsync(userId, request.Password, http.RequestAborted).ConfigureAwait(false);
+        if (!deleted)
+        {
+            return Results.Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Not deleted", detail: "Confirm with your current password.");
+        }
+
+        TokenDelivery.ClearCookie(http);
+        return Results.NoContent();
+    }
 
     private static async Task<IResult> MeAsync(HttpContext http, IAccountDirectory directory)
     {

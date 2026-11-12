@@ -2,7 +2,7 @@
 
 Users, device-bound guest accounts, sessions (JWT access tokens + rotating refresh tokens), and the age rule. Decisions: [ADR-0006](../../../../docs/architecture/adr-0006-accounts-and-auth.md).
 
-Status: increments 1 and 2 of Prompt 1.1 (guests, sessions, email accounts). Profiles and account deletion follow.
+Status: Prompt 1.1 complete (guests, sessions, email accounts, deletion).
 
 | Endpoint | What it does |
 |---|---|
@@ -15,6 +15,7 @@ Status: increments 1 and 2 of Prompt 1.1 (guests, sessions, email accounts). Pro
 | `POST /auth/login` | Email + password (5 failures lock for 15 minutes) |
 | `POST /auth/password/forgot` / `reset` | Mail a reset code (always 202) / set a new password, revoke every session |
 | `GET /accounts/me` | The signed-in account (`isMinor`: guests always) |
+| `POST /accounts/me/delete` | Delete and anonymise the account (email accounts confirm with their password) |
 
 Public surface for other modules: `IAccountDirectory` (`IsMinorAsync`, `GetSummaryAsync`). `AccountUser` is public only for the shared Identity DbContext; an architecture test stops other modules using it.
 
