@@ -571,7 +571,7 @@
         "tags": [
           "Sessions"
         ],
-        "summary": "Start an offline session (pass and play, vs AI, solo); returns its manifest",
+        "summary": "Start a single-owner session (pass and play, vs AI, solo); returns its manifest",
         "requestBody": {
           "content": {
             "application/json": {
@@ -874,7 +874,7 @@
             "description": "Gets or sets house-rule toggles as strings (e.g. \"sixToLeaveBase\": \"true\"). Each game's engine parses and\r\nvalidates its own; Ludo's keys are in `GameVerse.Contracts.Ludo.LudoHouseRules`."
           }
         },
-        "description": "Starts an offline session (local pass-and-play, vs AI, solo) for the signed-in player, who takes seat 0. Online\r\nsessions are created by private rooms and matchmaking instead (Prompts 1.4, 1.5)."
+        "description": "Starts a single-owner session (local pass-and-play, vs AI, solo) for the signed-in player, who takes seat 0. Online\r\nsessions are created by private rooms and matchmaking instead (Prompts 1.4, 1.5)."
       },
       "DeleteAccountRequest": {
         "type": "object",

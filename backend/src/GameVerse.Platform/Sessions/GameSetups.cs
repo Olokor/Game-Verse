@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using GameVerse.Contracts.Catalog;
 using GameVerse.Contracts.Ludo;
 using GameVerse.Rules.Engine;
 using GameVerse.Rules.Ludo;
@@ -21,8 +22,15 @@ internal static class GameSetups
         LudoHouseRules.SafeSquares, LudoHouseRules.QuickMode, LudoHouseRules.Teams,
     ];
 
-    /// <summary>Whether the server rolls dice or shuffles for this game, so the session needs a committed seed.</summary>
-    public static bool UsesServerRandomness(string gameId) => gameId == "ludo";
+    /// <summary>
+    /// Whether the server rolls dice or shuffles for this session, so it needs a committed seed (ADR-0008). Pass-and-play
+    /// (<c>local</c>) runs entirely on the device, which seeds its own dice; every other mode, vs AI included, is played
+    /// through the server's match host.
+    /// </summary>
+    public static bool UsesServerRandomness(string gameId, string modeKind) => gameId == "ludo" && modeKind != ModeKinds.Local;
+
+    /// <summary>Whether the manifest carries an initial state for this game.</summary>
+    public static bool HasInitialState(string gameId) => gameId == "ludo";
 
     /// <summary>Why the house rules are invalid for this game and player count, or null when they are fine.</summary>
     public static string? HouseRulesError(string gameId, IReadOnlyDictionary<string, string> rules, int playerCount)

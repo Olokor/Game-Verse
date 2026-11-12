@@ -70,7 +70,8 @@ Every game shares one registry (the catalog), one way to describe a play session
 - `cosmetics` is empty until Economy (2.2), `initialState` until the engine (1.3), and `realtime` until private rooms (1.4).
 
 ### Creating sessions
-- `POST /sessions` creates **offline sessions only** (`local`, `vs_ai`, `solo`) for an enabled game and an allowed player count. The caller takes seat 0.
+- `POST /sessions` creates **single-owner sessions only** (`local`, `vs_ai`, `solo`) for an enabled game and an allowed player count. The caller takes seat 0.
+- Ludo vs AI is played through the server's match host, not offline (ADR-0008); only `local` pass-and-play runs entirely on the device.
 - Online sessions are created through `ISessionService` by private rooms and matchmaking.
 
 ## Decisions: clients
