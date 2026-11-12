@@ -1,0 +1,9 @@
+<!--
+  Keep the shared libraries intact under IL2CPP managed code stripping.
+  Rules and Contracts are used via generics and serializers, which stripping cannot always see.
+  The DLLs next to this file are build output from `make rules`; never edit them in Unity.
+-->
+<linker>
+  <assembly fullname="GameVerse.Rules" preserve="all" />
+  <assembly fullname="GameVerse.Contracts" preserve="all" />
+</linker>

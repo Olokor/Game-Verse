@@ -1,0 +1,17 @@
+{
+  "game": "_selftest",
+  "name": "Illegal actions are rejected and leave the state unchanged",
+  "config": { "pile": 4, "maxTake": 3 },
+  "seats": [
+    { "seat": 0, "playerId": "p0" },
+    { "seat": 1, "playerId": "p1" }
+  ],
+  "seed": 1,
+  "steps": [
+    { "seat": 1, "action": { "take": 1 }, "expect": { "ok": false, "error": "not_your_turn", "legalActions": [], "state": { "pile": 4, "toMove": 0 } } },
+    { "seat": 0, "action": { "take": 4 }, "expect": { "ok": false, "error": "illegal_take", "state": { "pile": 4 } } },
+    { "seat": 0, "action": { "take": 0 }, "expect": { "ok": false, "error": "illegal_take" } },
+    { "seat": 0, "action": { "take": 2 }, "expect": { "state": { "pile": 2, "toMove": 1 } } }
+  ],
+  "outcome": { "kind": "none" }
+}

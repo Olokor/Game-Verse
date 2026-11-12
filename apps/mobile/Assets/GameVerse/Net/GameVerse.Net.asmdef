@@ -1,0 +1,22 @@
+{
+    "rootNamespace": "GameVerse.Net",
+    "references": [
+        "GameVerse.Core",
+        "UniTask",
+        "endel.nativewebsocket"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "GameVerse.Rules.dll",
+        "GameVerse.Contracts.dll",
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false,
+    "name": "GameVerse.Net"
+}

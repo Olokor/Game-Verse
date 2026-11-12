@@ -1,0 +1,49 @@
+{
+  "config": {
+    "variant": null,
+    "houseRules": {
+      "sixToLeaveBase": true,
+      "stackLimit": 2
+    },
+    "aiLevel": 3
+  },
+  "initialState": {
+    "board": [
+      0,
+      0,
+      5,
+      12
+    ],
+    "turn": 1,
+    "seed": 18446744073709551615,
+    "lastMove": null
+  },
+  "gameId": "ludo",
+  "gameVersion": "1.0.0",
+  "sessionId": "8d0f6c3e-2b7a-4c55-9a51-0e7f5d1b2c3a",
+  "mode": "online_private",
+  "localPlayerId": "p-0",
+  "players": [
+    {
+      "id": "p-0",
+      "displayName": "Wisdom",
+      "seat": 0,
+      "cosmetics": {
+        "diceSkin": "dice_neon",
+        "Frame": "gold_frame"
+      },
+      "isAI": false
+    },
+    {
+      "id": "ai-1",
+      "displayName": "Bot Ada",
+      "seat": 1,
+      "cosmetics": {},
+      "isAI": true
+    }
+  ],
+  "realtime": {
+    "wsUrl": "wss://api.gameverse.app/ws/play/8d0f6c3e",
+    "ticket": "tkt_abc123"
+  }
+}

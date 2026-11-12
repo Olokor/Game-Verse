@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- netstandard2.1, C# 9 and zero dependencies are set and enforced in shared/Directory.Build.* -->
+  <PropertyGroup>
+    <RootNamespace>GameVerse.Rules</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="GameVerse.Rules.Tests" />
+  </ItemGroup>
+</Project>

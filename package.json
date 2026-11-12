@@ -1,0 +1,15 @@
+{
+  "name": "gameverse",
+  "private": true,
+  "description": "GameVerse pnpm workspace: apps/web, apps/admin and packages/*. The .NET and Unity code is not part of it.",
+  "packageManager": "pnpm@12.18.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "tokens": "node packages/design-tokens/build.mjs",
+    "tokens:check": "node packages/design-tokens/build.mjs --check",
+    "web": "pnpm --filter @gameverse/web dev",
+    "test": "pnpm -r --if-present test"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "game": "_selftest",
+  "name": "Normal game, seat 0 takes the last item",
+  "description": "Proves the fixture runner: legal actions before a move, partial state after it, and the final outcome.",
+  "config": { "pile": 5, "maxTake": 3 },
+  "seats": [
+    { "seat": 0, "playerId": "p0" },
+    { "seat": 1, "playerId": "p1" }
+  ],
+  "seed": 1,
+  "steps": [
+    {
+      "seat": 0,
+      "action": { "take": 1 },
+      "expect": {
+        "legalActions": [{ "take": 1 }, { "take": 2 }, { "take": 3 }],
+        "state": { "pile": 4, "toMove": 1 }
+      }
+    },
+    { "seat": 1, "action": { "take": 3 }, "expect": { "state": { "pile": 1, "toMove": 0, "winner": null } } },
+    {
+      "seat": 0,
+      "action": { "take": 1 },
+      "expect": { "legalActions": [{ "take": 1 }], "state": { "pile": 0, "winner": 0 } }
+    }
+  ],
+  "outcome": { "kind": "win", "winningSeats": [0], "reason": "took_last" }
+}

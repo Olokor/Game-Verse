@@ -1,0 +1,142 @@
+# Local development stack. Start with `make up`, stop with `make down`.
+# Values come from .env (copy .env.example). Web and admin services are added in Prompts 0.5 and 2.4.
+
+name: gameverse
+
+x-api-common: &api-common
+  build:
+    context: .
+    dockerfile: infrastructure/docker/api.Dockerfile
+  image: gameverse-api:dev
+  restart: unless-stopped
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+    migrate:
+      condition: service_completed_successfully
+
+x-api-env: &api-env
+  ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+  GameVerse__ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=${POSTGRES_DB:-gameverse};Username=${POSTGRES_USER:-gameverse};Password=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+  GameVerse__ConnectionStrings__Redis: redis:6379
+  GameVerse__Log__Pretty: ${GAMEVERSE_LOG_PRETTY:-false}
+  # Error reporting (ADR-0005): empty = off. Inside this network GlitchTip is http://glitchtip:8000.
+  GameVerse__ErrorReporting__Dsn: ${GAMEVERSE_ERROR_DSN_API:-}
+  GameVerse__ErrorReporting__Environment: ${GAMEVERSE_ERROR_ENVIRONMENT:-development}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gameverse}
+      POSTGRES_USER: ${POSTGRES_USER:-gameverse}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # One-shot: applies EF Core migrations, then exits. api and worker wait for it.
+  migrate:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/api.Dockerfile
+    image: gameverse-api:dev
+    command: ["migrate"]
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *api-env
+      GameVerse__Role: api
+
+  api:
+    <<: *api-common
+    environment:
+      <<: *api-env
+      GameVerse__Role: api
+      # Dashboard is localhost-only in Development; from the host, Docker NAT makes requests non-local,
+      # so it stays denied here. Use `dotnet run` on the host to open /hangfire.
+      GameVerse__Hangfire__Dashboard: "true"
+    ports:
+      - "127.0.0.1:${API_PORT:-8080}:8080"
+
+  worker:
+    <<: *api-common
+    environment:
+      <<: *api-env
+      GameVerse__Role: worker
+
+  # --- Error reporting (ADR-0005): self-hosted GlitchTip, Sentry-compatible. Optional: `make errors-up`. ---
+  glitchtip-postgres:
+    image: postgres:18-alpine
+    profiles: [errors]
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: glitchtip
+      POSTGRES_USER: glitchtip
+      POSTGRES_PASSWORD: ${GLITCHTIP_DB_PASSWORD:-glitchtip_dev}
+    volumes:
+      - glitchtip-postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U glitchtip -d glitchtip"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  glitchtip:
+    # 6.2.6: last 6.x release (Aug 2026). 7.0.0 shipped 2026-11-09; move up once it has settled.
+    image: glitchtip/glitchtip:6.2.6
+    profiles: [errors]
+    restart: unless-stopped
+    depends_on:
+      glitchtip-postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://glitchtip:${GLITCHTIP_DB_PASSWORD:-glitchtip_dev}@glitchtip-postgres:5432/glitchtip
+      SECRET_KEY: ${GLITCHTIP_SECRET_KEY:?set GLITCHTIP_SECRET_KEY in .env}
+      # 127.0.0.1, not localhost: on Windows localhost resolves to ::1, which the port mapping does not cover.
+      GLITCHTIP_DOMAIN: http://127.0.0.1:${GLITCHTIP_PORT:-8000}
+      DEFAULT_FROM_EMAIL: glitchtip@localhost
+      EMAIL_URL: consolemail://
+      # Postgres-only mode (no Valkey) and web + worker in one process: enough for development.
+      VALKEY_URL: ""
+      SERVER_ROLE: all_in_one
+      ENABLE_USER_REGISTRATION: "false"
+      ENABLE_ORGANIZATION_CREATION: "false"
+      PORT: "8000"
+    ports:
+      - "127.0.0.1:${GLITCHTIP_PORT:-8000}:8000"
+    volumes:
+      - glitchtip-uploads:/code/uploads
+
+volumes:
+  postgres-data:
+  redis-data:
+  glitchtip-postgres-data:
+  glitchtip-uploads:

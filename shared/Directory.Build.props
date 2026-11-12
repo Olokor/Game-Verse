@@ -1,0 +1,16 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <!--
+    Shared libraries (GameVerse.Rules, GameVerse.Contracts) are loaded by Unity 6,
+    so they must stay netstandard2.1 + C# 9. See CLAUDE.md section 3 "Shared libraries".
+  -->
+  <PropertyGroup Condition="!$(MSBuildProjectName.EndsWith('.Tests'))">
+    <IsSharedLibrary>true</IsSharedLibrary>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <UnityPluginDir>$(RepoRoot)apps/mobile/Assets/GameVerse/Plugins/Shared/</UnityPluginDir>
+    <UnityFixtureDir>$(RepoRoot)apps/mobile/Assets/GameVerse/Resources/Fixtures/</UnityFixtureDir>
+  </PropertyGroup>
+</Project>
