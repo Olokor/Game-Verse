@@ -1,0 +1,18 @@
+{
+  "game": "ludo",
+  "name": "Reaching home needs an exact roll; an overshooting token cannot move",
+  "description": "Token 0 is at 52 (home is 56). A 5 would overshoot, so only token 1 may move.",
+  "config": {"dice": [5]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[52, 10, -1, -1], [-1, -1, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"phase": "move"}}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"ok": false, "error": "illegal_move", "legalActions": [{"move": 1}]}},
+    {"seat": 0, "action": {"move": 1}, "expect": {"state": {"tokens": [[52, 15, -1, -1], [-1, -1, -1, -1]], "currentSeat": 1}}}
+  ],
+  "outcome": {"kind": "none"}
+}

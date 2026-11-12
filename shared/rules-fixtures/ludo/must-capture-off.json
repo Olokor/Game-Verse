@@ -1,0 +1,17 @@
+{
+  "game": "ludo",
+  "name": "Must-capture off (default): the player may decline a capture",
+  "description": "Same position as must-capture-on; token 1 may move instead and the turn passes.",
+  "config": {"dice": [3]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[33, 10, -1, -1], [10, -1, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 1}, "expect": {"legalActions": [{"move": 0}, {"move": 1}], "state": {"tokens": [[33, 13, -1, -1], [10, -1, -1, -1]], "currentSeat": 1}}}
+  ],
+  "outcome": {"kind": "none"}
+}

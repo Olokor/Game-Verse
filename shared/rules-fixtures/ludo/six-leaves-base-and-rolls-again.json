@@ -1,0 +1,18 @@
+{
+  "game": "ludo",
+  "name": "A six brings a token out of base and gives another roll",
+  "description": "Any of the four tokens may come out on a six. It lands on the start square (position 0). A 4 then moves it on and the turn passes.",
+  "config": {"dice": [6, 4]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"phase": "move", "lastRoll": 6, "sixesInRow": 1}}},
+    {"seat": 0, "action": {"move": 2}, "expect": {"legalActions": [{"move": 0}, {"move": 1}, {"move": 2}, {"move": 3}], "state": {"tokens": [[-1, -1, 0, -1], [-1, -1, -1, -1]], "currentSeat": 0, "phase": "roll", "sixesInRow": 1}}},
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"phase": "move", "lastRoll": 4, "sixesInRow": 0}}},
+    {"seat": 0, "action": {"move": 2}, "expect": {"legalActions": [{"move": 2}], "state": {"tokens": [[-1, -1, 4, -1], [-1, -1, -1, -1]], "currentSeat": 1, "phase": "roll"}}}
+  ],
+  "outcome": {"kind": "none"}
+}

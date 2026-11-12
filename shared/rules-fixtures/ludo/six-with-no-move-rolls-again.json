@@ -1,0 +1,17 @@
+{
+  "game": "ludo",
+  "name": "A six with no legal move still gives another roll",
+  "description": "Only one token is left, in the home column at 53: a 6 overshoots, so there is no move, but the six still rolls again. A 5 also overshoots and the turn passes.",
+  "config": {"dice": [6, 5]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[56, 56, 56, 53], [-1, -1, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"currentSeat": 0, "phase": "roll", "lastRoll": 6, "sixesInRow": 1}}},
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"currentSeat": 1, "phase": "roll", "lastRoll": 5, "sixesInRow": 0}}}
+  ],
+  "outcome": {"kind": "none"}
+}

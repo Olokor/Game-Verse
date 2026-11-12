@@ -1,0 +1,21 @@
+{
+  "game": "ludo",
+  "name": "Out-of-turn and out-of-phase actions are rejected and change nothing",
+  "description": "Error codes: not_your_turn, roll_first, must_move, illegal_move.",
+  "config": {"dice": [6]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "steps": [
+    {"seat": 1, "action": {"roll": true}, "expect": {"ok": false, "error": "not_your_turn", "legalActions": [], "state": {"currentSeat": 0, "phase": "roll"}}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"ok": false, "error": "roll_first", "legalActions": [{"roll": true}]}},
+    {"seat": 0, "action": {"roll": true}, "expect": {"state": {"phase": "move", "lastRoll": 6}}},
+    {"seat": 0, "action": {"roll": true}, "expect": {"ok": false, "error": "must_move", "state": {"phase": "move", "lastRoll": 6}}},
+    {"seat": 0, "action": {"move": 7}, "expect": {"ok": false, "error": "illegal_move"}},
+    {"seat": 1, "action": {"move": 0}, "expect": {"ok": false, "error": "not_your_turn"}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"state": {"tokens": [[0, -1, -1, -1], [-1, -1, -1, -1]]}}}
+  ],
+  "outcome": {"kind": "none"}
+}

@@ -1,0 +1,18 @@
+{
+  "game": "ludo",
+  "name": "Must-capture on: when a capture is possible, only capturing moves are legal",
+  "description": "With a 3, token 0 (33 -> 36) captures seat 1; token 1 (10 -> 13) does not, so it is not allowed.",
+  "config": {"mustCapture": true, "dice": [3]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[33, 10, -1, -1], [10, -1, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 1}, "expect": {"ok": false, "error": "illegal_move", "legalActions": [{"move": 0}]}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"state": {"tokens": [[36, 10, -1, -1], [-1, -1, -1, -1]]}}}
+  ],
+  "outcome": {"kind": "none"}
+}

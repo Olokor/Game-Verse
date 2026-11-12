@@ -1,0 +1,17 @@
+{
+  "game": "ludo",
+  "name": "Your own tokens can share a square and are never captured",
+  "description": "Token 1 lands on token 0's square; both stay.",
+  "config": {"dice": [4]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[14, 10, -1, -1], [-1, -1, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 1}, "expect": {"state": {"tokens": [[14, 14, -1, -1], [-1, -1, -1, -1]], "currentSeat": 1}}}
+  ],
+  "outcome": {"kind": "none"}
+}

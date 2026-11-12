@@ -1,0 +1,22 @@
+{
+  "game": "ludo",
+  "name": "Placings 2: the game continues after the first player finishes, and finished players are skipped",
+  "description": "Seat 0 finishes first and drops out (no bonus roll, its turn is skipped). Seat 1 finishes second and the game ends.",
+  "config": {"placings": 2, "dice": [1, 5, 1, 2]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"},
+    {"seat": 2, "playerId": "p2"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[56, 56, 56, 55], [56, 56, 56, 54], [-1, -1, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 3}, "expect": {"state": {"finished": [0], "currentSeat": 1, "phase": "roll"}}},
+    {"seat": 1, "action": {"roll": true}, "expect": {"state": {"currentSeat": 2}}},
+    {"seat": 2, "action": {"roll": true}, "expect": {"state": {"currentSeat": 1}}},
+    {"seat": 1, "action": {"roll": true}, "expect": {}},
+    {"seat": 1, "action": {"move": 3}, "expect": {"state": {"finished": [0, 1], "phase": "over"}}}
+  ],
+  "outcome": {"kind": "win", "winningSeats": [0], "placements": [0, 1, 2], "reason": "all_tokens_home"}
+}

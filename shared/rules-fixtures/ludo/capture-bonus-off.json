@@ -1,0 +1,17 @@
+{
+  "game": "ludo",
+  "name": "Capture-bonus off: a capture does not give another roll",
+  "description": "Same capture as capture-sends-to-base, but the turn passes.",
+  "config": {"captureBonus": false, "dice": [3]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[33, -1, -1, -1], [10, 20, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"state": {"tokens": [[36, -1, -1, -1], [-1, 20, -1, -1]], "currentSeat": 1}}}
+  ],
+  "outcome": {"kind": "none"}
+}

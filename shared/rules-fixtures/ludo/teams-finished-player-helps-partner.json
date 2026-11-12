@@ -1,0 +1,25 @@
+{
+  "game": "ludo",
+  "name": "Teams: a finished player keeps playing and moves the partner's tokens",
+  "description": "Seat 0 brings its last token home (bonus roll), then its 4 moves seat 2's token 0 (10 -> 14). Seat 0 keeps its turns afterwards.",
+  "config": {"teams": true, "dice": [1, 4, 1, 1, 1]},
+  "seats": [
+    {"seat": 0, "playerId": "p0"},
+    {"seat": 1, "playerId": "p1"},
+    {"seat": 2, "playerId": "p2"},
+    {"seat": 3, "playerId": "p3"}
+  ],
+  "seed": 1,
+  "initialState": {"tokens": [[56, 56, 56, 55], [-1, -1, -1, -1], [10, -1, -1, -1], [-1, -1, -1, -1]], "currentSeat": 0},
+  "steps": [
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 3}, "expect": {"state": {"finished": [0], "currentSeat": 0, "phase": "roll"}}},
+    {"seat": 0, "action": {"roll": true}, "expect": {}},
+    {"seat": 0, "action": {"move": 0}, "expect": {"legalActions": [{"move": 0}], "state": {"tokens": [[56, 56, 56, 56], [-1, -1, -1, -1], [14, -1, -1, -1], [-1, -1, -1, -1]], "currentSeat": 1}}},
+    {"seat": 1, "action": {"roll": true}, "expect": {}},
+    {"seat": 2, "action": {"roll": true}, "expect": {}},
+    {"seat": 2, "action": {"move": 0}, "expect": {"state": {"tokens": [[56, 56, 56, 56], [-1, -1, -1, -1], [15, -1, -1, -1], [-1, -1, -1, -1]]}}},
+    {"seat": 3, "action": {"roll": true}, "expect": {"state": {"currentSeat": 0}}}
+  ],
+  "outcome": {"kind": "none"}
+}
