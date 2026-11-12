@@ -23,6 +23,8 @@ public static class AccountsModule
         services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton<AccessTokenIssuer>();
         services.AddScoped<AuthService>();
+        services.AddScoped<EmailCodes>();
+        services.AddScoped<EmailAccountService>();
         services.AddScoped<IAccountDirectory, AccountDirectory>();
         services.AddValidatorsFromAssemblyContaining<AccountsOptions>(includeInternalTypes: true);
 

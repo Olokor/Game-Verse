@@ -2,6 +2,7 @@ using System.Globalization;
 using GameVerse.Api.Endpoints;
 using GameVerse.Api.Hosting;
 using GameVerse.Infrastructure;
+using GameVerse.Infrastructure.Email;
 using GameVerse.Platform.Accounts;
 using Hangfire;
 using Scalar.AspNetCore;
@@ -65,6 +66,7 @@ builder.Services.AddGameVerseInfrastructure(options.ConnectionStrings, runJobSer
 var accountsOptions = builder.Configuration.GetSection(AccountsOptions.Section).Get<AccountsOptions>() ?? new AccountsOptions();
 var signingKey = AccountsSigningKey.Create(accountsOptions.SigningKey, allowEphemeral: builder.Environment.IsDevelopment() || BuildTimeOpenApi.IsRunning);
 builder.Services.AddAccountsModule(accountsOptions, signingKey).AddGameVerseIdentityStores();
+builder.Services.AddGameVerseEmail(builder.Configuration.GetSection(EmailOptions.Section).Get<EmailOptions>() ?? new EmailOptions());
 builder.Services.AddRateLimiter(limiter =>
 {
     limiter.RejectionStatusCode = StatusCodes.Status429TooManyRequests;

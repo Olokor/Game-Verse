@@ -2,7 +2,7 @@
 
 Users, device-bound guest accounts, sessions (JWT access tokens + rotating refresh tokens), and the age rule. Decisions: [ADR-0006](../../../../docs/architecture/adr-0006-accounts-and-auth.md).
 
-Status: increment 1 of Prompt 1.1 (guests, sessions, `GET /accounts/me`). Email upgrade, verification, password reset and deletion follow.
+Status: increments 1 and 2 of Prompt 1.1 (guests, sessions, email accounts). Profiles and account deletion follow.
 
 | Endpoint | What it does |
 |---|---|
@@ -10,6 +10,10 @@ Status: increment 1 of Prompt 1.1 (guests, sessions, `GET /accounts/me`). Email 
 | `POST /auth/guest/login` | Guest signs back in with `guestId` + `deviceSecret` |
 | `POST /auth/refresh` | Rotate the refresh token (body, or cookie for web) |
 | `POST /auth/logout` | End the session (idempotent) |
+| `POST /auth/upgrade` | Signed-in guest becomes an email account (same id); mails a 6-digit code |
+| `POST /auth/email/verify` / `resend` | Confirm the email with the code / mail a new one |
+| `POST /auth/login` | Email + password (5 failures lock for 15 minutes) |
+| `POST /auth/password/forgot` / `reset` | Mail a reset code (always 202) / set a new password, revoke every session |
 | `GET /accounts/me` | The signed-in account (`isMinor`: guests always) |
 
 Public surface for other modules: `IAccountDirectory` (`IsMinorAsync`, `GetSummaryAsync`). `AccountUser` is public only for the shared Identity DbContext; an architecture test stops other modules using it.

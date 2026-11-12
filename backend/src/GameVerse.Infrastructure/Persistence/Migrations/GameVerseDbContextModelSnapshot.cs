@@ -110,13 +110,65 @@ namespace GameVerse.Infrastructure.Persistence.Migrations
                         .HasName("pk_users");
 
                     b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
+                        .IsUnique()
+                        .HasDatabaseName("EmailIndex")
+                        .HasFilter("normalized_email IS NOT NULL");
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("users", "accounts");
+                });
+
+            modelBuilder.Entity("GameVerse.Platform.Accounts.EmailCode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempts");
+
+                    b.Property<byte[]>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("bytea")
+                        .HasColumnName("code_hash");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("purpose");
+
+                    b.Property<byte[]>("Salt")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("bytea")
+                        .HasColumnName("salt");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_email_codes");
+
+                    b.HasIndex("UserId", "Purpose")
+                        .HasDatabaseName("ix_email_codes_user_id_purpose");
+
+                    b.ToTable("email_codes", "accounts");
                 });
 
             modelBuilder.Entity("GameVerse.Platform.Accounts.GuestDevice", b =>
@@ -371,6 +423,16 @@ namespace GameVerse.Infrastructure.Persistence.Migrations
                         .HasName("pk_user_tokens");
 
                     b.ToTable("user_tokens", "accounts");
+                });
+
+            modelBuilder.Entity("GameVerse.Platform.Accounts.EmailCode", b =>
+                {
+                    b.HasOne("GameVerse.Platform.Accounts.AccountUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_email_codes_users_user_id");
                 });
 
             modelBuilder.Entity("GameVerse.Platform.Accounts.GuestDevice", b =>

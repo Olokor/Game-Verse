@@ -45,10 +45,40 @@ internal sealed class RefreshToken
     public string? RevokedReason { get; set; }
 }
 
+/// <summary>
+/// A one-time 6-digit code sent by email (verify the address, reset the password). Stored as a salted SHA-256 hash;
+/// valid 15 minutes and for at most 5 attempts, so the small code space cannot be guessed online.
+/// </summary>
+internal sealed class EmailCode
+{
+    public Guid Id { get; set; }
+
+    public Guid UserId { get; set; }
+
+    /// <summary>verify_email or reset_password.</summary>
+    public string Purpose { get; set; } = string.Empty;
+
+    public byte[] Salt { get; set; } = [];
+
+    public byte[] CodeHash { get; set; } = [];
+
+    public DateTimeOffset CreatedAt { get; set; }
+
+    public DateTimeOffset ExpiresAt { get; set; }
+
+    public int Attempts { get; set; }
+}
+
 // EF Core mappings (picked up by GameVerseDbContext's assembly scan). Identity's tables move into the "accounts" schema.
 internal sealed class AccountUserConfiguration : IEntityTypeConfiguration<AccountUser>
 {
-    public void Configure(EntityTypeBuilder<AccountUser> builder) => builder.ToTable("users", AccountsSchema.Name);
+    public void Configure(EntityTypeBuilder<AccountUser> builder)
+    {
+        builder.ToTable("users", AccountsSchema.Name);
+        // Identity's email index is not unique (guests have no email). Make it unique where an email exists, so two
+        // upgrades racing for one address cannot both win.
+        builder.HasIndex(u => u.NormalizedEmail).IsUnique().HasFilter("normalized_email IS NOT NULL");
+    }
 }
 
 internal sealed class RoleConfiguration : IEntityTypeConfiguration<IdentityRole<Guid>>
@@ -105,6 +135,20 @@ internal sealed class RefreshTokenConfiguration : IEntityTypeConfiguration<Refre
         builder.HasIndex(t => t.UserId);
         builder.Property(t => t.RevokedReason).HasMaxLength(32);
         builder.HasOne<AccountUser>().WithMany().HasForeignKey(t => t.UserId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+internal sealed class EmailCodeConfiguration : IEntityTypeConfiguration<EmailCode>
+{
+    public void Configure(EntityTypeBuilder<EmailCode> builder)
+    {
+        builder.ToTable("email_codes", AccountsSchema.Name);
+        builder.HasKey(c => c.Id);
+        builder.Property(c => c.Purpose).HasMaxLength(32).IsRequired();
+        builder.Property(c => c.Salt).HasMaxLength(16).IsRequired();
+        builder.Property(c => c.CodeHash).HasMaxLength(32).IsRequired();
+        builder.HasIndex(c => new { c.UserId, c.Purpose });
+        builder.HasOne<AccountUser>().WithMany().HasForeignKey(c => c.UserId).OnDelete(DeleteBehavior.Cascade);
     }
 }
 
