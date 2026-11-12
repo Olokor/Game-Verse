@@ -4,7 +4,6 @@
         "GameVerse.Core",
         "GameVerse.UI",
         "GameVerse.Platform",
-        "GameVerse.Spike",
         "Unity.RenderPipelines.Universal.Runtime",
         "Unity.RenderPipelines.Universal.2D.Runtime",
         "Unity.RenderPipelines.Core.Runtime",

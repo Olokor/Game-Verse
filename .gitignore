@@ -35,7 +35,7 @@ playwright-report/
 test-results/
 *.tsbuildinfo
 .pnpm-store/
-# Unity Web builds copied into the web app (build output; `make web-spike` for the Prompt 0.7 spike)
+# Unity Web builds copied into the web app (build output; one folder per game, ADR-0002)
 apps/web/public/unity/
 
 # --- Logs and OS / editor files ---
