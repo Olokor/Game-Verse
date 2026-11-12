@@ -56,7 +56,7 @@ export const mockHomeFeed: HomeFeed = {
 
 /** Mock local player for the shell header. TODO(gameverse): replace with the profile endpoint (Prompt 1.1/2.1). */
 export const mockPlayer = {
-  displayName: 'Moses',
+  displayName: 'Wisdom',
   rank: 'gold' as const,
   level: 12,
   xp: 1240,

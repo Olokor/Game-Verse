@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-09
-- **Deciders:** Moses (owner), Claude Code (tech lead)
+- **Deciders:** Wisdom (owner), Claude Code (tech lead)
 - **Supersedes:** the Clash Display + Satoshi choice in `docs/design/DESIGN_SYSTEM.md` section 3
 - **Note:** ADR-0002 stays reserved for the web-delivery decision (Prompt 0.7).
 

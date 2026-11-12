@@ -164,7 +164,7 @@ function PlayerChipsDemo() {
             />
           );
         })}
-        <PlayerChip displayName="Moses" rank="gold" hideStatus />
+        <PlayerChip displayName="Wisdom" rank="gold" hideStatus />
         <PlayerChipSkeleton />
       </div>
     </Demo>
