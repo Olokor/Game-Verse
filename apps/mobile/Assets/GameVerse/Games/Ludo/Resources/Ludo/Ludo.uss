@@ -1,0 +1,68 @@
+/* Ludo table layout. Colours of the board itself come from tokens in code (LudoPalette); everything here uses var(--gv-*). */
+
+.ludo {
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.ludo__table {
+    padding: var(--gv-space-8);
+}
+
+.ludo__board {
+    width: 100%;
+    border-radius: var(--gv-radius-lg);
+    overflow: hidden;
+}
+
+.ludo__pieces {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.ludo__bar {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--gv-space-12) var(--gv-space-16);
+}
+
+/* 56px die: well above the 44px touch minimum. */
+.ludo__dice {
+    width: var(--gv-space-56);
+    height: var(--gv-space-56);
+    flex-shrink: 0;
+}
+
+.ludo__prompt {
+    -unity-font-definition: url("/Assets/GameVerse/UI/Fonts/BricolageGrotesque-SemiBold.ttf");
+    font-size: var(--gv-font-size-title-sm);
+    color: var(--gv-color-text-primary);
+    margin-left: var(--gv-space-16);
+    flex-shrink: 1;
+    white-space: normal;
+}
+
+.ludo__curtain {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--gv-color-bg-base);
+    align-items: center;
+    justify-content: center;
+}
+
+.ludo__curtain-label {
+    -unity-font-definition: url("/Assets/GameVerse/UI/Fonts/BricolageGrotesque-Bold.ttf");
+    font-size: var(--gv-font-size-display);
+}
+
+.ludo__curtain-hint {
+    font-size: var(--gv-font-size-body);
+    color: var(--gv-color-text-secondary);
+    margin-top: var(--gv-space-12);
+}

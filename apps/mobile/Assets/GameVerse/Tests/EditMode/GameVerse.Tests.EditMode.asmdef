@@ -7,7 +7,8 @@
         "GameVerse.Platform",
         "UniTask",
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "GameVerse.Games.Ludo"
     ],
     "includePlatforms": [
         "Editor"

@@ -128,6 +128,24 @@ namespace GameVerse.UI
                 public static readonly Color32 Brain = new Color32(255, 194, 61, 255); // token: color.category.brain
             }
 
+            public static class Game
+            {
+                public static class Ludo
+                {
+                    /// <summary>Ludo seat colour 0: base, home column, tokens (each colour also has its own token shape) (#FF5468)</summary>
+                    public static readonly Color32 Red = new Color32(255, 84, 104, 255); // token: color.game.ludo.red
+
+                    /// <summary>Ludo seat colour 1 (#3DDC97)</summary>
+                    public static readonly Color32 Green = new Color32(61, 220, 151, 255); // token: color.game.ludo.green
+
+                    /// <summary>Ludo seat colour 2 (#FFC23D)</summary>
+                    public static readonly Color32 Yellow = new Color32(255, 194, 61, 255); // token: color.game.ludo.yellow
+
+                    /// <summary>Ludo seat colour 3 (#4DA3FF)</summary>
+                    public static readonly Color32 Blue = new Color32(77, 163, 255, 255); // token: color.game.ludo.blue
+                }
+            }
+
             public static class Rank
             {
                 /// <summary>Rank badge (#C98A5A)</summary>
@@ -354,6 +372,18 @@ namespace GameVerse.UI
             {
                 /// <summary>One cycle of looping ambient motion: skeleton pulse, live dot, loading dots (1400ms, in seconds for DOTween/LitMotion)</summary>
                 public const float Duration = 1.4f; // token: motion.ambient.duration
+            }
+
+            public static class Game
+            {
+                /// <summary>Ludo die tumble before it settles on the value (600ms, in seconds for DOTween/LitMotion)</summary>
+                public const float DiceRoll = 0.6f; // token: motion.game.dice-roll
+
+                /// <summary>Ludo token moving one square (with a small squash on landing) (90ms, in seconds for DOTween/LitMotion)</summary>
+                public const float TokenHop = 0.09f; // token: motion.game.token-hop
+
+                /// <summary>A captured Ludo token flying back to its base (420ms, in seconds for DOTween/LitMotion)</summary>
+                public const float Capture = 0.42f; // token: motion.game.capture
             }
         }
     }

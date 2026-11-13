@@ -49,3 +49,49 @@ Prompt 1.6 builds the first playable Unity client:
   - The game's `action_submitted` is sent as an `action`. The wire seq is the connection's, not the game's.
   - A refused action triggers a resync. The game re-enables its input on any new state, so it needs no error channel.
   - Turn clocks, presence and the result go to the platform UI, never into the game.
+
+## Decisions: the Ludo module (part B)
+
+### Presentation only
+- **`GameVerse.Games.Ludo` contains no rules.**
+  - `LudoStateMapper` rebuilds an engine `LudoState` from the seat's view (no PRNG), so `LudoEngine.LegalActions` decides which tokens light up.
+  - The server checks every action again.
+  - `LudoTransition` works out what to animate (a roll, one token's path, captures) by comparing consecutive states. A jump of more than one step (a reconnect snapshot) is shown without animation.
+- **`LudoController`** owns input:
+  - only seats played on this device can act;
+  - one action in flight at a time;
+  - any new state, even a rejection's snapshot, re-enables input.
+
+### The board is drawn in code
+- **`BoardElement` draws with UI Toolkit's `Painter2D`:**
+  - the classic 15×15 board with four yards and the 52-square track, which cuts the four inner corners diagonally as real boards do;
+  - start squares, home columns, stars (only when safe squares are on) and the centre triangles.
+- **It's original art** with no asset pack (DESIGN_SYSTEM section 8), and crisp at any resolution.
+- **Tokens:**
+  - each carries its colour **and** a shape (red circle, green square, yellow triangle, blue diamond), so colour is never the only signal;
+  - a volt ring marks the tokens that can move;
+  - tokens sharing a square fan out so each stays tappable.
+- **Colours come from new tokens** (`color.game.ludo.*`), and motion timings from `motion.game.*`:
+
+  | Motion | Timing |
+  |---|---|
+  | Dice tumble | 600ms |
+  | Hop per square, with a small arc and a squash | 90ms |
+  | Capture arc back to the yard | 420ms |
+
+### Motion: built-in, not LitMotion
+- **The plan named LitMotion.** Every animated thing is a UI Toolkit element, so a 40-line tween helper (`GameVerse.UI.Motion.Tween`) is enough.
+  - It is driven per frame, with the design system's cubic-bezier and an Android "remove animations" check (reduced motion jumps to the end).
+  - This avoids a package dependency.
+  - LitMotion can still come in for world-space games (CLAUDE.md allows it).
+
+### Sound and haptics
+- **Effects are synthesised when the game loads** (`AudioClip.Create`): dice rattle, hop tick, capture whoosh, home chime, win fanfare.
+  - Original, a few kilobytes, nothing to license.
+  - A recorded sound set can replace them without code changes outside `LudoSounds`.
+- **Haptics** use Android one-shot vibration effects (a light tap on press). They're toggled with `gv.haptics`; sound with `gv.sound`.
+
+### Pass-and-play
+- **`LocalLudoHost`** runs the engine on the device, seeded from the secure random generator. It feeds the module exactly like the server does, through `ApplyServerState` with versioned states.
+- **No account, no network, no rewards.**
+- **A full-screen "Pass to Blue" curtain** waits for a tap between human players.

@@ -2,7 +2,9 @@
     "rootNamespace": "GameVerse.Games.Ludo",
     "references": [
         "GameVerse.Core",
-        "UniTask"
+        "UniTask",
+        "GameVerse.UI",
+        "GameVerse.Net"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -10,7 +12,8 @@
     "overrideReferences": true,
     "precompiledReferences": [
         "GameVerse.Rules.dll",
-        "GameVerse.Contracts.dll"
+        "GameVerse.Contracts.dll",
+        "Newtonsoft.Json.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [],

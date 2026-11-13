@@ -25,6 +25,10 @@
   --gv-color-category-fight: #FF4D6A;
   --gv-color-category-adventure: #B07CFF;
   --gv-color-category-brain: #FFC23D;
+  --gv-color-game-ludo-red: #FF5468;
+  --gv-color-game-ludo-green: #3DDC97;
+  --gv-color-game-ludo-yellow: #FFC23D;
+  --gv-color-game-ludo-blue: #4DA3FF;
   --gv-color-rank-bronze: #C98A5A;
   --gv-color-rank-silver: #B9C2D0;
   --gv-color-rank-gold: #FFC23D;
@@ -77,6 +81,9 @@
   --gv-motion-celebrate-duration-max: 1600ms;
   --gv-motion-ambient-duration: 1400ms;
   --gv-motion-press-scale: 0.96;
+  --gv-motion-game-dice-roll: 600ms;
+  --gv-motion-game-token-hop: 90ms;
+  --gv-motion-game-capture: 420ms;
 }
 
 /* Not expressible in USS, use GameVerseTokens in Tokens.g.cs:

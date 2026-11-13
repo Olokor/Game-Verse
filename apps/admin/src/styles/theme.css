@@ -40,6 +40,10 @@
   --color-category-fight: var(--gv-color-category-fight);
   --color-category-adventure: var(--gv-color-category-adventure);
   --color-category-brain: var(--gv-color-category-brain);
+  --color-game-ludo-red: var(--gv-color-game-ludo-red);
+  --color-game-ludo-green: var(--gv-color-game-ludo-green);
+  --color-game-ludo-yellow: var(--gv-color-game-ludo-yellow);
+  --color-game-ludo-blue: var(--gv-color-game-ludo-blue);
   --color-rank-bronze: var(--gv-color-rank-bronze);
   --color-rank-silver: var(--gv-color-rank-silver);
   --color-rank-gold: var(--gv-color-rank-gold);
@@ -105,4 +109,7 @@
    motion.celebrate.duration-max  --gv-motion-celebrate-duration-max
    motion.ambient.duration  --gv-motion-ambient-duration
    motion.press-scale  --gv-motion-press-scale
+   motion.game.dice-roll  --gv-motion-game-dice-roll
+   motion.game.token-hop  --gv-motion-game-token-hop
+   motion.game.capture  --gv-motion-game-capture
 */

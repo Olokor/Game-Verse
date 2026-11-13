@@ -29,14 +29,16 @@ Assets/GameVerse/
   Core/        GameVerse.Core      IGameModule, IGameHost (CLAUDE.md 4.2), GameStateEnvelope
   Net/         GameVerse.Net       GameVerseJson (matches the server's JSON), AppConfig (API URL), Http/ApiClient,
                                    Realtime/RealtimeConnection over ISocket (NativeWebSocket)
-  UI/          GameVerse.UI        Tokens.uss + Tokens.g.cs (generated), Theme/, Components/ (GameCard, ButtonStyle), Home/, Fonts/
+  UI/          GameVerse.UI        Tokens.uss + Tokens.g.cs (generated), Theme/, Components/ (GameCard, ButtonStyle), Home/, Fonts/,
+                                   Motion/ (Tween, reduced motion, haptics)
   Platform/    GameVerse.Platform  Boot (scene entry), Diagnostics/RulesSelfCheck, Session/ (PlayerSession, SecureStore),
                                    Play/GameHost (IGameHost over the realtime connection)
-  Games/Ludo/  GameVerse.Games.Ludo  one assembly per game (empty until Prompt 1.6)
+  Games/Ludo/  GameVerse.Games.Ludo  LudoModule (IGameModule + IGameView), LocalLudoHost (pass-and-play), Logic/ (board
+                                   layout, state mapper, transitions, input controller), View/ (board, tokens, die, sounds)
   Plugins/Shared/  GameVerse.Rules.dll + GameVerse.Contracts.dll (build output of `make rules`, never edit) + link.xml
   Resources/Fixtures/  golden JSON copied by `make rules` (gitignored)
   Editor/      ProjectSetup (all settings as code), BuildScript
-  Tests/EditMode/  PRNG parity, wire format round trip, API client, player session, realtime connection (fakes, no server)
+  Tests/EditMode/  PRNG parity, wire format, API client, session, realtime connection, Ludo layout/logic/pass-and-play
   Scenes/Boot.unity, Rendering/ (URP asset: renderer 0 = 2D, renderer 1 = Forward+ for 3D games)
 ```
 
