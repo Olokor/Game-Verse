@@ -4,7 +4,8 @@
 //   GV_SELFCHECK  shared-rules PRNG vectors under IL2CPP; must say "prng ok"
 //   GV_ERRORCHECK error reporting (ADR-0005); "sent" or "disabled" (build made without UNITY_ERROR_DSN)
 // When the build reports "sent" and GLITCHTIP_API_TOKEN is in .env, the event must also be found in GlitchTip's unity
-// project. `adb reverse tcp:8000` lets the phone reach GlitchTip on this PC at 127.0.0.1:8000 (the DSN's host).
+// project. `adb reverse tcp:8000` lets the phone reach GlitchTip on this PC at 127.0.0.1:8000 (the DSN's host), and
+// `adb reverse tcp:8080` the API (`make up`).
 // Exits 0 only if every check passes. Usage: node device-check.mjs <adb> <apk>
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
@@ -32,6 +33,9 @@ console.log(`device: ${devices[0].split('\t')[0]}`);
 console.log(run('install', '-r', apk).trim());
 const glitchtipPort = envValue('GLITCHTIP_PORT') || '8000';
 run('reverse', `tcp:${glitchtipPort}`, `tcp:${glitchtipPort}`);
+// The app's development API URL is http://127.0.0.1:8080 (ADR-0011): forward it to `make up` on this PC.
+const apiPort = envValue('API_PORT') || '8080';
+run('reverse', `tcp:${apiPort}`, `tcp:${apiPort}`);
 run('logcat', '-c');
 run('shell', 'monkey', '-p', 'app.gameverse.mobile', '-c', 'android.intent.category.LAUNCHER', '1');
 

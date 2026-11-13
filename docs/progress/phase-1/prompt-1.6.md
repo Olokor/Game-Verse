@@ -16,7 +16,7 @@ The Ludo game module in Unity, on the shared engine with no rule logic in Unity,
 | A | Client plumbing: API client, guest session, Android Keystore secure store, realtime connection, `GameHost` | Done | `9eb4eb7` |
 | B | Ludo module: board, tokens, die drawn in code; transitions and animations; synthesised sounds; pass-and-play host | Done | `8e07f23` |
 | C | Platform screens: Welcome, Home, Lobby, Matchmaking, Private room, Game (HUD), Results; router; new components | Done | `b863baf` |
-| D | Android build, autoplay device acceptance against the backend, screenshots and ui-reviewer, your playtest | Not started | |
+| D | Android build, autoplay acceptance (editor done, phone pending), your playtest | **In progress** | |
 
 ## Part A: done (`9eb4eb7`)
 - **What was built:**
@@ -72,13 +72,24 @@ The Ludo game module in Unity, on the shared engine with no rule logic in Unity,
   - the catalog answered in 5.7s once on a cold API (15ms warm), so the tour waits for the cards;
   - a heredoc with quotes broke the shell twice, so longer edit scripts now go to a scratchpad file.
 
-## Part D: not started
-1. `make android`, and add `adb reverse tcp:8080` to device-check.
-2. The autoplay acceptance: `adb shell am start ... -e gv_autoplay_room CODE`, with the Node bot as the other seat. Look for `GV_ACCEPT` in logcat.
-3. An opt-in editor PlayMode test against the backend.
-4. Your manual playtest.
-
-**Needs:** a phone connected over USB.
+## Part D: in progress (the editor side is done; the phone side is ready and waiting for a phone)
+- **Done:**
+  - **`make unity-accept`** (`Tests/PlayMode/AcceptanceTests.cs`): the real app autoplays through Welcome, Home, Lobby and Room, then plays a full private-room game against a bot seat through `make up`.
+    - It **passed** on 2026-11-13 with session `01a1d5bc-0919-7d00-87c4-df8a8dcddcb6`, room `J3UFXR`.
+    - Postgres shows it `finished`, `online_private`, with 297 validated moves and the reason `all_tokens_home`.
+    - The app showed Results ("You came 2nd").
+  - **`make device-accept`** (`infrastructure/scripts/device-accept.mjs`):
+    1. installs the APK and sets up `adb reverse tcp:8080`;
+    2. a bot opens a room;
+    3. launches the app with `-e gv_autoplay_room CODE`;
+    4. the bot plays the other seat;
+    5. passes when the match ends and logcat shows `GV_ACCEPT session=...`.
+  - `make device-check` now also forwards the API port (8080).
+- **Next steps:**
+  1. Connect the phone over USB (USB debugging on, accept the prompt).
+  2. With `make up` running, run `make device-accept`. The APK is rebuilt with the new screens; if not, run `make android` first (about 25 minutes, in the background).
+  3. The owner's manual playtest: create a room on the phone, join it from the editor (`GameVerse > Play` in the Boot scene) with the code, and play a game.
+  4. Update ADR-0011 (part D), this file and the summary; commit part D.
 
 ## Decisions taken in this prompt (tech lead; recorded in ADR-0011)
 - The board and dice are drawn in code (original art), and the sounds are synthesised.

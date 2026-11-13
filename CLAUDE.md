@@ -338,6 +338,7 @@ make unity-test    # Unity EditMode tests headless (UNITY=path overrides the edi
 make unity-screens # render every Unity platform screen at 360x800 against `make up` -> apps/mobile/TestResults/screens
 make android       # IL2CPP ARM64 development APK -> apps/mobile/Build/Android/GameVerse.apk
 make device-check  # install on the USB phone, launch, require "GV_SELFCHECK prng ok" and GV_ERRORCHECK (event found in GlitchTip when sent)
+make device-accept # USB phone autoplays a full private-room Ludo game vs a bot through `make up` (Prompt 1.6 acceptance)
 # Linux/CI Unity tests: unity-editor -batchmode -nographics -projectPath apps/mobile -runTests -testPlatform EditMode -testResults TestResults/editmode.xml -logFile -
 make tokens        # regenerate design tokens (CSS, USS, C#) from packages/design-tokens/tokens.json
 make tokens-check  # fail if a token output is stale or missing a token
