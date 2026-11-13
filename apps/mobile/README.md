@@ -27,14 +27,16 @@ unity-editor -batchmode -nographics -projectPath apps/mobile \
 ```
 Assets/GameVerse/
   Core/        GameVerse.Core      IGameModule, IGameHost (CLAUDE.md 4.2), GameStateEnvelope
-  Net/         GameVerse.Net       GameVerseJson: Newtonsoft settings matching the server's System.Text.Json
+  Net/         GameVerse.Net       GameVerseJson (matches the server's JSON), AppConfig (API URL), Http/ApiClient,
+                                   Realtime/RealtimeConnection over ISocket (NativeWebSocket)
   UI/          GameVerse.UI        Tokens.uss + Tokens.g.cs (generated), Theme/, Components/ (GameCard, ButtonStyle), Home/, Fonts/
-  Platform/    GameVerse.Platform  Boot (scene entry), Diagnostics/RulesSelfCheck
+  Platform/    GameVerse.Platform  Boot (scene entry), Diagnostics/RulesSelfCheck, Session/ (PlayerSession, SecureStore),
+                                   Play/GameHost (IGameHost over the realtime connection)
   Games/Ludo/  GameVerse.Games.Ludo  one assembly per game (empty until Prompt 1.6)
   Plugins/Shared/  GameVerse.Rules.dll + GameVerse.Contracts.dll (build output of `make rules`, never edit) + link.xml
   Resources/Fixtures/  golden JSON copied by `make rules` (gitignored)
   Editor/      ProjectSetup (all settings as code), BuildScript
-  Tests/EditMode/  PRNG parity, wire format round trip
+  Tests/EditMode/  PRNG parity, wire format round trip, API client, player session, realtime connection (fakes, no server)
   Scenes/Boot.unity, Rendering/ (URP asset: renderer 0 = 2D, renderer 1 = Forward+ for 3D games)
 ```
 
@@ -52,3 +54,20 @@ An `.asmdef` makes a folder its own compiled assembly with explicit references, 
   - the `GameVerseSentryConfiguration` hook sets the environment and strips the user block.
 
   The committed asset never holds a DSN. `make android` reads `UNITY_ERROR_DSN` from `.env`, and `BuildScript` puts it into the asset only for the duration of the build. Development builds log `GV_ERRORCHECK sent|disabled` and send one info event. Unity's own analytics, crash and performance reporting are switched off.
+
+## Talking to the backend (Prompt 1.6, ADR-0011)
+
+- **API URL.** `Resources/GameVerse/AppConfig.asset` holds it.
+  - The committed asset is empty, which means `http://127.0.0.1:8080` (`make up` on this PC).
+  - `make android` writes `GAMEVERSE_API_URL` (from the environment) into it for the build, then clears it.
+  - A USB phone reaches the PC's API through `adb reverse tcp:8080 tcp:8080`.
+- **Plain HTTP** is allowed only in development builds (`PlayerSettings.insecureHttpOption = DevelopmentOnly`). Release builds need https.
+- **Sign-in.** `PlayerSession` creates a guest on the very first run, then signs back in with the refresh token, or with the device secret if that has expired.
+  - On Android both secrets are encrypted with an AES-GCM key held in the Android Keystore (`AndroidKeystoreStore`).
+  - The editor uses plain PlayerPrefs (dev only).
+- **Realtime.** `RealtimeConnection` must be ticked every frame. It:
+  - answers pings;
+  - drops stale state versions;
+  - reconnects with backoff and a fresh ticket;
+  - resends unacknowledged actions with their original seq, which the server never applies twice;
+  - starts seqs from the current Unix milliseconds, so a restarted app never reuses one.

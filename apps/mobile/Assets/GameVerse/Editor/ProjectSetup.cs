@@ -32,6 +32,9 @@ namespace GameVerse.Editor
         public const string HomeDocumentPath = Root + "/UI/Home/Home.uxml";
         public const string BootScenePath = Root + "/Scenes/Boot.unity";
 
+        // API location baked into builds (ADR-0011). Committed empty; BuildScript fills it from GAMEVERSE_API_URL.
+        public const string AppConfigPath = Root + "/Resources/" + GameVerse.Net.AppConfig.ResourcePath + ".asset";
+
         // Error reporting (ADR-0005). The Sentry Unity SDK loads its options from this exact Resources path.
         public const string SentryOptionsPath = "Assets/Resources/Sentry/SentryOptions.asset";
         public const string SentryConfigurationPath = Root + "/Platform/Diagnostics/GameVerseSentryConfiguration.asset";
@@ -41,6 +44,7 @@ namespace GameVerse.Editor
         {
             ConfigurePlayer();
             ConfigureErrorReporting();
+            ConfigureAppConfig();
             ConfigureRendering();
             var panel = EnsurePanelSettings();
             EnsureBootScene(panel);
@@ -66,6 +70,10 @@ namespace GameVerse.Editor
             PlayerSettings.SetManagedStrippingLevel(android, ManagedStrippingLevel.Low);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
+
+            // Plain HTTP only in development builds, which talk to `make up` on this PC (adb reverse). Release builds
+            // refuse http:// (Android cleartext off), so production traffic is always TLS (ADR-0011).
+            PlayerSettings.insecureHttpOption = InsecureHttpOption.DevelopmentOnly;
 
             // Web defaults, chosen for download size (measured in the Prompt 0.7 spike; ADR-0002). Per platform,
             // so Android is unaffected. Brotli without decompression fallback means the server must send
@@ -137,6 +145,22 @@ namespace GameVerse.Editor
             options.OptionsConfiguration = configuration;
             EditorUtility.SetDirty(options);
             return options;
+        }
+
+        /// <summary>The API location asset, reset to empty (= the development default) unless a build is filling it.</summary>
+        public static GameVerse.Net.AppConfig ConfigureAppConfig()
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(AppConfigPath));
+            var config = AssetDatabase.LoadAssetAtPath<GameVerse.Net.AppConfig>(AppConfigPath);
+            if (config == null)
+            {
+                config = ScriptableObject.CreateInstance<GameVerse.Net.AppConfig>();
+                AssetDatabase.CreateAsset(config, AppConfigPath);
+            }
+
+            config.ApiBaseUrl = string.Empty;
+            EditorUtility.SetDirty(config);
+            return config;
         }
 
         private static void ConfigureRendering()

@@ -33,6 +33,7 @@ namespace GameVerse.Editor
 
             BuildReport report;
             using (ErrorReportingDsn.ForBuild())
+            using (ApiUrl.ForBuild())
             {
                 report = BuildPipeline.BuildPlayer(options);
             }
@@ -53,6 +54,33 @@ namespace GameVerse.Editor
             {
                 throw new InvalidOperationException(failure);
             }
+        }
+    }
+
+    /// <summary>
+    /// Puts GAMEVERSE_API_URL (environment variable) into the AppConfig asset for the duration of a build and clears it
+    /// afterwards, like the DSN below. Empty builds talk to http://127.0.0.1:8080 (development, through adb reverse).
+    /// </summary>
+    internal sealed class ApiUrl : IDisposable
+    {
+        private ApiUrl()
+        {
+        }
+
+        public static ApiUrl ForBuild()
+        {
+            var config = ProjectSetup.ConfigureAppConfig();
+            config.ApiBaseUrl = (Environment.GetEnvironmentVariable("GAMEVERSE_API_URL") ?? string.Empty).Trim();
+            EditorUtility.SetDirty(config);
+            AssetDatabase.SaveAssets();
+            Debug.Log("GV_BUILD api " + GameVerse.Net.AppConfig.Resolve(config));
+            return new ApiUrl();
+        }
+
+        public void Dispose()
+        {
+            ProjectSetup.ConfigureAppConfig(); // back to empty
+            AssetDatabase.SaveAssets();
         }
     }
 

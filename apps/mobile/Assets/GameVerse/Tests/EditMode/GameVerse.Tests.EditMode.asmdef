@@ -5,6 +5,7 @@
         "GameVerse.Net",
         "GameVerse.UI",
         "GameVerse.Platform",
+        "UniTask",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
