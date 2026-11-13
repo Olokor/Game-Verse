@@ -158,6 +158,9 @@ namespace GameVerse.Tests.PlayMode
             }
 
             Capture("10b-game-vs-ai-in-progress");
+            game.Module.View.Q<GameVerse.Games.Ludo.View.LudoView>()!.Win(0);
+            yield return Wait(0.45f);
+            Capture("10c-win-confetti");
             services.Router.PopTo(lobby);
 
             var manifest = LocalLudoHost.CreateManifest(4);

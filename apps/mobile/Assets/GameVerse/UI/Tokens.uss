@@ -5,6 +5,8 @@
   --gv-color-bg-elevated: #1A1D28;
   --gv-color-bg-inset: #07080C;
   --gv-color-bg-scrim: #000000A0;
+  --gv-color-bg-shadow-soft: #0000004D;
+  --gv-color-bg-shadow-strong: #000000A6;
   --gv-color-border-subtle: #232736;
   --gv-color-border-strong: #343A4F;
   --gv-color-text-primary: #F2F3F7;
@@ -90,6 +92,8 @@
   --gv-motion-game-dice-roll: 600ms;
   --gv-motion-game-token-hop: 90ms;
   --gv-motion-game-capture: 420ms;
+  --gv-motion-game-capture-burst: 400ms;
+  --gv-motion-game-home-ripple: 500ms;
 }
 
 /* Not expressible in USS, use GameVerseTokens in Tokens.g.cs:

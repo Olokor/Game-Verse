@@ -62,14 +62,17 @@ namespace GameVerse.UI
         private readonly Label nameLabel = new Label();
         private readonly Label statusLabel = new Label();
         private readonly VisualElement dot = new VisualElement();
-        private readonly VisualElement turnBar = new VisualElement();
-        private readonly VisualElement turnFill = new VisualElement();
+        private readonly RingClock ring = new RingClock();
 
-        public PlayerChip()
+        /// <param name="compact">The in-game strip: avatar over name, so four players fit one row.</param>
+        public PlayerChip(bool compact = false)
         {
             AddToClassList("gv-player");
+            EnableInClassList("gv-player--compact", compact);
             avatar.AddToClassList("gv-player__avatar");
             initial.AddToClassList("gv-player__initial");
+            ring.AddToClassList("gv-player__ring");
+            avatar.Add(ring);
             avatar.Add(initial);
             dot.AddToClassList("gv-player__dot");
             avatar.Add(dot);
@@ -79,10 +82,6 @@ namespace GameVerse.UI
             statusLabel.AddToClassList("gv-player__status");
             text.Add(nameLabel);
             text.Add(statusLabel);
-            turnBar.AddToClassList("gv-player__turn");
-            turnFill.AddToClassList("gv-player__turn-fill");
-            turnBar.Add(turnFill);
-            text.Add(turnBar);
             Add(avatar);
             Add(text);
             SetTurn(false, null);
@@ -112,16 +111,14 @@ namespace GameVerse.UI
             }
         }
 
-        /// <summary>Highlights the seat to act; <paramref name="remaining"/> 0..1 of the turn clock left (null: no clock).</summary>
+        /// <summary>
+        /// Highlights the seat to act. <paramref name="remaining"/> is the share of the turn clock left (0..1), drawn as a
+        /// ring that empties around the avatar; null means no clock (the ring stays full).
+        /// </summary>
         public void SetTurn(bool active, float? remaining)
         {
             EnableInClassList("gv-player--active", active);
-            turnBar.style.display = active && remaining != null ? DisplayStyle.Flex : DisplayStyle.None;
-            if (remaining is { } left)
-            {
-                turnFill.style.width = Length.Percent(Mathf.Clamp01(left) * 100);
-                turnFill.EnableInClassList("gv-player__turn-fill--low", left < 0.3f);
-            }
+            ring.Show(active, remaining is { } left ? Mathf.Clamp01(left) : 1f);
         }
     }
 
@@ -253,6 +250,53 @@ namespace GameVerse.UI
                     style.opacity = 0.55f + (0.35f * Mathf.Sin(phase * Mathf.PI * 2));
                 }).Every(33);
             }
+        }
+    }
+
+    /// <summary>The turn clock as a ring around an avatar: volt, turning flare in the last 30%.</summary>
+    public sealed class RingClock : VisualElement
+    {
+        private bool visible;
+        private float fraction = 1;
+
+        public RingClock()
+        {
+            pickingMode = PickingMode.Ignore;
+            generateVisualContent += Draw;
+        }
+
+        public void Show(bool on, float share)
+        {
+            if (on == visible && Mathf.Abs(share - fraction) < 0.005f)
+            {
+                return;
+            }
+
+            visible = on;
+            fraction = share;
+            MarkDirtyRepaint();
+        }
+
+        private void Draw(MeshGenerationContext context)
+        {
+            if (!visible)
+            {
+                return;
+            }
+
+            var p = context.painter2D;
+            var centre = contentRect.center;
+            var radius = (Mathf.Min(contentRect.width, contentRect.height) / 2) - 2;
+            p.lineWidth = 3;
+            p.lineCap = LineCap.Round;
+            p.strokeColor = GameVerseTokens.Color.Border.Subtle;
+            p.BeginPath();
+            p.Arc(centre, radius, 0, 360);
+            p.Stroke();
+            p.strokeColor = fraction < 0.3f ? GameVerseTokens.Color.Accent.Flare : GameVerseTokens.Color.Brand.Volt;
+            p.BeginPath();
+            p.Arc(centre, radius, -90, -90 + (360 * fraction));
+            p.Stroke();
         }
     }
 }

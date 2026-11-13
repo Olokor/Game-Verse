@@ -80,7 +80,12 @@ The Ludo game module in Unity, on the shared engine with no rule logic in Unity,
   - Logcat showed `GV_SELFCHECK prng ok`, `GV_ERRORCHECK sent`, and then `GV_ACCEPT ... ended=You won!`.
   - The build's project setup regenerated the Boot scene once, to add the AudioListener (expected).
 - **The owner then asked for a premium visual pass on the Ludo table, keeping the brand colours.** The plan was approved: a raised board, dark yard wells with a turn light, pawn-like tokens, a 3D die in a dock, capture, home and win effects, and a compact player strip.
-  - Status: **in progress**.
+  - **Built:**
+    - board, tokens, die, dock, effects, compact HUD, curtain (ADR-0011, "the premium table");
+    - two ui-reviewer passes, with the second pass's findings fixed: glow banding (now a 9-slice texture), the olive die halo, repaint cost (glows breathe by opacity), a lighter HUD, larger yard tokens, the curtain button, reduced-motion cues, press states, richer confetti, the dock tint.
+  - **Checked:** EditMode 43/43 (a new particle-cap test), and the screen tour reviewed by eye.
+  - **Next:** the phone run with `GV_FPS`, then the owner's playtest.
+  - **Problem met:** stopping a running `make android` left the Sentry DSN injected into `SentryOptions.asset`. The DSN test caught it, and `make unity-setup` restored it. **Never kill a build:** wait for it, or run `make unity-setup` afterwards.
 
 ### Earlier notes for part D
 - **Done:**

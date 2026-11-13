@@ -45,6 +45,12 @@ namespace GameVerse.UI
 
                 /// <summary>Behind sheets and modals (#000000A0)</summary>
                 public static readonly Color32 Scrim = new Color32(0, 0, 0, 160); // token: color.bg.scrim
+
+                /// <summary>Soft contact shadows drawn in code (game pieces, the board plate) (#0000004D)</summary>
+                public static readonly Color32 ShadowSoft = new Color32(0, 0, 0, 77); // token: color.bg.shadow-soft
+
+                /// <summary>Deep shadows drawn in code (a lifted piece, the die) (#000000A6)</summary>
+                public static readonly Color32 ShadowStrong = new Color32(0, 0, 0, 166); // token: color.bg.shadow-strong
             }
 
             public static class Border
@@ -402,6 +408,12 @@ namespace GameVerse.UI
 
                 /// <summary>A captured Ludo token flying back to its base (420ms, in seconds for DOTween/LitMotion)</summary>
                 public const float Capture = 0.42f; // token: motion.game.capture
+
+                /// <summary>Particles bursting from a capture (400ms, in seconds for DOTween/LitMotion)</summary>
+                public const float CaptureBurst = 0.4f; // token: motion.game.capture-burst
+
+                /// <summary>A ring rippling from the centre when a token reaches home (500ms, in seconds for DOTween/LitMotion)</summary>
+                public const float HomeRipple = 0.5f; // token: motion.game.home-ripple
             }
         }
     }

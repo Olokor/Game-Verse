@@ -146,3 +146,58 @@ Prompt 1.6 builds the first playable Unity client:
 ### Checking the screens
 - `make unity-screens` (with `make up` running) renders every screen at 360×800 into `apps/mobile/TestResults/screens/`.
 - It runs as an opt-in PlayMode test that drives the real screens against the backend.
+
+## Decisions: the premium table (owner request, 2026-11-13)
+
+**Brief:** the owner found the first Ludo table "not premium" and asked for polish while keeping the brand colours. Two review passes (the ui-reviewer agent) shaped the result.
+
+### Board
+- **A raised plate** with a soft layered shadow and a lit rim.
+- **Yards:** dark wells with a rim in the seat colour and recessed token slots.
+- **Track:** tiles with a lit top edge and a shadowed lip.
+- **Start squares** carry a direction chevron.
+- **Home columns** brighten toward the centre.
+- **Stars** are soft.
+- **The centre medallion** is ringed in brand volt, with a volt core.
+
+### Turn light
+- The acting seat's yard glows and the others dim.
+- **The glow is a soft texture,** generated at runtime and used as a tinted 9-slice background (`Glow.cs`).
+  - Painter2D has no blur, and stacked strokes banded into stripes.
+  - Breathing changes only `style.opacity`, so it costs no geometry: this matters at 60fps on mid-range phones.
+
+### Pieces
+- **Tokens:**
+  - a contact shadow, rim, lit body, specular glint and the shape emblem;
+  - larger while resting in their yard;
+  - when they can move, they lift, and one crisp volt ring breathes by opacity;
+  - a press state;
+  - "×n" when a seat stacks tokens on one square.
+- **The die:** a bevelled cube in a dock at the bottom (the thumb zone), with one crisp volt ring when it's your roll (no halo), a rise-and-squash tumble, a volt flash on a six, and a "TAP TO ROLL" hint.
+
+### Dock
+The prompt is shown with the acting seat's colour and shape, and the dock is tinted toward that colour.
+
+### Moments (`Effects.cs`)
+
+| Moment | Effect |
+|---|---|
+| Capture | a burst |
+| Home | a ripple from the centre |
+| Win | a winner card, and confetti with a paper flip |
+
+- **Particles are pooled** and capped at 30 (tested).
+- **Under reduced motion,** a six shows the ring for a beat, the win card fades in, and no particles spawn.
+
+### HUD
+- Compact chips in one row.
+- **The ring around the avatar is the only turn signal.**
+- The status shows only what matters: You, AI, Away, places, Left.
+
+### Pass-and-play curtain
+The seat's emblem, "Pass to Green", and a single "I'm Green" button.
+
+### Constraints kept
+- **No new hues:** light and shade are mixes of the seat colours toward `text.primary` or `bg.base`.
+- **New tokens:** `color.bg.shadow-soft`, `color.bg.shadow-strong`, `motion.game.capture-burst`, `motion.game.home-ripple`.
+- **Frame pacing:** development builds log `GV_FPS` (the average and the worst frame) every 10 seconds, to check the 60fps budget on devices.

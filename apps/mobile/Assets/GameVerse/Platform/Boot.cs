@@ -46,8 +46,27 @@ namespace GameVerse.Platform
             services.Router.Push(new WelcomeScreen(services));
         }
 
+        private float fpsWindowStart;
+        private int fpsFrames;
+        private float worstFrame;
+
         private void Update()
         {
+            // Development builds log frame pacing every 10 s (GV_FPS) for the 60 fps budget on mid-range Android.
+            if (Debug.isDebugBuild)
+            {
+                fpsFrames++;
+                worstFrame = Mathf.Max(worstFrame, Time.unscaledDeltaTime);
+                if (Time.realtimeSinceStartup - fpsWindowStart >= 10)
+                {
+                    var seconds = Time.realtimeSinceStartup - fpsWindowStart;
+                    Debug.Log($"GV_FPS avg={fpsFrames / seconds:0.0} worst_ms={worstFrame * 1000:0} screen={services?.Router.Top?.GetType().Name}");
+                    fpsWindowStart = Time.realtimeSinceStartup;
+                    fpsFrames = 0;
+                    worstFrame = 0;
+                }
+            }
+
             // Android's back button arrives as Escape.
             if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
             {

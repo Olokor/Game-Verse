@@ -133,12 +133,14 @@ namespace GameVerse.Games.Ludo
                     }
 
                     var transition = controller.Apply(state);
-                    view.SetInput(false, new (int, int)[0], null, Prompt());
+                    // While a step animates, the light stays on the seat that rolled or moved (the state already names the next one).
+                    var acting = transition.RolledBy ?? transition.MoverSeat ?? (state.Phase == "over" ? (int?)null : state.CurrentSeat);
+                    view.SetInput(false, new (int, int)[0], acting, Prompt());
                     await view.PresentAsync(state, transition, lifetime.Token);
                     host.StateApplied(envelope.StateVersion);
                     if (state.Phase == "over" && controller.Current?.Finished.Length > 0 && manifest.Players.Any(p => p.Seat == state.Finished[0] && (passAndPlay || p.Id == manifest.LocalPlayerId)))
                     {
-                        view.Win();
+                        view.Win(state.Finished[0]);
                     }
                 }
 
@@ -176,7 +178,7 @@ namespace GameVerse.Games.Ludo
                 return;
             }
 
-            view.SetInput(false, new (int, int)[0], null, Prompt());
+            view.SetInput(false, new (int, int)[0], controller.Current?.CurrentSeat, Prompt());
             host.SubmitAction(++submitted, action);
         }
 
@@ -193,14 +195,20 @@ namespace GameVerse.Games.Ludo
                 return "Game over";
             }
 
-            var name = passAndPlay ? LudoPalette.Names[state.Colors[state.CurrentSeat]] : "Your turn";
+            var colour = LudoPalette.Names[state.Colors[state.CurrentSeat]];
             if (controller.LocalSeatToAct != null)
             {
-                return state.Phase == "roll" ? name + ". Tap the die." : "Rolled " + state.LastRoll + ". Pick a token.";
+                if (state.Phase == "move")
+                {
+                    return "Move a token " + state.LastRoll + (state.LastRoll == 1 ? " square" : " squares");
+                }
+
+                var again = state.SixesInRow > 0 ? "Six! Roll again" : null;
+                return again ?? (passAndPlay ? colour + " to roll" : "Your roll");
             }
 
-            var other = manifest.Players.FirstOrDefault(p => p.Seat == state.CurrentSeat)?.DisplayName ?? LudoPalette.Names[state.Colors[state.CurrentSeat]];
-            return "Waiting for " + other;
+            var other = manifest.Players.FirstOrDefault(p => p.Seat == state.CurrentSeat)?.DisplayName ?? colour;
+            return other + (state.Phase == "move" ? " is moving" : " is rolling");
         }
     }
 }

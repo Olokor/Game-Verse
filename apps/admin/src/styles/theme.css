@@ -20,6 +20,8 @@
   --color-bg-elevated: var(--gv-color-bg-elevated);
   --color-bg-inset: var(--gv-color-bg-inset);
   --color-bg-scrim: var(--gv-color-bg-scrim);
+  --color-bg-shadow-soft: var(--gv-color-bg-shadow-soft);
+  --color-bg-shadow-strong: var(--gv-color-bg-shadow-strong);
   --color-border-subtle: var(--gv-color-border-subtle);
   --color-border-strong: var(--gv-color-border-strong);
   --color-text-primary: var(--gv-color-text-primary);
@@ -117,4 +119,6 @@
    motion.game.dice-roll  --gv-motion-game-dice-roll
    motion.game.token-hop  --gv-motion-game-token-hop
    motion.game.capture  --gv-motion-game-capture
+   motion.game.capture-burst  --gv-motion-game-capture-burst
+   motion.game.home-ripple  --gv-motion-game-home-ripple
 */

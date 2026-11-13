@@ -498,6 +498,7 @@
 
 .gv-player--active {
     border-color: var(--gv-color-brand-volt);
+    background-color: var(--gv-color-bg-elevated);
 }
 
 .gv-player__avatar {
@@ -556,21 +557,44 @@
     color: var(--gv-color-text-secondary);
 }
 
-.gv-player__turn {
-    height: var(--gv-space-4);
+/* The turn clock ring sits just outside the avatar. */
+.gv-player__ring {
+    position: absolute;
+    left: -5px;
+    top: -5px;
+    right: -5px;
+    bottom: -5px;
+}
+
+/* In-game strip: avatar over name, centred, so up to four players share one row. The ring is the only turn signal. */
+.gv-player--compact {
+    flex-direction: column;
+    padding: var(--gv-space-8) var(--gv-space-4) var(--gv-space-4) var(--gv-space-4);
+}
+
+.gv-player--compact.gv-player--active {
+    border-color: var(--gv-color-border-subtle);
+}
+
+.gv-player--compact > .gv-player__avatar {
+    width: var(--gv-space-32);
+    height: var(--gv-space-32);
+}
+
+.gv-player--compact > .gv-player__text {
+    margin-left: 0;
     margin-top: var(--gv-space-4);
-    border-radius: var(--gv-radius-pill);
-    background-color: var(--gv-color-bg-inset);
-    overflow: hidden;
+    align-items: center;
+    max-width: 100%;
 }
 
-.gv-player__turn-fill {
-    height: 100%;
-    background-color: var(--gv-color-brand-volt);
+.gv-player--compact .gv-player__name {
+    font-size: var(--gv-font-size-caption);
+    -unity-text-align: middle-center;
 }
 
-.gv-player__turn-fill--low {
-    background-color: var(--gv-color-accent-flare);
+.gv-player--compact .gv-player__status {
+    -unity-text-align: middle-center;
 }
 
 /* ---------- RoomCodeDisplay ---------- */

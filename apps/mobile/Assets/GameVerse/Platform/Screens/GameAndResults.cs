@@ -83,8 +83,16 @@ namespace GameVerse.Platform.Screens
             }
         }
 
+        private int chipsAtMove = -1;
+
         public override void Tick()
         {
+            if (module.Controller?.Current is { } current && current.MoveNumber != chipsAtMove)
+            {
+                chipsAtMove = current.MoveNumber;
+                UpdateChips(); // places and leavers change with the game
+            }
+
             if (local != null && turn.Seat != local.State.CurrentSeat)
             {
                 SetTurn((local.State.CurrentSeat, null));
@@ -162,7 +170,7 @@ namespace GameVerse.Platform.Screens
             var colors = LudoBoard.ColorsFor(manifest.Players.Count);
             foreach (var player in manifest.Players.OrderBy(p => p.Seat))
             {
-                var chip = new PlayerChip();
+                var chip = new PlayerChip(compact: true);
                 chips[player.Seat] = chip;
                 container.Add(chip);
             }
@@ -173,10 +181,15 @@ namespace GameVerse.Platform.Screens
         private void UpdateChips()
         {
             var colors = LudoBoard.ColorsFor(manifest.Players.Count);
+            var state = module.Controller?.Current;
             foreach (var player in manifest.Players)
             {
                 var you = manifest.Mode != GameModes.Local && player.Id == manifest.LocalPlayerId;
-                var status = player.IsAI ? "AI" : you ? "You" : offline.Contains(player.Seat) ? "Reconnecting" : LudoPalette.Names[colors[player.Seat]];
+                var place = state is null ? -1 : System.Array.IndexOf(state.Finished, player.Seat);
+                var left = state != null && System.Array.IndexOf(state.Left, player.Seat) >= 0;
+                var status = place >= 0 ? (place == 0 ? "1st" : place == 1 ? "2nd" : "3rd") + " home"
+                    : left ? "Left"
+                    : player.IsAI ? "AI" : you ? "You" : offline.Contains(player.Seat) ? "Away" : string.Empty; // colour and shape already name the seat
                 chips[player.Seat].Set(player.DisplayName, status, LudoPalette.Of(colors[player.Seat]), player.IsAI || manifest.Mode == GameModes.Local ? (bool?)null : !offline.Contains(player.Seat));
                 chips[player.Seat].SetGlyph(new ShapeBadge(colors[player.Seat]));
             }
