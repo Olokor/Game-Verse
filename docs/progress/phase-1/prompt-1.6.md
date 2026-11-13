@@ -72,7 +72,17 @@ The Ludo game module in Unity, on the shared engine with no rule logic in Unity,
   - the catalog answered in 5.7s once on a cold API (15ms warm), so the tour waits for the cards;
   - a heredoc with quotes broke the shell twice, so longer edit scripts now go to a scratchpad file.
 
-## Part D: in progress (the editor side is done; the phone side is ready and waiting for a phone)
+## Part D: acceptance passed on 2026-11-13; a premium polish pass was requested
+
+- **On the phone:** `make device-accept` on a Samsung Galaxy Note 9 (SM-N960U).
+  - The app autoplayed room `4D7978` and **won** session `01a1d5dc-9234-7fb5-8197-1fa31c2692b3`.
+  - Postgres shows it `finished`, `online_private`, with 316 moves checked by the server and the reason `all_tokens_home`.
+  - Logcat showed `GV_SELFCHECK prng ok`, `GV_ERRORCHECK sent`, and then `GV_ACCEPT ... ended=You won!`.
+  - The build's project setup regenerated the Boot scene once, to add the AudioListener (expected).
+- **The owner then asked for a premium visual pass on the Ludo table, keeping the brand colours.** The plan was approved: a raised board, dark yard wells with a turn light, pawn-like tokens, a 3D die in a dock, capture, home and win effects, and a compact player strip.
+  - Status: **in progress**.
+
+### Earlier notes for part D
 - **Done:**
   - **`make unity-accept`** (`Tests/PlayMode/AcceptanceTests.cs`): the real app autoplays through Welcome, Home, Lobby and Room, then plays a full private-room game against a bot seat through `make up`.
     - It **passed** on 2026-11-13 with session `01a1d5bc-0919-7d00-87c4-df8a8dcddcb6`, room `J3UFXR`.
@@ -88,7 +98,7 @@ The Ludo game module in Unity, on the shared engine with no rule logic in Unity,
 - **Next steps:**
   1. Connect the phone over USB (USB debugging on, accept the prompt).
   2. With `make up` running, run `make device-accept`. The APK is rebuilt with the new screens; if not, run `make android` first (about 25 minutes, in the background).
-  3. The owner's manual playtest: create a room on the phone, join it from the editor (`GameVerse > Play` in the Boot scene) with the code, and play a game.
+  3. The owner's manual playtest: create a room on the phone, join it from the editor (open `Assets/GameVerse/Scenes/Boot.unity` and press Play) with the code, and play a game.
   4. Update ADR-0011 (part D), this file and the summary; commit part D.
 
 ## Decisions taken in this prompt (tech lead; recorded in ADR-0011)
