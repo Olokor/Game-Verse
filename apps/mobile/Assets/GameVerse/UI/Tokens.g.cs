@@ -42,6 +42,9 @@ namespace GameVerse.UI
 
                 /// <summary>Inputs, wells, board backgrounds (#07080C)</summary>
                 public static readonly Color32 Inset = new Color32(7, 8, 12, 255); // token: color.bg.inset
+
+                /// <summary>Behind sheets and modals (#000000A0)</summary>
+                public static readonly Color32 Scrim = new Color32(0, 0, 0, 160); // token: color.bg.scrim
             }
 
             public static class Border
@@ -291,6 +294,18 @@ namespace GameVerse.UI
             }
         }
 
+        public static class Opacity
+        {
+            /// <summary>Disabled controls (0.45)</summary>
+            public const float Disabled = 0.45f; // token: opacity.disabled
+
+            /// <summary>Inert content, e.g. coming-soon cards (0.6)</summary>
+            public const float Muted = 0.6f; // token: opacity.muted
+
+            /// <summary>Pieces of a player who left (0.35)</summary>
+            public const float Inactive = 0.35f; // token: opacity.inactive
+        }
+
         public static class Radius
         {
             /// <summary>8px</summary>
@@ -319,6 +334,9 @@ namespace GameVerse.UI
         {
             /// <summary>Every pressable scales to this on press (0.96)</summary>
             public const float PressScale = 0.96f; // token: motion.press-scale
+
+            /// <summary>How long a toast stays before it fades (2800ms, in seconds for DOTween/LitMotion)</summary>
+            public const float ToastHold = 2.8f; // token: motion.toast-hold
 
             public static class Instant
             {

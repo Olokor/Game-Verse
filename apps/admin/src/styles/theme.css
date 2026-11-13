@@ -19,6 +19,7 @@
   --color-bg-surface: var(--gv-color-bg-surface);
   --color-bg-elevated: var(--gv-color-bg-elevated);
   --color-bg-inset: var(--gv-color-bg-inset);
+  --color-bg-scrim: var(--gv-color-bg-scrim);
   --color-border-subtle: var(--gv-color-border-subtle);
   --color-border-strong: var(--gv-color-border-strong);
   --color-text-primary: var(--gv-color-text-primary);
@@ -98,6 +99,9 @@
 
 /* No Tailwind namespace, use the variable directly, e.g. duration-(--gv-motion-fast-duration):
    font.numeric  --gv-font-numeric
+   opacity.disabled  --gv-opacity-disabled
+   opacity.muted  --gv-opacity-muted
+   opacity.inactive  --gv-opacity-inactive
    border.width  --gv-border-width
    motion.instant.duration  --gv-motion-instant-duration
    motion.fast.duration  --gv-motion-fast-duration
@@ -109,6 +113,7 @@
    motion.celebrate.duration-max  --gv-motion-celebrate-duration-max
    motion.ambient.duration  --gv-motion-ambient-duration
    motion.press-scale  --gv-motion-press-scale
+   motion.toast-hold  --gv-motion-toast-hold
    motion.game.dice-roll  --gv-motion-game-dice-roll
    motion.game.token-hop  --gv-motion-game-token-hop
    motion.game.capture  --gv-motion-game-capture

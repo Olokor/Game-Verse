@@ -95,3 +95,54 @@ Prompt 1.6 builds the first playable Unity client:
 - **`LocalLudoHost`** runs the engine on the device, seeded from the secure random generator. It feeds the module exactly like the server does, through `ApplyServerState` with versioned states.
 - **No account, no network, no rewards.**
 - **A full-screen "Pass to Blue" curtain** waits for a tap between human players.
+
+## Decisions: the platform screens (part C)
+
+### Shell
+- **`Boot` builds the shell in code** on the scene's UI document:
+  - `AppServices` holds the session, the router, live connections, the overlay and toasts;
+  - the screens are plain classes, each with a UXML layout in `Platform/Resources/Screens`.
+- **The router is a stack:**
+  - the top screen gets `Tick()`;
+  - Android back closes an open sheet first, then asks the screen (games ask to confirm leaving);
+  - opening or closing a screen closes any sheet.
+- **Transitions:** a 240ms slide-and-fade (motion.base). Under reduced motion it's a fade only (motion.fast), and sheets do the same.
+- **The Boot scene is regenerated only when it is missing or wrong.** Before, every `ProjectSetup` run rewrote it and churned its object ids in git.
+  - The camera now carries an `AudioListener`, without which no game sound would play.
+
+### Screens
+
+| Screen | What it does |
+|---|---|
+| Welcome | One-tap guest sign-in; a returning player is signed in behind a skeleton |
+| Home | The real catalog, as on web |
+| Lobby | Catalog modes as tiles; the player counts each mode allows; AI level; best of 1 or 3; the house-rules sheet; join by code; my rating |
+| Matchmaking | Polls once a second |
+| Private room | The live lobby socket, seats with shapes and ready states, the host's rules and Start, with the reason when it can't start yet |
+| Game | Chips with a turn-clock bar, a reconnect banner, Leave (resign) after a confirm |
+| Results | Placements, the reason, the new rating after ranked games, back to the room (rematch) or the lobby |
+
+### Accessibility and states (from the ui-reviewer pass)
+- **Touch targets:**
+  - tokens keep a 44px touch area even when the disc drawn is smaller;
+  - choice pills, the code field and the header buttons use `layout.touch-target`.
+- **Never colour alone:**
+  - "on" choices are filled, "off" are outlined;
+  - avatars show the seat's token shape;
+  - AI seats have no online dot.
+- **States:**
+  - Home has empty, loading and error states;
+  - every button that calls the server shows its loading state;
+  - leave and cancel can't fire twice;
+  - the die has a pressed state.
+- **New tokens:** `opacity.disabled`, `opacity.muted`, `opacity.inactive`, `motion.toast-hold` and `color.bg.scrim`.
+
+### Not done yet (from the review)
+- a celebration animation on Results (Rive, later);
+- a QR code on the room code;
+- fully tokenised pulse sizes and letter spacing;
+- icons on the Back and Leave buttons.
+
+### Checking the screens
+- `make unity-screens` (with `make up` running) renders every screen at 360×800 into `apps/mobile/TestResults/screens/`.
+- It runs as an opt-in PlayMode test that drives the real screens against the backend.

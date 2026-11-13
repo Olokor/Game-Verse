@@ -13,7 +13,7 @@
 | 1.3 | Ludo rules engine, AI levels 1 to 3, dice commit-reveal | Done | [prompt-1.3.md](prompt-1.3.md) |
 | 1.4 | Realtime play (`/ws/play`, match host) and private rooms | Done | [prompt-1.4.md](prompt-1.4.md) |
 | 1.5 | Matchmaking queues (casual and ranked) and Glicko-2 ratings | Done | [prompt-1.5.md](prompt-1.5.md) |
-| 1.6 | Ludo in Unity: module, platform screens, device acceptance | **In progress** (A and B committed, C being built) | [prompt-1.6.md](prompt-1.6.md) |
+| 1.6 | Ludo in Unity: module, platform screens, device acceptance | **In progress** (A, B and C committed; D next) | [prompt-1.6.md](prompt-1.6.md) |
 | 1.7 | Ludo on web (Unity Web build in `apps/web`), Playwright test | Not started | |
 
 ## Phase acceptance (milestone 1 demo)

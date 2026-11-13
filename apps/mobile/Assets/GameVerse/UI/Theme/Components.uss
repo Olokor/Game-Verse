@@ -438,3 +438,218 @@
 .gv-section {
     margin-top: var(--gv-space-40);
 }
+
+/* ---------- ModeTile ---------- */
+
+.gv-mode {
+    margin: 0 0 var(--gv-space-12) 0;
+    padding: var(--gv-space-16);
+    min-height: var(--gv-space-72);
+    border-radius: var(--gv-radius-lg);
+    border-width: var(--gv-border-width);
+    border-color: var(--gv-color-border-subtle);
+    background-color: var(--gv-color-bg-surface);
+    align-items: flex-start;
+    justify-content: center;
+    transition-property: scale, border-color;
+    transition-duration: var(--gv-motion-instant-duration);
+}
+
+.gv-mode:active {
+    scale: var(--gv-motion-press-scale) var(--gv-motion-press-scale);
+    background-color: var(--gv-color-bg-elevated);
+}
+
+.gv-mode--selected {
+    border-color: var(--gv-color-brand-volt);
+}
+
+.gv-mode:disabled {
+    opacity: var(--gv-opacity-disabled);
+}
+
+.gv-mode__title {
+    -unity-text-align: upper-left;
+    -unity-font-definition: url("../Fonts/BricolageGrotesque-SemiBold.ttf");
+    font-size: var(--gv-font-size-title-sm);
+    color: var(--gv-color-text-primary);
+}
+
+.gv-mode__detail {
+    -unity-text-align: upper-left;
+    font-size: var(--gv-font-size-body-sm);
+    color: var(--gv-color-text-secondary);
+    margin-top: var(--gv-space-4);
+    white-space: normal;
+}
+
+/* ---------- PlayerChip ---------- */
+
+.gv-player {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--gv-space-8);
+    border-radius: var(--gv-radius-md);
+    border-width: var(--gv-border-width);
+    border-color: var(--gv-color-border-subtle);
+    background-color: var(--gv-color-bg-surface);
+    margin: var(--gv-space-4);
+}
+
+.gv-player--active {
+    border-color: var(--gv-color-brand-volt);
+}
+
+.gv-player__avatar {
+    width: var(--gv-space-40);
+    height: var(--gv-space-40);
+    border-radius: var(--gv-radius-pill);
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.gv-player__glyph {
+    position: absolute;
+    left: 20%;
+    top: 20%;
+}
+
+.gv-player__initial {
+    -unity-font-definition: url("../Fonts/BricolageGrotesque-Bold.ttf");
+    font-size: var(--gv-font-size-title-sm);
+    color: var(--gv-color-brand-volt-ink);
+}
+
+.gv-player__dot {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: var(--gv-space-12);
+    height: var(--gv-space-12);
+    border-radius: var(--gv-radius-pill);
+    border-width: 2px;
+    border-color: var(--gv-color-bg-surface);
+    background-color: var(--gv-color-text-muted);
+}
+
+.gv-player__dot--online {
+    background-color: var(--gv-color-state-success);
+}
+
+.gv-player__text {
+    margin-left: var(--gv-space-8);
+    flex-shrink: 1;
+    flex-grow: 1;
+}
+
+.gv-player__name {
+    -unity-font-definition: url("../Fonts/Manrope-Bold.ttf");
+    font-size: var(--gv-font-size-body-sm);
+    color: var(--gv-color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gv-player__status {
+    font-size: var(--gv-font-size-caption);
+    color: var(--gv-color-text-secondary);
+}
+
+.gv-player__turn {
+    height: var(--gv-space-4);
+    margin-top: var(--gv-space-4);
+    border-radius: var(--gv-radius-pill);
+    background-color: var(--gv-color-bg-inset);
+    overflow: hidden;
+}
+
+.gv-player__turn-fill {
+    height: 100%;
+    background-color: var(--gv-color-brand-volt);
+}
+
+.gv-player__turn-fill--low {
+    background-color: var(--gv-color-accent-flare);
+}
+
+/* ---------- RoomCodeDisplay ---------- */
+
+.gv-roomcode {
+    align-items: center;
+    padding: var(--gv-space-24) var(--gv-space-16);
+    border-radius: var(--gv-radius-xl);
+    background-color: var(--gv-color-bg-surface);
+    border-width: var(--gv-border-width);
+    border-color: var(--gv-color-border-subtle);
+}
+
+/* The code uses the display face with wide tracking; the alphabet has no look-alike characters. */
+.gv-roomcode__code {
+    -unity-font-definition: url("../Fonts/BricolageGrotesque-Bold.ttf");
+    font-size: var(--gv-font-size-hero-number);
+    letter-spacing: 6px;
+    color: var(--gv-color-brand-volt);
+    margin: var(--gv-space-8) 0;
+}
+
+.gv-roomcode__actions {
+    flex-direction: row;
+}
+
+.gv-roomcode__actions > .gv-button {
+    margin: 0 var(--gv-space-4);
+}
+
+/* ---------- Sheet ---------- */
+
+.gv-sheet {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--gv-color-bg-scrim);
+    justify-content: flex-end;
+}
+
+.gv-sheet__panel {
+    background-color: var(--gv-color-bg-elevated);
+    border-top-left-radius: var(--gv-radius-xl);
+    border-top-right-radius: var(--gv-radius-xl);
+    padding: var(--gv-space-24) var(--gv-space-16) var(--gv-space-32) var(--gv-space-16);
+}
+
+.gv-sheet__title {
+    -unity-font-definition: url("../Fonts/BricolageGrotesque-SemiBold.ttf");
+    font-size: var(--gv-font-size-title);
+    margin-bottom: var(--gv-space-16);
+}
+
+/* ---------- Toast ---------- */
+
+.gv-toast {
+    position: absolute;
+    left: var(--gv-space-16);
+    right: var(--gv-space-16);
+    bottom: var(--gv-space-32);
+    padding: var(--gv-space-12) var(--gv-space-16);
+    border-radius: var(--gv-radius-md);
+    background-color: var(--gv-color-bg-elevated);
+    border-width: var(--gv-border-width);
+    border-color: var(--gv-color-border-strong);
+    color: var(--gv-color-text-primary);
+    white-space: normal;
+}
+
+.gv-toast--error {
+    border-color: var(--gv-color-state-danger);
+}
+
+/* ---------- Skeleton ---------- */
+
+.gv-skeleton {
+    border-radius: var(--gv-radius-md);
+    background-color: var(--gv-color-bg-elevated);
+    margin-bottom: var(--gv-space-12);
+}

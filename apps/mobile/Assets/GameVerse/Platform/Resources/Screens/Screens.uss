@@ -1,0 +1,267 @@
+/* Platform screen layout (DESIGN_SYSTEM section 7). Components live in UI/Theme/Components.uss; tokens only. */
+
+.gv-shell__screens {
+    flex-grow: 1;
+}
+
+.gv-shell__overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.gv-shell__overlay > * {
+    /* Sheets and toasts inside the overlay take touches; the empty overlay does not. */
+}
+
+.gv-page {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* Bars keep their height when the content below is long. */
+.gv-page > .gv-topbar,
+.gv-page__header,
+.gv-page__footer {
+    flex-shrink: 0;
+}
+
+.gv-page__header {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--gv-space-12) var(--gv-space-16);
+    min-height: var(--gv-space-56);
+}
+
+.gv-page__title {
+    -unity-font-definition: url("/Assets/GameVerse/UI/Fonts/BricolageGrotesque-Bold.ttf");
+    font-size: var(--gv-font-size-title);
+    flex-grow: 1;
+}
+
+.gv-page__body {
+    flex-grow: 1;
+    padding: 0 var(--gv-space-16);
+}
+
+.gv-page__footer {
+    padding: var(--gv-space-12) var(--gv-space-16) var(--gv-space-24) var(--gv-space-16);
+}
+
+.gv-page__footer > .gv-button {
+    margin-top: var(--gv-space-8);
+}
+
+.gv-back {
+    min-width: var(--gv-layout-touch-target);
+    min-height: var(--gv-layout-touch-target);
+    margin-right: var(--gv-space-8);
+}
+
+.gv-muted {
+    color: var(--gv-color-text-secondary);
+    font-size: var(--gv-font-size-body-sm);
+    white-space: normal;
+}
+
+.gv-error {
+    color: var(--gv-color-state-danger);
+    font-size: var(--gv-font-size-body-sm);
+    white-space: normal;
+    margin: var(--gv-space-8) 0;
+}
+
+.gv-empty {
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    padding: var(--gv-space-24);
+}
+
+.gv-empty__title {
+    -unity-font-definition: url("/Assets/GameVerse/UI/Fonts/BricolageGrotesque-SemiBold.ttf");
+    font-size: var(--gv-font-size-title);
+    margin-bottom: var(--gv-space-8);
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+/* ---------- Welcome ---------- */
+
+.gv-welcome {
+    flex-grow: 1;
+    justify-content: center;
+    padding: var(--gv-space-32) var(--gv-space-24);
+}
+
+.gv-welcome__brand {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: var(--gv-space-24);
+}
+
+.gv-welcome__headline {
+    -unity-font-definition: url("/Assets/GameVerse/UI/Fonts/BricolageGrotesque-Bold.ttf");
+    font-size: var(--gv-font-size-display);
+    white-space: normal;
+    margin-bottom: var(--gv-space-12);
+}
+
+.gv-welcome__actions {
+    margin-top: var(--gv-space-32);
+}
+
+/* ---------- Choices (player count, AI level, best of, house rules) ---------- */
+
+.gv-choices {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: var(--gv-space-8) 0 var(--gv-space-16) 0;
+}
+
+.gv-choice {
+    min-height: var(--gv-layout-touch-target);
+    min-width: var(--gv-space-56);
+    margin: 0 var(--gv-space-8) var(--gv-space-8) 0;
+    padding: 0 var(--gv-space-16);
+    /* About half the height: Unity draws an oversized pill radius on a wide button as an ellipse. */
+    border-radius: var(--gv-radius-lg);
+    border-width: var(--gv-border-width);
+    border-color: var(--gv-color-border-strong);
+    background-color: var(--gv-color-bg-surface);
+    color: var(--gv-color-text-secondary);
+    -unity-font-definition: url("/Assets/GameVerse/UI/Fonts/Manrope-Bold.ttf");
+    font-size: var(--gv-font-size-body-sm);
+}
+
+.gv-choice:active {
+    scale: var(--gv-motion-press-scale) var(--gv-motion-press-scale);
+}
+
+/* "On" is a filled chip, "off" an outline: the fill, not only the colour, tells them apart. */
+.gv-choice--on {
+    border-color: var(--gv-color-brand-volt);
+    color: var(--gv-color-brand-volt-ink);
+    background-color: var(--gv-color-brand-volt);
+}
+
+.gv-join {
+    flex-direction: row;
+    align-items: center;
+    margin-top: var(--gv-space-8);
+}
+
+.gv-join__field {
+    flex-grow: 1;
+    margin-right: var(--gv-space-8);
+}
+
+.gv-join__field > .unity-text-field__input {
+    min-height: var(--gv-layout-touch-target);
+    background-color: var(--gv-color-bg-inset);
+    border-color: var(--gv-color-border-strong);
+    border-radius: var(--gv-radius-md);
+    color: var(--gv-color-text-primary);
+    -unity-font-definition: url("/Assets/GameVerse/UI/Fonts/Manrope-Bold.ttf");
+    font-size: var(--gv-font-size-title-sm);
+    letter-spacing: 3px;
+}
+
+/* ---------- Matchmaking ---------- */
+
+.gv-search {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+.gv-search__pulse {
+    width: 160px;
+    height: 160px;
+    border-radius: var(--gv-radius-pill);
+    background-color: var(--gv-color-bg-elevated);
+    border-width: 2px;
+    border-color: var(--gv-color-brand-volt);
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--gv-space-32);
+}
+
+.gv-search__time {
+    -unity-font-definition: url("/Assets/GameVerse/UI/Fonts/BricolageGrotesque-Bold.ttf");
+    font-size: var(--gv-font-size-hero-number);
+}
+
+/* ---------- Room ---------- */
+
+.gv-seats {
+    margin-top: var(--gv-space-16);
+}
+
+.gv-seats > .gv-player {
+    flex-grow: 0;
+    flex-basis: auto;
+    margin: 0 0 var(--gv-space-8) 0;
+}
+
+/* ---------- Game HUD ---------- */
+
+.gv-hud {
+    flex-grow: 1;
+}
+
+.gv-hud__players {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    align-content: flex-start;
+    padding: var(--gv-space-4) var(--gv-space-12);
+}
+
+/* Two chips per row, whatever the player count. */
+.gv-hud__players > .gv-player {
+    flex-grow: 1;
+    flex-basis: 40%;
+}
+
+.gv-hud__banner {
+    background-color: var(--gv-color-state-warning);
+    color: var(--gv-color-brand-volt-ink);
+    -unity-font-definition: url("/Assets/GameVerse/UI/Fonts/Manrope-Bold.ttf");
+    font-size: var(--gv-font-size-body-sm);
+    padding: var(--gv-space-8) var(--gv-space-16);
+    -unity-text-align: middle-center;
+}
+
+.gv-hud__game {
+    flex-grow: 1;
+}
+
+/* ---------- Results ---------- */
+
+.gv-results__headline {
+    -unity-font-definition: url("/Assets/GameVerse/UI/Fonts/BricolageGrotesque-Bold.ttf");
+    font-size: var(--gv-font-size-display);
+    margin: var(--gv-space-24) 0 var(--gv-space-8) 0;
+    white-space: normal;
+}
+
+.gv-results__row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.gv-results__row > .gv-player {
+    flex-grow: 1;
+}
+
+.gv-results__place {
+    -unity-font-definition: url("/Assets/GameVerse/UI/Fonts/BricolageGrotesque-Bold.ttf");
+    font-size: var(--gv-font-size-title);
+    width: var(--gv-space-56);
+}

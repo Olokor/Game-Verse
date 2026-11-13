@@ -8,6 +8,7 @@ Unity **6000.6.8f1** (Unity 6.6; moves to 6.7 LTS when released, see [ADR-0004](
 make rules         # build GameVerse.Rules + Contracts, copy DLLs and golden fixtures into this project
 make unity-setup   # apply project settings and generated assets (ProjectSetup.Apply), idempotent
 make unity-test    # EditMode tests headless -> apps/mobile/TestResults/editmode.xml
+make unity-screens # PlayMode screen tour against `make up`: every screen at 360x800 -> apps/mobile/TestResults/screens
 make android       # development IL2CPP APK -> apps/mobile/Build/Android/GameVerse.apk
 make device-check  # install on the USB phone, launch, check GV_SELFCHECK (rules) and GV_ERRORCHECK (error reporting)
 ```
@@ -32,13 +33,17 @@ Assets/GameVerse/
   UI/          GameVerse.UI        Tokens.uss + Tokens.g.cs (generated), Theme/, Components/ (GameCard, ButtonStyle), Home/, Fonts/,
                                    Motion/ (Tween, reduced motion, haptics)
   Platform/    GameVerse.Platform  Boot (scene entry), Diagnostics/RulesSelfCheck, Session/ (PlayerSession, SecureStore),
-                                   Play/GameHost (IGameHost over the realtime connection)
+                                   Play/GameHost (IGameHost over the realtime connection), Shell/ (router, services,
+                                   dev autoplay), Screens/ + Resources/Screens/*.uxml (Welcome, Home, Lobby, Matchmaking,
+                                   Room, Game HUD, Results)
   Games/Ludo/  GameVerse.Games.Ludo  LudoModule (IGameModule + IGameView), LocalLudoHost (pass-and-play), Logic/ (board
                                    layout, state mapper, transitions, input controller), View/ (board, tokens, die, sounds)
   Plugins/Shared/  GameVerse.Rules.dll + GameVerse.Contracts.dll (build output of `make rules`, never edit) + link.xml
   Resources/Fixtures/  golden JSON copied by `make rules` (gitignored)
   Editor/      ProjectSetup (all settings as code), BuildScript
-  Tests/EditMode/  PRNG parity, wire format, API client, session, realtime connection, Ludo layout/logic/pass-and-play
+  Tests/EditMode/  PRNG parity, wire format, API client, session, realtime connection, Ludo layout/logic/pass-and-play,
+                   router, house rules
+  Tests/PlayMode/  screen tour (opt-in: GV_SCREENSHOTS=1, needs `make up`)
   Scenes/Boot.unity, Rendering/ (URP asset: renderer 0 = 2D, renderer 1 = Forward+ for 3D games)
 ```
 

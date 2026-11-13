@@ -4,7 +4,9 @@
         "GameVerse.Core",
         "GameVerse.Net",
         "GameVerse.UI",
-        "UniTask"
+        "UniTask",
+        "GameVerse.Games.Ludo",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

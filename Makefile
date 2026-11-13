@@ -17,7 +17,7 @@ SHARED_LIBS := shared/GameVerse.Rules/GameVerse.Rules.csproj shared/GameVerse.Co
 REQUIRE_ENV = $(if $(wildcard .env),,$(error .env not found. Copy .env.example to .env first))
 
 .DEFAULT_GOAL := help
-.PHONY: help build test rules up down logs migrate schema tokens tokens-check install web web-test e2e unity-setup unity-test android device-check errors-up errors-down errors-setup
+.PHONY: help build test rules up down logs migrate schema tokens tokens-check install web web-test e2e unity-setup unity-test unity-screens android device-check errors-up errors-down errors-setup
 
 help: ## List targets
 	@echo make build    - build the solution - backend and shared
@@ -101,6 +101,9 @@ e2e: ## Playwright smoke + screenshots (first run: pnpm --filter @gameverse/web 
 
 unity-setup: rules ## Apply Unity project settings (ProjectSetup.Apply)
 	node infrastructure/scripts/unity-batch.mjs $(UNITY_PROJECT)/Logs/setup.log "GV_SETUP" "ok" -- "$(UNITY)" -batchmode -nographics -quit -projectPath $(UNITY_PROJECT) -executeMethod GameVerse.Editor.ProjectSetup.Apply
+
+unity-screens: rules ## Render every platform screen at 360x800 against `make up` -> apps/mobile/TestResults/screens (PlayMode)
+	GV_SCREENSHOTS=1 node infrastructure/scripts/unity-batch.mjs $(UNITY_PROJECT)/Logs/playmode.log "Test run completed" "Exiting with code 0" -- "$(UNITY)" -batchmode -projectPath $(UNITY_PROJECT) -runTests -testPlatform PlayMode -testResults TestResults/playmode.xml
 
 unity-test: rules ## Unity EditMode tests (headless)
 	node infrastructure/scripts/unity-batch.mjs $(UNITY_PROJECT)/Logs/editmode.log "Test run completed" "Exiting with code 0" -- "$(UNITY)" -batchmode -nographics -projectPath $(UNITY_PROJECT) -runTests -testPlatform EditMode -testResults TestResults/editmode.xml

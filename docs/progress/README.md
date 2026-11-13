@@ -20,10 +20,10 @@ The running record of what has been built, step by step, so anyone (or the next 
 | Phase | Branch | Status |
 |---|---|---|
 | [Phase 0: foundation](phase-0/README.md) | `phase-0-foundation` | Done, merged into `main` (2026-11-12) |
-| [Phase 1: Ludo vertical slice](phase-1/README.md) | `phase-1-ludo-slice` | In progress: Prompts 1.1 to 1.5 done, 1.6 in progress (parts A and B committed, C being built) |
+| [Phase 1: Ludo vertical slice](phase-1/README.md) | `phase-1-ludo-slice` | In progress: Prompts 1.1 to 1.5 done, 1.6 in progress (parts A, B and C committed; D next) |
 | Phase 2: progression, social, admin | `phase-2-progression-social` | Not started |
 | Phases 3 to 7 | | Not started |
 
 ## Where to pick up
 
-**Prompt 1.6, part C (platform screens in Unity).** See [phase-1/prompt-1.6.md](phase-1/prompt-1.6.md) for the exact state and the next steps.
+**Prompt 1.6, part D (Android build and device acceptance; needs a phone on USB).** See [phase-1/prompt-1.6.md](phase-1/prompt-1.6.md) for the exact state and the next steps.

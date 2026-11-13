@@ -64,8 +64,11 @@ namespace GameVerse.Games.Ludo.View
             curtain.RegisterCallback<PointerUpEvent>(_ => curtainTap?.TrySetResult());
             Add(curtain);
 
+            dice.RegisterCallback<PointerDownEvent>(_ => dice.style.scale = new Scale(Vector3.one * GameVerseTokens.Motion.PressScale));
+            dice.RegisterCallback<PointerLeaveEvent>(_ => dice.style.scale = new Scale(Vector3.one));
             dice.RegisterCallback<PointerUpEvent>(_ =>
             {
+                dice.style.scale = new Scale(Vector3.one);
                 Haptics.Light();
                 RollTapped?.Invoke();
             });
@@ -90,6 +93,7 @@ namespace GameVerse.Games.Ludo.View
         public void Setup(LudoStateDto state)
         {
             colors = state.Colors;
+            dice.Value = state.LastRoll == 0 ? 6 : state.LastRoll;
             board.Configure(colors, state.Rules.SafeSquares);
             pieces.Clear();
             tokens = new TokenElement[state.Tokens.Length][];
@@ -142,7 +146,7 @@ namespace GameVerse.Games.Ludo.View
                 }
             }
 
-            dice.Value = state.LastRoll;
+            dice.Value = state.LastRoll == 0 ? 6 : state.LastRoll; // a full face before the first roll, not an empty box
             Snap(state);
         }
 
@@ -239,7 +243,7 @@ namespace GameVerse.Games.Ludo.View
                 for (var t = 0; t < LudoBoard.TokensPerSeat; t++)
                 {
                     tokens[seat][t].Cell = LudoBoardLayout.TokenCentre(colors[seat], state.Tokens[seat][t], t);
-                    tokens[seat][t].style.opacity = Array.IndexOf(state.Left, seat) >= 0 ? 0.35f : 1f;
+                    tokens[seat][t].style.opacity = Array.IndexOf(state.Left, seat) >= 0 ? GameVerseTokens.Opacity.Inactive : 1f;
                 }
             }
 

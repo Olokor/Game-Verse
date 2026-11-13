@@ -2,7 +2,7 @@
 
 .ludo {
     flex-grow: 1;
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 .ludo__table {

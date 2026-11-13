@@ -29,7 +29,6 @@ namespace GameVerse.Editor
         public const int ForwardPlusRendererIndex = 1;
         public const string PanelSettingsPath = Root + "/UI/GameVersePanelSettings.asset";
         public const string ThemePath = Root + "/UI/Theme/GameVerse.tss";
-        public const string HomeDocumentPath = Root + "/UI/Home/Home.uxml";
         public const string BootScenePath = Root + "/Scenes/Boot.unity";
 
         // API location baked into builds (ADR-0011). Committed empty; BuildScript fills it from GAMEVERSE_API_URL.
@@ -238,6 +237,12 @@ namespace GameVerse.Editor
         private static void EnsureBootScene(PanelSettings panel)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(BootScenePath));
+            if (BootSceneIsCurrent(panel))
+            {
+                EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(BootScenePath, true) };
+                return; // regenerating an identical scene only churns its object ids in git
+            }
+
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             var cameraGo = new GameObject("Main Camera");
@@ -246,15 +251,37 @@ namespace GameVerse.Editor
             camera.backgroundColor = GameVerse.UI.GameVerseTokens.Color.Bg.Base;
             camera.orthographic = true;
             cameraGo.tag = "MainCamera";
+            cameraGo.AddComponent<AudioListener>(); // without one no game sound plays
 
             var boot = new GameObject("Boot");
             var document = boot.AddComponent<UIDocument>();
             document.panelSettings = panel;
-            document.visualTreeAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(HomeDocumentPath);
+            document.visualTreeAsset = null; // Boot builds the shell (router and screens) in code from Resources/Screens
             boot.AddComponent<Boot>();
 
             EditorSceneManager.SaveScene(scene, BootScenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(BootScenePath, true) };
+        }
+
+        /// <summary>True when the saved Boot scene already has a camera and a Boot object wired to this panel.</summary>
+        private static bool BootSceneIsCurrent(PanelSettings panel)
+        {
+            if (!File.Exists(BootScenePath))
+            {
+                return false;
+            }
+
+            var scene = EditorSceneManager.OpenScene(BootScenePath, OpenSceneMode.Single);
+            var hasCamera = false;
+            var bootReady = false;
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                hasCamera |= root.GetComponent<Camera>() != null && root.GetComponent<AudioListener>() != null;
+                var document = root.GetComponent<UIDocument>();
+                bootReady |= root.GetComponent<Boot>() != null && document != null && document.panelSettings == panel && document.visualTreeAsset == null;
+            }
+
+            return hasCamera && bootReady;
         }
     }
 }

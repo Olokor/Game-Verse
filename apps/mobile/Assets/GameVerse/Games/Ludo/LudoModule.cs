@@ -84,6 +84,27 @@ namespace GameVerse.Games.Ludo
             }
         }
 
+        /// <summary>
+        /// Development autoplay (the device acceptance check): takes the same action a player's tap would, through the same
+        /// controller and host, once the board is still. Roll when allowed, otherwise the first legal token.
+        /// </summary>
+        public void AutoplayStep()
+        {
+            if (controller is null || Presenting || controller.InFlight)
+            {
+                return;
+            }
+
+            if (controller.CanRoll)
+            {
+                Submit(controller.Roll());
+            }
+            else if (controller.MovableTokens() is { Count: > 0 } movable)
+            {
+                Submit(controller.Move(movable[0].Seat, movable[0].Token));
+            }
+        }
+
         /// <summary>Gives up the game (allowed at any time; the server ranks a leaver last).</summary>
         public void Resign() => Submit(controller.Forfeit());
 

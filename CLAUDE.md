@@ -335,6 +335,7 @@ make web-test      # web typecheck + Vitest (includes the no-hardcoded-design-va
 make e2e           # Playwright smoke + screenshots at 360x800 and 1440x900
 make unity-setup   # apply Unity project settings and generated assets (ProjectSetup.Apply)
 make unity-test    # Unity EditMode tests headless (UNITY=path overrides the editor)
+make unity-screens # render every Unity platform screen at 360x800 against `make up` -> apps/mobile/TestResults/screens
 make android       # IL2CPP ARM64 development APK -> apps/mobile/Build/Android/GameVerse.apk
 make device-check  # install on the USB phone, launch, require "GV_SELFCHECK prng ok" and GV_ERRORCHECK (event found in GlitchTip when sent)
 # Linux/CI Unity tests: unity-editor -batchmode -nographics -projectPath apps/mobile -runTests -testPlatform EditMode -testResults TestResults/editmode.xml -logFile -

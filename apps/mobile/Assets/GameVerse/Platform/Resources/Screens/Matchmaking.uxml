@@ -1,0 +1,17 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- Matchmaking (DESIGN_SYSTEM screen 5): animated search, wait time, cancel, vs AI while you wait. -->
+    <ui:VisualElement class="gv-page__header">
+        <ui:Label name="title" text="Quick match" class="gv-page__title" />
+    </ui:VisualElement>
+    <ui:VisualElement class="gv-search">
+        <ui:VisualElement name="pulse" class="gv-search__pulse">
+            <ui:Label name="time" text="0:00" class="gv-search__time" />
+        </ui:VisualElement>
+        <ui:Label name="status" text="Finding players" class="gv-empty__title" />
+        <ui:Label name="detail" class="gv-muted" />
+    </ui:VisualElement>
+    <ui:VisualElement class="gv-page__footer">
+        <ui:Button name="vs-ai" text="Play vs AI while you wait" class="gv-button gv-button--secondary gv-button--md" />
+        <ui:Button name="cancel" text="Cancel" class="gv-button gv-button--ghost gv-button--md" />
+    </ui:VisualElement>
+</ui:UXML>

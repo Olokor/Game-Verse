@@ -15,7 +15,7 @@ The Ludo game module in Unity, on the shared engine with no rule logic in Unity,
 |---|---|---|---|
 | A | Client plumbing: API client, guest session, Android Keystore secure store, realtime connection, `GameHost` | Done | `9eb4eb7` |
 | B | Ludo module: board, tokens, die drawn in code; transitions and animations; synthesised sounds; pass-and-play host | Done | `8e07f23` |
-| C | Platform screens: Welcome, Home, Lobby, Matchmaking, Private room, Game (HUD), Results; router; new components | **In progress** | |
+| C | Platform screens: Welcome, Home, Lobby, Matchmaking, Private room, Game (HUD), Results; router; new components | Done | part C commit |
 | D | Android build, autoplay device acceptance against the backend, screenshots and ui-reviewer, your playtest | Not started | |
 
 ## Part A: done (`9eb4eb7`)
@@ -41,22 +41,36 @@ The Ludo game module in Unity, on the shared engine with no rule logic in Unity,
   - New tokens: `color.game.ludo.*` and `motion.game.*`.
 - **Verified:** 39/39 EditMode tests, including a full pass-and-play game through the host.
 
-## Part C: in progress
-- **Written so far** (all compiling, 39/39 tests still passing):
-  - **Components** (`UI/Components/PlatformComponents.cs`): ModeTile, PlayerChip, RoomCodeDisplay, Sheet, Toast, Skeleton; their styles in `Components.uss`; a new `color.bg.scrim` token.
-  - **Shell** (`Platform/Shell/`):
-    - `AppServices` (session, router, connections, toasts);
-    - `AppScreen` (base class);
-    - `Router` (stack, 240ms transitions);
-    - `DevLaunch` (autoplay launch extra);
-    - `Autoplay`.
-  - **Screens** (`Platform/Screens/` plus `Platform/Resources/Screens/*.uxml`, `Screens.uss`): Welcome, Home (real catalog), Lobby (modes, players, AI level, best of, house rules sheet, join by code), Matchmaking (polls every second), Room (live lobby socket, ready, start, rules, copy and share), Game (HUD: chips, turn clock, reconnect banner, leave), Results.
-  - **Boot** now builds the shell. `ProjectSetup` only rebuilds the Boot scene when it is missing or wrong (this ends the scene churn), and the mock `UI/Home/Home.uxml` is gone.
-- **Next steps:**
-  1. Run `make unity-setup`, then a play test in the editor against `make up`: does UI Toolkit get taps without an EventSystem?
-  2. Capture screenshots at 360×800 and run ui-reviewer.
-  3. EditMode tests for the router and the house-rules mapping.
-  4. Update ADR-0011 (part C), the Unity README and this file; commit part C.
+## Part C: done (commit: see the table)
+- **What was built:**
+  - **Components** (`UI/Components/PlatformComponents.cs`): ModeTile, PlayerChip (shape glyph, optional online dot, turn bar), RoomCodeDisplay, Sheet, Toast, Skeleton.
+  - **Shell** (`Platform/Shell/`): AppServices, AppScreen, Router (closes sheets, back-button order), DevLaunch, Autoplay.
+  - **Screens** (`Platform/Screens/` plus `Platform/Resources/Screens/*.uxml`, `Screens.uss`): Welcome, Home, Lobby (with the house-rules sheet), Matchmaking, Room, Game (HUD), Results.
+  - **Boot** builds the shell. The Boot scene is regenerated only when it is missing or wrong (no more git churn), and its camera now has an AudioListener. The mock `UI/Home` is removed.
+  - **New tokens:** `color.bg.scrim`, `opacity.*`, `motion.toast-hold`.
+- **How it was checked:**
+  - `make unity-screens`, a new PlayMode screen tour against `make up`: 12 screenshots at 360×800 in `apps/mobile/TestResults/screens/`, reviewed by eye.
+  - **First tour, fixed:** oversized HUD chips, a gap above the board, a blank die face, a leaked toast, an invented "0 playing" count, a squashed top bar, elliptical choice chips.
+  - **The ui-reviewer agent:** 18 findings. Fixed: all 4 critical, all 5 high, and the cheap medium ones.
+    - token touch area at least 44px, and larger shapes;
+    - back closes sheets first;
+    - "vs AI while you wait" no longer uses a disposed screen;
+    - the lobby no longer opens twice;
+    - loading and double-tap guards;
+    - a reduced-motion fade;
+    - "on" choices filled;
+    - 44px targets;
+    - the Home empty state;
+    - left-aligned tile text;
+    - a reason on the Start button;
+    - a pressed die;
+    - shape avatars;
+    - opacity tokens.
+  - **Deferred** (listed in ADR-0011): a Results celebration, a room QR code, tokenised pulse sizes and letter spacing, header icons.
+  - EditMode tests: 42/42, including the router and house rules.
+- **Problems met:**
+  - the catalog answered in 5.7s once on a cold API (15ms warm), so the tour waits for the cards;
+  - a heredoc with quotes broke the shell twice, so longer edit scripts now go to a scratchpad file.
 
 ## Part D: not started
 1. `make android`, and add `adb reverse tcp:8080` to device-check.

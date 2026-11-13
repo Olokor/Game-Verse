@@ -1,0 +1,29 @@
+{
+    "name": "GameVerse.Tests.PlayMode",
+    "rootNamespace": "GameVerse.Tests.PlayMode",
+    "references": [
+        "GameVerse.Core",
+        "GameVerse.Net",
+        "GameVerse.UI",
+        "GameVerse.Platform",
+        "GameVerse.Games.Ludo",
+        "UniTask",
+        "UnityEngine.TestRunner"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "GameVerse.Rules.dll",
+        "GameVerse.Contracts.dll",
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -139,6 +139,7 @@ namespace GameVerse.UI
             actions.style.display = hero ? DisplayStyle.Flex : DisplayStyle.None;
             chips.style.display = variant == "compact" ? DisplayStyle.None : DisplayStyle.Flex;
             live.text = FormatCompact(livePlayers) + " playing";
+            live.style.display = livePlayers > 0 ? DisplayStyle.Flex : DisplayStyle.None; // no invented counts (ADR-0007)
         }
 
         // Same output as the web's Intl compact format for the ranges we show ("12.8K").

@@ -43,6 +43,27 @@ namespace GameVerse.UI.Motion
             }
         }
 
+        /// <summary>
+        /// Fades an element in over motion.fast. Runs under reduced motion too: it is what replaces slides and scales there
+        /// (DESIGN_SYSTEM section 5).
+        /// </summary>
+        public static async UniTask Fade(UnityEngine.UIElements.VisualElement element, CancellationToken ct = default)
+        {
+            var start = Time.realtimeSinceStartup;
+            var seconds = GameVerseTokens.Motion.Fast.Duration;
+            while (true)
+            {
+                var t = Mathf.Clamp01((Time.realtimeSinceStartup - start) / seconds);
+                element.style.opacity = t;
+                if (t >= 1)
+                {
+                    return;
+                }
+
+                await UniTask.Yield(PlayerLoopTiming.Update, ct);
+            }
+        }
+
         /// <summary>CSS cubic-bezier(x1, y1, x2, y2) evaluated at time t (Newton iterations on x).</summary>
         public static float CubicBezier(float x1, float y1, float x2, float y2, float t)
         {

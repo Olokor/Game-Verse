@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- Results (DESIGN_SYSTEM screen 8): placings, reason, rating change, rematch or play again. -->
+    <ui:ScrollView mode="Vertical" vertical-scroller-visibility="Hidden" class="gv-page__body">
+        <ui:Label name="headline" class="gv-results__headline" />
+        <ui:Label name="reason" class="gv-muted" />
+        <ui:VisualElement name="placings" class="gv-seats" />
+        <ui:Label name="rating" class="gv-muted" />
+    </ui:ScrollView>
+    <ui:VisualElement class="gv-page__footer">
+        <ui:Button name="again" text="Play again" class="gv-button gv-button--primary gv-button--lg" />
+        <ui:Button name="home" text="Home" class="gv-button gv-button--ghost gv-button--md" />
+    </ui:VisualElement>
+</ui:UXML>

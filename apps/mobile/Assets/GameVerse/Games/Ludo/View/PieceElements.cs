@@ -13,6 +13,7 @@ namespace GameVerse.Games.Ludo.View
     {
         private readonly int color;
         private bool movable;
+        private float discSize;
 
         public TokenElement(int seat, int token, int color)
         {
@@ -48,7 +49,9 @@ namespace GameVerse.Games.Ludo.View
         /// <summary>Places the element for a board whose cells are <paramref name="cellSize"/> pixels.</summary>
         public void Layout(float cellSize, Vector2 offset)
         {
-            var size = cellSize * 0.84f;
+            // The disc is drawn at 0.84 of a cell; the element (its touch area) is never smaller than the 44px target.
+            discSize = cellSize * 0.84f;
+            var size = Mathf.Max(discSize, TouchTarget);
             style.width = size;
             style.height = size;
             style.left = ((Cell.x + offset.x) * cellSize) - (size / 2);
@@ -56,11 +59,14 @@ namespace GameVerse.Games.Ludo.View
             style.scale = new Scale(new Vector3(Squash.x, Squash.y, 1));
         }
 
+        /// <summary>Minimum touch area in panel pixels (layout.touch-target).</summary>
+        public const float TouchTarget = 44;
+
         private void Draw(MeshGenerationContext context)
         {
             var p = context.painter2D;
-            var r = contentRect.width / 2;
-            var centre = new Vector2(r, r);
+            var r = (discSize > 0 ? discSize : contentRect.width) / 2;
+            var centre = contentRect.center;
             if (movable)
             {
                 p.strokeColor = LudoPalette.Highlight;
@@ -81,7 +87,7 @@ namespace GameVerse.Games.Ludo.View
             p.Fill();
 
             p.fillColor = LudoPalette.Ink;
-            LudoPalette.FillShape(p, LudoPalette.ShapeOf(color), centre, r * 0.32f);
+            LudoPalette.FillShape(p, LudoPalette.ShapeOf(color), centre, r * 0.45f);
         }
     }
 
@@ -176,6 +182,25 @@ namespace GameVerse.Games.Ludo.View
             p.ArcTo(new Vector2(x, y + s), new Vector2(x, y), r);
             p.ArcTo(new Vector2(x, y), new Vector2(x + s, y), r);
             p.ClosePath();
+        }
+    }
+
+    /// <summary>A seat's token shape in ink, for avatars: names like "Player 2" all start with P, shapes do not.</summary>
+    public sealed class ShapeBadge : VisualElement
+    {
+        private readonly int color;
+
+        public ShapeBadge(int color)
+        {
+            this.color = color;
+            pickingMode = PickingMode.Ignore;
+            style.width = Length.Percent(60);
+            style.height = Length.Percent(60);
+            generateVisualContent += context =>
+            {
+                context.painter2D.fillColor = LudoPalette.Ink;
+                LudoPalette.FillShape(context.painter2D, LudoPalette.ShapeOf(this.color), contentRect.center, contentRect.width / 2);
+            };
         }
     }
 }
