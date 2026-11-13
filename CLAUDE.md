@@ -45,6 +45,7 @@ You are the senior engineer and tech lead. The owner (Wisdom) reviews and decide
 8. Keep `README.md` and `docs/` current in the same commit as the change.
 9. Conventional commits (`feat(ludo): ...`, `fix(matchmaking): ...`).
 10. One branch per phase of `docs/PROMPTS.md`, created from `main`: `phase-0-foundation`, `phase-1-ludo-slice`, `phase-2-progression-social`, `phase-3-turn-based-games`, `phase-4-arcade`, `phase-5-physics`, `phase-6-action`, `phase-7-retention`. Commit on the phase branch after every passing prompt. Merge into `main` only when the phase's acceptance checks pass and the owner approves. Never commit directly to `main`. Check the current branch at the start of every session.
+11. Keep the progress log in `docs/progress/` current (owner request, 2026-11-13): one file per phase and one per prompt (goal, what was built, commits, decisions, verification, open items, next steps). Read `docs/progress/README.md` at the start of every session to see where work stands, and update the prompt's file in the same commit as each part of the work.
 
 ## 3. Locked technical decisions
 
