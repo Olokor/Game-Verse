@@ -15,7 +15,7 @@ The Ludo game module in Unity, on the shared engine with no rule logic in Unity,
 |---|---|---|---|
 | A | Client plumbing: API client, guest session, Android Keystore secure store, realtime connection, `GameHost` | Done | `9eb4eb7` |
 | B | Ludo module: board, tokens, die drawn in code; transitions and animations; synthesised sounds; pass-and-play host | Done | `8e07f23` |
-| C | Platform screens: Welcome, Home, Lobby, Matchmaking, Private room, Game (HUD), Results; router; new components | Done | part C commit |
+| C | Platform screens: Welcome, Home, Lobby, Matchmaking, Private room, Game (HUD), Results; router; new components | Done | `b863baf` |
 | D | Android build, autoplay device acceptance against the backend, screenshots and ui-reviewer, your playtest | Not started | |
 
 ## Part A: done (`9eb4eb7`)
@@ -41,7 +41,7 @@ The Ludo game module in Unity, on the shared engine with no rule logic in Unity,
   - New tokens: `color.game.ludo.*` and `motion.game.*`.
 - **Verified:** 39/39 EditMode tests, including a full pass-and-play game through the host.
 
-## Part C: done (commit: see the table)
+## Part C: done (`b863baf`)
 - **What was built:**
   - **Components** (`UI/Components/PlatformComponents.cs`): ModeTile, PlayerChip (shape glyph, optional online dot, turn bar), RoomCodeDisplay, Sheet, Toast, Skeleton.
   - **Shell** (`Platform/Shell/`): AppServices, AppScreen, Router (closes sheets, back-button order), DevLaunch, Autoplay.
