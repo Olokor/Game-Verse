@@ -43,8 +43,9 @@ You are the senior engineer and tech lead. The owner (Wisdom) reviews and decide
 6. Ask before any decision that changes product scope, the tech stack, data models shared across games, or anything with money.
 7. Every session ends with: what changed, files touched, how to run it, how to test it, open TODOs.
 8. Keep `README.md` and `docs/` current in the same commit as the change.
-9. Conventional commits (`feat(ludo): ...`, `fix(matchmaking): ...`).
+9. Conventional commits (`feat(ludo): ...`, `fix(matchmaking): ...`). Commits and PRs are authored by the owner only (owner request, 2026-11-17): no `Co-Authored-By` trailers, no "Generated with Claude Code" lines, no mention of Claude, Anthropic or any AI assistant in commit messages, PR titles or PR descriptions. Attribution is turned off in `.claude/settings.json`, and the local `commit-msg` hook rejects such lines. References to the `CLAUDE.md` file name are fine.
 10. One branch per phase of `docs/PROMPTS.md`, created from `main`: `phase-0-foundation`, `phase-1-ludo-slice`, `phase-2-progression-social`, `phase-3-turn-based-games`, `phase-4-arcade`, `phase-5-physics`, `phase-6-action`, `phase-7-retention`. Commit on the phase branch after every passing prompt. Merge into `main` only when the phase's acceptance checks pass and the owner approves. Never commit directly to `main`. Check the current branch at the start of every session.
+11. Keep the progress log in `docs/progress/` current (owner request, 2026-11-13): one file per phase and one per prompt (goal, what was built, commits, decisions, verification, open items, next steps). Read `docs/progress/README.md` at the start of every session to see where work stands, and update the prompt's file in the same commit as each part of the work.
 
 ## 3. Locked technical decisions
 
@@ -171,7 +172,7 @@ SessionManifest (platform to game):
   "gameId": "ludo",
   "gameVersion": "1.0.0",
   "sessionId": "uuid",
-  "mode": "online_private | online_ranked | local | vs_ai | solo",
+  "mode": "online_private | online_ranked | online_casual | local | vs_ai | solo",
   "localPlayerId": "uuid",
   "players": [{ "id": "uuid", "displayName": "...", "seat": 0, "cosmetics": {...}, "isAI": false }],
   "config": { "variant": "...", "houseRules": {...}, "aiLevel": 3 },
@@ -334,8 +335,10 @@ make web-test      # web typecheck + Vitest (includes the no-hardcoded-design-va
 make e2e           # Playwright smoke + screenshots at 360x800 and 1440x900
 make unity-setup   # apply Unity project settings and generated assets (ProjectSetup.Apply)
 make unity-test    # Unity EditMode tests headless (UNITY=path overrides the editor)
+make unity-screens # render every Unity platform screen at 360x800 against `make up` -> apps/mobile/TestResults/screens
 make android       # IL2CPP ARM64 development APK -> apps/mobile/Build/Android/GameVerse.apk
 make device-check  # install on the USB phone, launch, require "GV_SELFCHECK prng ok" and GV_ERRORCHECK (event found in GlitchTip when sent)
+make device-accept # USB phone autoplays a full private-room Ludo game vs a bot through `make up` (Prompt 1.6 acceptance)
 # Linux/CI Unity tests: unity-editor -batchmode -nographics -projectPath apps/mobile -runTests -testPlatform EditMode -testResults TestResults/editmode.xml -logFile -
 make tokens        # regenerate design tokens (CSS, USS, C#) from packages/design-tokens/tokens.json
 make tokens-check  # fail if a token output is stale or missing a token

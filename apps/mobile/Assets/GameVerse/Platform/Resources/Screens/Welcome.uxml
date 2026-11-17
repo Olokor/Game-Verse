@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- First run (DESIGN_SYSTEM screen 1): guest play in one tap; returning players sign in automatically. -->
+    <ui:VisualElement class="gv-welcome">
+        <ui:VisualElement class="gv-welcome__brand">
+            <ui:Label text="G" class="gv-logo" />
+            <ui:Label text="GameVerse" class="gv-wordmark" />
+        </ui:VisualElement>
+        <ui:Label text="Ludo, Whot, Chess and more. One account, all your games." class="gv-welcome__headline" />
+        <ui:Label text="Play now as a guest. You can add an email later to keep your progress on any device." class="gv-muted" />
+        <ui:VisualElement name="signing-in" class="gv-welcome__actions" />
+        <ui:VisualElement name="actions" class="gv-welcome__actions">
+            <ui:Label name="error" class="gv-error" />
+            <ui:Button name="play" text="Play as guest" class="gv-button gv-button--primary gv-button--lg" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

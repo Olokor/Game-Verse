@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- In-game HUD frame (DESIGN_SYSTEM screen 7): players and turn clock, connection status, leave. -->
+    <ui:VisualElement class="gv-hud">
+        <ui:VisualElement class="gv-page__header">
+            <ui:Label name="title" text="Ludo" class="gv-page__title" />
+            <ui:Button name="leave" text="Leave" class="gv-button gv-button--ghost gv-button--sm" />
+        </ui:VisualElement>
+        <ui:Label name="banner" text="Reconnecting..." class="gv-hud__banner" />
+        <ui:VisualElement name="players" class="gv-hud__players" />
+        <ui:VisualElement name="game" class="gv-hud__game" />
+    </ui:VisualElement>
+</ui:UXML>

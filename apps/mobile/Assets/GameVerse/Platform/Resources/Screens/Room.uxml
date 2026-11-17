@@ -1,0 +1,17 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- Private room (DESIGN_SYSTEM screen 6): code, seats with ready states, rules, start. Updates live. -->
+    <ui:VisualElement class="gv-page__header">
+        <ui:Button name="leave" text="Leave" class="gv-button gv-button--ghost gv-button--sm gv-back" />
+        <ui:Label name="title" text="Private room" class="gv-page__title" />
+        <ui:Button name="rules" text="Rules" class="gv-button gv-button--ghost gv-button--sm gv-back" />
+    </ui:VisualElement>
+    <ui:ScrollView mode="Vertical" vertical-scroller-visibility="Hidden" class="gv-page__body">
+        <ui:VisualElement name="code-slot" />
+        <ui:Label name="summary" class="gv-muted" />
+        <ui:VisualElement name="seats" class="gv-seats" />
+    </ui:ScrollView>
+    <ui:VisualElement class="gv-page__footer">
+        <ui:Button name="ready" text="I'm ready" class="gv-button gv-button--secondary gv-button--lg" />
+        <ui:Button name="start" text="Start game" class="gv-button gv-button--primary gv-button--lg" />
+    </ui:VisualElement>
+</ui:UXML>

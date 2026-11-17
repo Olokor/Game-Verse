@@ -1,0 +1,162 @@
+/* Ludo table layout. The board and pieces are drawn in code from tokens (LudoPalette); everything here uses var(--gv-*). */
+
+.ludo {
+    flex-grow: 1;
+}
+
+/* The board takes the space between the players strip and the dock, centred in it. */
+.ludo__table {
+    flex-grow: 1;
+    justify-content: center;
+    padding: var(--gv-space-4) var(--gv-space-8) var(--gv-space-12) var(--gv-space-8);
+}
+
+.ludo__board {
+    width: 100%;
+}
+
+/* Pieces and effects sit over the board, in the same pixel space. */
+.ludo__layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* The dock: the die in the thumb zone at the bottom, under a prompt in the acting seat's colour. */
+.ludo__dock {
+    flex-shrink: 0;
+    padding: var(--gv-space-16) var(--gv-space-16) var(--gv-space-24) var(--gv-space-16);
+    border-top-left-radius: var(--gv-radius-xl);
+    border-top-right-radius: var(--gv-radius-xl);
+    border-top-width: var(--gv-border-width);
+    border-top-color: var(--gv-color-border-subtle);
+    background-color: var(--gv-color-bg-surface);
+    align-items: center;
+    justify-content: center;
+}
+
+.ludo__prompt-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: var(--gv-space-16);
+}
+
+.ludo__pip {
+    width: var(--gv-space-24);
+    height: var(--gv-space-24);
+    border-radius: var(--gv-radius-pill);
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--gv-space-8);
+}
+
+.ludo__prompt {
+    -unity-font-definition: url("/Assets/GameVerse/UI/Fonts/BricolageGrotesque-SemiBold.ttf");
+    font-size: var(--gv-font-size-title-sm);
+    color: var(--gv-color-text-primary);
+    white-space: normal;
+}
+
+/* 72px die: the hero of the turn, well above the 44px touch minimum. */
+.ludo__dice {
+    width: var(--gv-space-72);
+    height: var(--gv-space-72);
+    flex-shrink: 0;
+}
+
+.ludo__hint {
+    -unity-font-definition: url("/Assets/GameVerse/UI/Fonts/Manrope-Bold.ttf");
+    font-size: var(--gv-font-size-label);
+    letter-spacing: 1px;
+    color: var(--gv-color-brand-volt);
+    margin-top: var(--gv-space-12);
+}
+
+.ludo__stack {
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 0 var(--gv-space-4);
+    border-radius: var(--gv-radius-pill);
+    background-color: var(--gv-color-bg-base);
+    color: var(--gv-color-text-primary);
+    -unity-font-definition: url("/Assets/GameVerse/UI/Fonts/Manrope-Bold.ttf");
+    font-size: var(--gv-font-size-caption);
+}
+
+.ludo__curtain {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--gv-color-bg-base);
+    align-items: center;
+    justify-content: center;
+}
+
+.ludo__curtain-emblem {
+    width: var(--gv-space-72);
+    height: var(--gv-space-72);
+    border-radius: var(--gv-radius-pill);
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--gv-space-24);
+}
+
+.ludo__curtain-button {
+    margin-top: var(--gv-space-32);
+    min-width: 60%;
+}
+
+/* Movable token: one crisp volt ring that breathes by opacity. */
+.ludo__ring {
+    position: absolute;
+    border-radius: var(--gv-radius-pill);
+    border-width: 2px;
+    border-color: var(--gv-color-brand-volt);
+}
+
+/* The die's "your roll" ring: crisp volt, no halo. */
+.ludo__dice-ring {
+    position: absolute;
+    left: 4%;
+    top: 0;
+    right: 4%;
+    bottom: 8%;
+    border-radius: var(--gv-radius-lg);
+    border-width: 2px;
+    border-color: var(--gv-color-brand-volt);
+}
+
+/* The win banner: a raised card centred on the board. */
+.ludo__banner {
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    top: 38%;
+    -unity-font-definition: url("/Assets/GameVerse/UI/Fonts/BricolageGrotesque-Bold.ttf");
+    font-size: var(--gv-font-size-display);
+    -unity-text-align: middle-center;
+    background-color: var(--gv-color-bg-elevated);
+    border-radius: var(--gv-radius-xl);
+    border-width: var(--gv-border-width);
+    border-color: var(--gv-color-border-strong);
+    padding: var(--gv-space-24) var(--gv-space-16);
+}
+
+.ludo__curtain-label {
+    -unity-font-definition: url("/Assets/GameVerse/UI/Fonts/BricolageGrotesque-Bold.ttf");
+    font-size: var(--gv-font-size-display);
+}
+
+.ludo__curtain-hint {
+    font-size: var(--gv-font-size-body);
+    color: var(--gv-color-text-secondary);
+    margin-top: var(--gv-space-12);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    padding: 0 var(--gv-space-32);
+}

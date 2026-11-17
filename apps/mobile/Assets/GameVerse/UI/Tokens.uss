@@ -4,6 +4,9 @@
   --gv-color-bg-surface: #12141C;
   --gv-color-bg-elevated: #1A1D28;
   --gv-color-bg-inset: #07080C;
+  --gv-color-bg-scrim: #000000A0;
+  --gv-color-bg-shadow-soft: #0000004D;
+  --gv-color-bg-shadow-strong: #000000A6;
   --gv-color-border-subtle: #232736;
   --gv-color-border-strong: #343A4F;
   --gv-color-text-primary: #F2F3F7;
@@ -25,6 +28,10 @@
   --gv-color-category-fight: #FF4D6A;
   --gv-color-category-adventure: #B07CFF;
   --gv-color-category-brain: #FFC23D;
+  --gv-color-game-ludo-red: #FF5468;
+  --gv-color-game-ludo-green: #3DDC97;
+  --gv-color-game-ludo-yellow: #FFC23D;
+  --gv-color-game-ludo-blue: #4DA3FF;
   --gv-color-rank-bronze: #C98A5A;
   --gv-color-rank-silver: #B9C2D0;
   --gv-color-rank-gold: #FFC23D;
@@ -58,6 +65,10 @@
   --gv-layout-gutter-desktop: 32px;
   --gv-layout-touch-target: 44px;
 
+  --gv-opacity-disabled: 0.45;
+  --gv-opacity-muted: 0.6;
+  --gv-opacity-inactive: 0.35;
+
   --gv-radius-sm: 8px;
   --gv-radius-md: 14px;
   --gv-radius-lg: 20px;
@@ -77,6 +88,12 @@
   --gv-motion-celebrate-duration-max: 1600ms;
   --gv-motion-ambient-duration: 1400ms;
   --gv-motion-press-scale: 0.96;
+  --gv-motion-toast-hold: 2800ms;
+  --gv-motion-game-dice-roll: 600ms;
+  --gv-motion-game-token-hop: 90ms;
+  --gv-motion-game-capture: 420ms;
+  --gv-motion-game-capture-burst: 400ms;
+  --gv-motion-game-home-ripple: 500ms;
 }
 
 /* Not expressible in USS, use GameVerseTokens in Tokens.g.cs:

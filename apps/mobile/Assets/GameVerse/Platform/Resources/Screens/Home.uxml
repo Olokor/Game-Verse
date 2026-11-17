@@ -1,0 +1,17 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- Home (DESIGN_SYSTEM screen 2): the real catalog. Playable games open their lobby; the rest show "Coming soon". -->
+    <ui:VisualElement class="gv-topbar">
+        <ui:Label text="G" class="gv-logo" />
+        <ui:Label text="GameVerse" class="gv-wordmark" />
+    </ui:VisualElement>
+    <ui:ScrollView name="scroll" mode="Vertical" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" class="gv-screen">
+        <ui:Label name="greeting" text="Welcome" class="gv-greeting" />
+        <ui:VisualElement name="featured" />
+        <ui:VisualElement name="more" class="gv-section" />
+        <ui:VisualElement name="error-state" class="gv-empty">
+            <ui:Label text="Can't load your games" class="gv-empty__title" />
+            <ui:Label name="error" class="gv-muted" />
+            <ui:Button name="retry" text="Try again" class="gv-button gv-button--secondary gv-button--md" />
+        </ui:VisualElement>
+    </ui:ScrollView>
+</ui:UXML>

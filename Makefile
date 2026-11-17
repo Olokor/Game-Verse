@@ -17,7 +17,7 @@ SHARED_LIBS := shared/GameVerse.Rules/GameVerse.Rules.csproj shared/GameVerse.Co
 REQUIRE_ENV = $(if $(wildcard .env),,$(error .env not found. Copy .env.example to .env first))
 
 .DEFAULT_GOAL := help
-.PHONY: help build test rules up down logs migrate schema tokens tokens-check install web web-test e2e unity-setup unity-test android device-check errors-up errors-down errors-setup
+.PHONY: help build test rules up down logs migrate schema tokens tokens-check install web web-test e2e unity-setup unity-test unity-screens unity-accept android device-check device-accept errors-up errors-down errors-setup
 
 help: ## List targets
 	@echo make build    - build the solution - backend and shared
@@ -102,11 +102,20 @@ e2e: ## Playwright smoke + screenshots (first run: pnpm --filter @gameverse/web 
 unity-setup: rules ## Apply Unity project settings (ProjectSetup.Apply)
 	node infrastructure/scripts/unity-batch.mjs $(UNITY_PROJECT)/Logs/setup.log "GV_SETUP" "ok" -- "$(UNITY)" -batchmode -nographics -quit -projectPath $(UNITY_PROJECT) -executeMethod GameVerse.Editor.ProjectSetup.Apply
 
+unity-screens: rules ## Render every platform screen at 360x800 against `make up` -> apps/mobile/TestResults/screens (PlayMode)
+	GV_SCREENSHOTS=1 node infrastructure/scripts/unity-batch.mjs $(UNITY_PROJECT)/Logs/playmode.log "Test run completed" "Exiting with code 0" -- "$(UNITY)" -batchmode -projectPath $(UNITY_PROJECT) -runTests -testPlatform PlayMode -testResults TestResults/playmode.xml
+
+unity-accept: rules ## Prompt 1.6 acceptance in the editor: the app autoplays a full private-room game vs a bot through `make up`
+	GV_ACCEPT=1 node infrastructure/scripts/unity-batch.mjs $(UNITY_PROJECT)/Logs/accept.log "Test run completed" "Exiting with code 0" -- "$(UNITY)" -batchmode -projectPath $(UNITY_PROJECT) -runTests -testPlatform PlayMode -testResults TestResults/accept.xml
+
 unity-test: rules ## Unity EditMode tests (headless)
 	node infrastructure/scripts/unity-batch.mjs $(UNITY_PROJECT)/Logs/editmode.log "Test run completed" "Exiting with code 0" -- "$(UNITY)" -batchmode -nographics -projectPath $(UNITY_PROJECT) -runTests -testPlatform EditMode -testResults TestResults/editmode.xml
 
 android: rules ## IL2CPP Android development build
 	node infrastructure/scripts/unity-batch.mjs $(UNITY_PROJECT)/Logs/android.log "GV_BUILD android" "result=Succeeded" -- "$(UNITY)" -batchmode -nographics -quit -projectPath $(UNITY_PROJECT) -buildTarget Android -executeMethod GameVerse.Editor.BuildScript.BuildAndroid
+
+device-accept: ## Prompt 1.6 acceptance: the USB phone autoplays a full private-room game against a bot through `make up`
+	node infrastructure/scripts/device-accept.mjs "$(ADB)" $(UNITY_PROJECT)/Build/Android/GameVerse.apk
 
 device-check: ## Install the APK on the USB-connected phone, launch it and print the GV_SELFCHECK line
 	node infrastructure/scripts/device-check.mjs "$(ADB)" $(UNITY_PROJECT)/Build/Android/GameVerse.apk

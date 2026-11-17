@@ -7,6 +7,7 @@ using GameVerse.Platform.Catalog;
 using GameVerse.Platform.Profiles;
 using GameVerse.Rules.Random;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace GameVerse.Platform.Sessions;
 
@@ -34,6 +35,32 @@ public enum AppendMoveResult
 /// <summary>A finished session's outcome. Placements map seat to finishing place (1 = first).</summary>
 public sealed record MatchOutcome(string Outcome, IReadOnlyList<int> WinningSeats, string Reason, IReadOnlyDictionary<int, int> Placements);
 
+/// <summary>A seat of a live session, as the realtime match host needs it.</summary>
+public sealed record LiveSeat(int Seat, Guid? UserId, bool IsAi, int? AiLevel);
+
+/// <summary>
+/// What the realtime match host needs to run a session. <see cref="Seed"/> is the dice seed: server-only, never sent to a
+/// client before the end (null for games without server randomness).
+/// </summary>
+public sealed record LiveSession(
+    Guid Id, string GameId, string ModeKind, string Status, IReadOnlyDictionary<string, string> HouseRules, IReadOnlyList<LiveSeat> Seats, ulong? Seed)
+{
+    /// <summary>The seat a signed-in user plays, or null when they are not seated.</summary>
+    public int? SeatOf(Guid userId) => Seats.FirstOrDefault(s => s.UserId == userId)?.Seat;
+}
+
+/// <summary>
+/// Told when a session's result is recorded (an in-process domain event, CLAUDE.md 4.1). Private rooms use it to score
+/// a series; Progression will use it for rewards. Runs in the recording scope, after the result is saved.
+/// </summary>
+public interface IMatchFinishedHandler
+{
+    Task OnMatchFinishedAsync(Guid sessionId, MatchOutcome outcome, CancellationToken ct);
+}
+
+/// <summary>An accepted action from the move log.</summary>
+public sealed record LoggedMove(int Seq, int Seat, JsonElement Action);
+
 /// <summary>
 /// Sessions as other modules use them (CLAUDE.md 4.1): Realtime appends moves, Matchmaking and private rooms create
 /// online sessions, Progression reads results. Moves are opaque JSON here; each game's engine validates them before they
@@ -60,9 +87,26 @@ public interface ISessionService
 
     /// <summary>Commit-reveal data for a participant (secret only after the end), or null for non-participants.</summary>
     Task<SessionFairness?> GetFairnessAsync(Guid sessionId, Guid userId, CancellationToken ct = default);
+
+    /// <summary>The session as the match host runs it, or null when unknown.</summary>
+    Task<LiveSession?> GetLiveAsync(Guid sessionId, CancellationToken ct = default);
+
+    /// <summary>Accepted actions with a seq above <paramref name="afterSeq"/>, in order (resume after a snapshot).</summary>
+    Task<IReadOnlyList<LoggedMove>> ListMovesAsync(Guid sessionId, int afterSeq, CancellationToken ct = default);
+
+    /// <summary>Moves a created (online) session to active when its match host starts. True when it is active now.</summary>
+    Task<bool> MarkActiveAsync(Guid sessionId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Whether a session with this game, mode, player count and house rules could be created now: null when it could,
+    /// else the reason. Private rooms check this when they are created and when their rules change.
+    /// </summary>
+    Task<(CreateSessionError Error, string? Reason)> CheckSetupAsync(string gameId, string modeKey, int playerCount, IReadOnlyDictionary<string, string> houseRules, CancellationToken ct = default);
 }
 
-internal sealed class SessionService(DbContext db, ICatalog catalog, IProfileService profiles, TimeProvider time) : ISessionService
+internal sealed class SessionService(
+    DbContext db, ICatalog catalog, IProfileService profiles, TimeProvider time, IEnumerable<IMatchFinishedHandler> finishedHandlers, ILogger<SessionService> log)
+    : ISessionService
 {
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
@@ -100,7 +144,7 @@ internal sealed class SessionService(DbContext db, ICatalog catalog, IProfileSer
         var secret = GameSetups.UsesServerRandomness(game.Id, mode.Kind) ? RandomNumberGenerator.GetBytes(SeedCommitment.SecretLength) : null;
 
         var now = time.GetUtcNow();
-        var online = mode.Kind is ModeKinds.OnlineRanked or ModeKinds.OnlinePrivate;
+        var online = mode.Kind is ModeKinds.OnlineRanked or ModeKinds.OnlinePrivate or ModeKinds.OnlineCasual;
         var session = new GameSession
         {
             Id = Guid.CreateVersion7(now),
@@ -209,7 +253,51 @@ internal sealed class SessionService(DbContext db, ICatalog catalog, IProfileSer
             return false; // a result already exists (primary key)
         }
 
+        foreach (var handler in finishedHandlers)
+        {
+            try
+            {
+                await handler.OnMatchFinishedAsync(sessionId, outcome, ct).ConfigureAwait(false);
+            }
+#pragma warning disable CA1031 // The result is saved; a failing listener must not undo or hide that.
+            catch (Exception ex) when (ex is not OperationCanceledException)
+#pragma warning restore CA1031
+            {
+                SessionsLog.FinishedHandlerFailed(log, ex, sessionId, handler.GetType().Name);
+            }
+        }
+
         return true;
+    }
+
+    public async Task<(CreateSessionError Error, string? Reason)> CheckSetupAsync(
+        string gameId, string modeKey, int playerCount, IReadOnlyDictionary<string, string> houseRules, CancellationToken ct = default)
+    {
+        var game = await catalog.GetGameAsync(gameId, ct).ConfigureAwait(false);
+        if (game is null)
+        {
+            return (CreateSessionError.UnknownGame, "No such game.");
+        }
+
+        if (game.Status != GameStatuses.Enabled)
+        {
+            return (CreateSessionError.NotPlayable, "This game is not playable yet.");
+        }
+
+        var mode = game.Modes.SingleOrDefault(m => m.Key == modeKey);
+        if (mode is null)
+        {
+            return (CreateSessionError.UnknownMode, "This game has no such mode.");
+        }
+
+        if (!mode.PlayerCounts.Contains(playerCount))
+        {
+            return (CreateSessionError.BadPlayerCount, "This mode does not support that many players.");
+        }
+
+        return GameSetups.HouseRulesError(game.Id, houseRules, playerCount) is { } rules
+            ? (CreateSessionError.BadHouseRules, rules)
+            : (CreateSessionError.None, null);
     }
 
     public async Task<SessionManifest<SessionConfig<Dictionary<string, string>>, JsonElement?>?> GetManifestAsync(
@@ -249,7 +337,7 @@ internal sealed class SessionService(DbContext db, ICatalog catalog, IProfileSer
             }).ToList(),
             Config = config,
             InitialState = initialState, // the local seat's view: never the dice PRNG
-            Realtime = null, // online sessions get the socket URL and ticket in Prompt 1.4
+            Realtime = null, // filled by the endpoint for server-hosted modes (a fresh ticket per read, ADR-0009)
         };
     }
 
@@ -279,6 +367,52 @@ internal sealed class SessionService(DbContext db, ICatalog catalog, IProfileSer
             Secret = revealed ? SeedCommitment.ToHex(session.SeedSecret!) : null,
             Seed = revealed ? SeedCommitment.DeriveSeed(session.SeedSecret!).ToString(CultureInfo.InvariantCulture) : null,
         };
+    }
+
+    public async Task<LiveSession?> GetLiveAsync(Guid sessionId, CancellationToken ct = default)
+    {
+        var session = await db.Set<GameSession>().AsNoTracking().Include(s => s.Players)
+            .SingleOrDefaultAsync(s => s.Id == sessionId, ct).ConfigureAwait(false);
+        if (session is null)
+        {
+            return null;
+        }
+
+        var config = JsonSerializer.Deserialize<SessionConfig<Dictionary<string, string>>>(session.ConfigJson, Json)!;
+        return new LiveSession(
+            session.Id,
+            session.GameId,
+            session.ModeKind,
+            session.Status,
+            config.HouseRules ?? [],
+            session.Players.OrderBy(p => p.Seat).Select(p => new LiveSeat(p.Seat, p.UserId, p.IsAi, p.AiLevel)).ToList(),
+            session.SeedSecret is { } secret ? SeedCommitment.DeriveSeed(secret) : null);
+    }
+
+    public async Task<IReadOnlyList<LoggedMove>> ListMovesAsync(Guid sessionId, int afterSeq, CancellationToken ct = default)
+    {
+        var moves = await db.Set<MoveLog>().AsNoTracking()
+            .Where(m => m.SessionId == sessionId && m.Seq > afterSeq)
+            .OrderBy(m => m.Seq)
+            .Select(m => new { m.Seq, m.Seat, m.ActionJson })
+            .ToListAsync(ct).ConfigureAwait(false);
+        return moves.Select(m => new LoggedMove(m.Seq, m.Seat, JsonSerializer.Deserialize<JsonElement>(m.ActionJson))).ToList();
+    }
+
+    public async Task<bool> MarkActiveAsync(Guid sessionId, CancellationToken ct = default)
+    {
+        var now = time.GetUtcNow();
+        var updated = await db.Set<GameSession>()
+            .Where(s => s.Id == sessionId && s.Status == SessionStatuses.Created)
+            .ExecuteUpdateAsync(u => u.SetProperty(s => s.Status, SessionStatuses.Active).SetProperty(s => s.StartedAt, now), ct)
+            .ConfigureAwait(false);
+        if (updated > 0)
+        {
+            return true;
+        }
+
+        var status = await db.Set<GameSession>().Where(s => s.Id == sessionId).Select(s => s.Status).SingleOrDefaultAsync(ct).ConfigureAwait(false);
+        return status == SessionStatuses.Active;
     }
 
     public async Task<IReadOnlyList<SessionSummary>> ListForUserAsync(Guid userId, string? status, CancellationToken ct)
@@ -312,4 +446,10 @@ internal sealed class SessionService(DbContext db, ICatalog catalog, IProfileSer
             ? "AI level " + (seat.AiLevel ?? 1).ToString(CultureInfo.InvariantCulture)
             : "Player " + (index + 1).ToString(CultureInfo.InvariantCulture);
     }
+}
+
+internal static partial class SessionsLog
+{
+    [LoggerMessage(Level = LogLevel.Error, Message = "GV_SESSION {SessionId}: match-finished handler {Handler} failed")]
+    public static partial void FinishedHandlerFailed(ILogger logger, Exception exception, Guid sessionId, string handler);
 }

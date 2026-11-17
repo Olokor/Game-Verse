@@ -68,6 +68,56 @@
         }
       }
     },
+    "/realtime/tickets": {
+      "post": {
+        "tags": [
+          "Realtime"
+        ],
+        "summary": "A single-use WebSocket ticket (30 seconds): for a session you are seated in, or a private room you are in",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/guest": {
       "post": {
         "tags": [
@@ -739,6 +789,485 @@
           }
         }
       }
+    },
+    "/rooms": {
+      "post": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "Open a private room; you are the host on seat 0",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoomRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rooms/{code}": {
+      "get": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "A room by code (404 unknown, 410 expired or closed)",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rooms/{code}/join": {
+      "post": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "Take the first free seat (lobby only)",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rooms/{code}/ready": {
+      "post": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "Mark yourself ready or not. After a game, everyone ready starts the next game (or a new series)",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoomReadyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rooms/{code}/rules": {
+      "patch": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "Change the house rules (host, lobby only); everyone's ready flag resets",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoomRulesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rooms/{code}/leave": {
+      "post": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "Leave the room. During a game your seat frees when the game ends; resign or disconnect to forfeit it",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rooms/{code}/start": {
+      "post": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "Start the first game (host; every seat filled and ready). The room then carries the session id",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/matchmaking/queue": {
+      "post": {
+        "tags": [
+          "Matchmaking"
+        ],
+        "summary": "Start searching for a casual or ranked game; poll GET /matchmaking/queue until matched",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinQueueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatusDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Matchmaking"
+        ],
+        "summary": "Searching (with the wait and the current rating band) or matched (with the session to load); 404 when not searching",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatusDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Matchmaking"
+        ],
+        "summary": "Stop searching",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/matchmaking/ratings/{gameId}": {
+      "get": {
+        "tags": [
+          "Matchmaking"
+        ],
+        "summary": "Your Glicko-2 rating in a game (1500 and provisional until you play ranked)",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingDto"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -822,6 +1351,47 @@
           }
         },
         "description": "Tokens returned by every sign-in style call (ADR-0006). The access token is a short-lived JWT for the\r\nAuthorization header. The refresh token is in this body for Unity and other clients; web clients\r\n(header `X-GameVerse-Client: web`) get it as an httpOnly cookie instead and see `null` here."
+      },
+      "CreateRoomRequest": {
+        "required": [
+          "gameId",
+          "playerCount",
+          "houseRules",
+          "bestOf"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "string",
+            "description": "Gets or sets the catalog game id, e.g. \"ludo\"."
+          },
+          "playerCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the number of seats; the game's private-room mode must allow it.",
+            "format": "int32"
+          },
+          "houseRules": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Gets or sets the house rules, validated like a session's (e.g. GameVerse.Contracts.Ludo.LudoHouseRules)."
+          },
+          "bestOf": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets 1 (a single game) or 3 (best of three).",
+            "format": "int32"
+          }
+        },
+        "description": "Creates a private room (CLAUDE.md 4.6). The creator becomes the host on seat 0."
       },
       "CreateSessionRequest": {
         "required": [
@@ -1102,6 +1672,34 @@
           }
         }
       },
+      "JoinQueueRequest": {
+        "required": [
+          "gameId",
+          "modeKey",
+          "playerCount"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "string",
+            "description": "Gets or sets the catalog game id, e.g. \"ludo\"."
+          },
+          "modeKey": {
+            "type": "string",
+            "description": "Gets or sets the catalog mode key, e.g. \"quick-match\" (casual) or \"ranked\"."
+          },
+          "playerCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the number of players in the game to find, e.g. 2 or 4.",
+            "format": "int32"
+          }
+        },
+        "description": "Joins a public queue (CLAUDE.md 4.6): a casual or ranked mode of a game, with a player count it allows."
+      },
       "LoginRequest": {
         "required": [
           "email",
@@ -1222,6 +1820,114 @@
         },
         "description": "A player's public profile basics (Prompt 1.1). Frames, titles and stats come with Progression."
       },
+      "QueueStatusDto": {
+        "required": [
+          "status",
+          "gameId",
+          "modeKey",
+          "playerCount",
+          "waitedSeconds"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Gets or sets one of QueueStatuses."
+          },
+          "gameId": {
+            "type": "string",
+            "description": "Gets or sets the game."
+          },
+          "modeKey": {
+            "type": "string",
+            "description": "Gets or sets the mode key."
+          },
+          "playerCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the number of players being matched.",
+            "format": "int32"
+          },
+          "waitedSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets how long the caller has been searching, in whole seconds.",
+            "format": "int32"
+          },
+          "ratingBand": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets how far from the caller's rating an opponent may be right now (ranked; it widens with the wait), or\r\nnull when any rating is accepted (casual, or ranked after a long wait).",
+            "format": "int32"
+          },
+          "sessionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the session to load once matched (GET /sessions/{id}/manifest), else null."
+          }
+        },
+        "description": "Where the caller is in matchmaking. Clients poll it while searching."
+      },
+      "RatingDto": {
+        "required": [
+          "gameId",
+          "rating",
+          "deviation",
+          "gamesPlayed",
+          "provisional"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "string",
+            "description": "Gets or sets the game."
+          },
+          "rating": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the rating, rounded (new players start at 1500).",
+            "format": "int32"
+          },
+          "deviation": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the rating deviation, rounded: how unsure the rating still is (350 for a new player).",
+            "format": "int32"
+          },
+          "gamesPlayed": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the number of rated games played.",
+            "format": "int32"
+          },
+          "provisional": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether the rating is still settling (deviation above 110)."
+          }
+        },
+        "description": "A player's Glicko-2 rating in one game."
+      },
       "RealtimeInfo": {
         "required": [
           "wsUrl",
@@ -1275,6 +1981,193 @@
           }
         },
         "description": "Sets a new password with the 6-digit code from the reset email. Signs out every session."
+      },
+      "RoomDto": {
+        "required": [
+          "code",
+          "shareUrl",
+          "gameId",
+          "playerCount",
+          "houseRules",
+          "bestOf",
+          "status",
+          "hostSeat",
+          "seats",
+          "gameNumber",
+          "seriesWinners"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Gets or sets the 6-character code (no O/0, I/1/L)."
+          },
+          "shareUrl": {
+            "type": "string",
+            "description": "Gets or sets the link to share, e.g. https://gameverse.app/r/ABC234."
+          },
+          "gameId": {
+            "type": "string",
+            "description": "Gets or sets the catalog game id."
+          },
+          "playerCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the number of seats.",
+            "format": "int32"
+          },
+          "houseRules": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Gets or sets the house rules in force."
+          },
+          "bestOf": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets 1 or 3.",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string",
+            "description": "Gets or sets one of RoomStatuses."
+          },
+          "hostSeat": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the host's seat.",
+            "format": "int32"
+          },
+          "seats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoomSeatDto"
+            },
+            "description": "Gets or sets the seats, in order, empty ones included."
+          },
+          "sessionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the session of the game being played, or of the last one played; null before the first."
+          },
+          "gameNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the number of the current or last game within the series (1-based; 0 before the first).",
+            "format": "int32"
+          },
+          "seriesWinners": {
+            "type": "array",
+            "items": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            },
+            "description": "Gets or sets the seats that won the series, once it is decided (both partners in teams)."
+          },
+          "expiresAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets when the room closes if nothing happens, ISO 8601 UTC; null while a game is being played."
+          }
+        },
+        "description": "A private room as every member sees it: from the REST endpoints and pushed on `/ws/room/{code}` as a\r\n`room` envelope after every change."
+      },
+      "RoomReadyRequest": {
+        "required": [
+          "ready"
+        ],
+        "type": "object",
+        "properties": {
+          "ready": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether the caller is ready."
+          }
+        },
+        "description": "Marks the caller ready or not."
+      },
+      "RoomRulesRequest": {
+        "required": [
+          "houseRules"
+        ],
+        "type": "object",
+        "properties": {
+          "houseRules": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Gets or sets the new house rules."
+          }
+        },
+        "description": "The host changes the house rules (lobby only). Everyone's ready flag resets."
+      },
+      "RoomSeatDto": {
+        "required": [
+          "seat",
+          "ready",
+          "wins"
+        ],
+        "type": "object",
+        "properties": {
+          "seat": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the zero-based seat.",
+            "format": "int32"
+          },
+          "playerId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the player's id, or null for an empty seat."
+          },
+          "displayName": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the player's display name, or null for an empty seat."
+          },
+          "ready": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether the player is ready."
+          },
+          "wins": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets or sets the games this seat has won in the current series.",
+            "format": "int32"
+          }
+        },
+        "description": "A seat in a room."
       },
       "SessionConfigOfDictionaryOfstringAndstring": {
         "type": "object",
@@ -1406,7 +2299,7 @@
                 "type": "null"
               },
               {
-                "description": "Gets or sets realtime connection details; null for local, vs AI and solo modes.",
+                "description": "Gets or sets realtime connection details; null for modes played entirely on the device (local pass-and-play, solo).",
                 "$ref": "#/components/schemas/RealtimeInfo"
               }
             ]
@@ -1446,6 +2339,26 @@
           }
         },
         "description": "One of the player's sessions."
+      },
+      "TicketRequest": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the session to play in."
+          },
+          "roomCode": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets or sets the private room code whose lobby to follow."
+          }
+        },
+        "description": "Asks for a single-use WebSocket ticket (valid 30 seconds, CLAUDE.md section 7). Set exactly one target: a session to\r\nplay in (`/ws/play/{sessionId}`) or a private room's lobby (`/ws/room/{code}`). The response is a\r\nRealtimeInfo."
       },
       "UpdateProfileRequest": {
         "type": "object",
@@ -1515,6 +2428,9 @@
       "name": "Accounts"
     },
     {
+      "name": "Realtime"
+    },
+    {
       "name": "Auth"
     },
     {
@@ -1525,6 +2441,12 @@
     },
     {
       "name": "Sessions"
+    },
+    {
+      "name": "Rooms"
+    },
+    {
+      "name": "Matchmaking"
     }
   ]
 }

@@ -1,6 +1,7 @@
 using FluentValidation;
 using GameVerse.Contracts.Catalog;
 using GameVerse.Contracts.Session;
+using GameVerse.Platform.Realtime;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -19,6 +20,7 @@ public static class SessionsModule
     {
         services.AddScoped<SessionService>();
         services.AddScoped<ISessionService>(sp => sp.GetRequiredService<SessionService>());
+        services.AddSingleton<IMatchGames, MatchGames>();
         return services;
     }
 
@@ -50,7 +52,8 @@ public static class SessionsModule
         return app;
     }
 
-    private static async Task<IResult> CreateAsync(CreateSessionRequest request, HttpContext http, SessionService sessions, Catalog.ICatalog catalog)
+    private static async Task<IResult> CreateAsync(
+        CreateSessionRequest request, HttpContext http, SessionService sessions, Catalog.ICatalog catalog, IRealtimeTickets tickets)
     {
         if (SignedInUser(http) is not { } userId)
         {
@@ -86,7 +89,7 @@ public static class SessionsModule
         {
             CreateSessionError.None => Results.Created(
                 $"/sessions/{sessionId}/manifest",
-                await sessions.GetManifestAsync(sessionId!.Value, userId, http.RequestAborted).ConfigureAwait(false)),
+                await WithTicketAsync(await sessions.GetManifestAsync(sessionId!.Value, userId, http.RequestAborted).ConfigureAwait(false), userId, http, tickets).ConfigureAwait(false)),
             CreateSessionError.UnknownGame => Results.Problem(statusCode: StatusCodes.Status404NotFound, title: "Game not found"),
             CreateSessionError.NotPlayable => Results.Problem(statusCode: StatusCodes.Status409Conflict, title: "Coming soon", detail: "This game is not playable yet."),
             CreateSessionError.UnknownMode => Field(nameof(CreateSessionRequest.Mode), "This game has no such mode."),
@@ -95,10 +98,10 @@ public static class SessionsModule
         };
     }
 
-    private static async Task<IResult> ManifestAsync(Guid sessionId, HttpContext http, SessionService sessions)
+    private static async Task<IResult> ManifestAsync(Guid sessionId, HttpContext http, SessionService sessions, IRealtimeTickets tickets)
     {
         var manifest = SignedInUser(http) is { } userId
-            ? await sessions.GetManifestAsync(sessionId, userId, http.RequestAborted).ConfigureAwait(false)
+            ? await WithTicketAsync(await sessions.GetManifestAsync(sessionId, userId, http.RequestAborted).ConfigureAwait(false), userId, http, tickets).ConfigureAwait(false)
             : null;
 
         // Non-participants get the same 404 as a missing session: session ids are not discoverable.
@@ -117,6 +120,18 @@ public static class SessionsModule
         SignedInUser(http) is { } userId
             ? Results.Ok(await sessions.ListForUserAsync(userId, status, http.RequestAborted).ConfigureAwait(false))
             : InvalidCredentials();
+
+    /// <summary>Server-hosted sessions (online, vs AI) get the socket URL and a fresh single-use ticket (ADR-0009).</summary>
+    private static async Task<SessionManifest<SessionConfig<Dictionary<string, string>>, System.Text.Json.JsonElement?>?> WithTicketAsync(
+        SessionManifest<SessionConfig<Dictionary<string, string>>, System.Text.Json.JsonElement?>? manifest, Guid userId, HttpContext http, IRealtimeTickets tickets)
+    {
+        if (manifest is not null && RealtimeModule.IsHosted(manifest.Mode))
+        {
+            manifest.Realtime = await tickets.IssueAsync(TicketKind.Play, manifest.SessionId, userId, RealtimeModule.RequestBase(http), http.RequestAborted).ConfigureAwait(false);
+        }
+
+        return manifest;
+    }
 
     private static IResult Field(string field, string message) =>
         Results.ValidationProblem(new Dictionary<string, string[]> { [field] = [message] });

@@ -19,6 +19,9 @@
   --color-bg-surface: var(--gv-color-bg-surface);
   --color-bg-elevated: var(--gv-color-bg-elevated);
   --color-bg-inset: var(--gv-color-bg-inset);
+  --color-bg-scrim: var(--gv-color-bg-scrim);
+  --color-bg-shadow-soft: var(--gv-color-bg-shadow-soft);
+  --color-bg-shadow-strong: var(--gv-color-bg-shadow-strong);
   --color-border-subtle: var(--gv-color-border-subtle);
   --color-border-strong: var(--gv-color-border-strong);
   --color-text-primary: var(--gv-color-text-primary);
@@ -40,6 +43,10 @@
   --color-category-fight: var(--gv-color-category-fight);
   --color-category-adventure: var(--gv-color-category-adventure);
   --color-category-brain: var(--gv-color-category-brain);
+  --color-game-ludo-red: var(--gv-color-game-ludo-red);
+  --color-game-ludo-green: var(--gv-color-game-ludo-green);
+  --color-game-ludo-yellow: var(--gv-color-game-ludo-yellow);
+  --color-game-ludo-blue: var(--gv-color-game-ludo-blue);
   --color-rank-bronze: var(--gv-color-rank-bronze);
   --color-rank-silver: var(--gv-color-rank-silver);
   --color-rank-gold: var(--gv-color-rank-gold);
@@ -94,6 +101,9 @@
 
 /* No Tailwind namespace, use the variable directly, e.g. duration-(--gv-motion-fast-duration):
    font.numeric  --gv-font-numeric
+   opacity.disabled  --gv-opacity-disabled
+   opacity.muted  --gv-opacity-muted
+   opacity.inactive  --gv-opacity-inactive
    border.width  --gv-border-width
    motion.instant.duration  --gv-motion-instant-duration
    motion.fast.duration  --gv-motion-fast-duration
@@ -105,4 +115,10 @@
    motion.celebrate.duration-max  --gv-motion-celebrate-duration-max
    motion.ambient.duration  --gv-motion-ambient-duration
    motion.press-scale  --gv-motion-press-scale
+   motion.toast-hold  --gv-motion-toast-hold
+   motion.game.dice-roll  --gv-motion-game-dice-roll
+   motion.game.token-hop  --gv-motion-game-token-hop
+   motion.game.capture  --gv-motion-game-capture
+   motion.game.capture-burst  --gv-motion-game-capture-burst
+   motion.game.home-ripple  --gv-motion-game-home-ripple
 */

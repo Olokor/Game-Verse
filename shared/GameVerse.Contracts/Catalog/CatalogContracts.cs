@@ -71,8 +71,11 @@ namespace GameVerse.Contracts.Catalog
         /// <summary>One player against AI seats.</summary>
         public const string VsAi = "vs_ai";
 
-        /// <summary>Matchmade online play.</summary>
+        /// <summary>Matchmade online play that changes ratings (humans only).</summary>
         public const string OnlineRanked = "online_ranked";
+
+        /// <summary>Matchmade online play without ratings; the matchmaker fills empty seats with AI after a wait.</summary>
+        public const string OnlineCasual = "online_casual";
 
         /// <summary>Online play in a private room.</summary>
         public const string OnlinePrivate = "online_private";

@@ -1,7 +1,8 @@
 {
     "rootNamespace": "GameVerse.UI",
     "references": [
-        "GameVerse.Core"
+        "GameVerse.Core",
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

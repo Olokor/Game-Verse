@@ -1,0 +1,32 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- Game lobby (DESIGN_SYSTEM screen 4): mode tiles, players, house rules, join by code. -->
+    <ui:VisualElement class="gv-page__header">
+        <ui:Button name="back" text="Back" class="gv-button gv-button--ghost gv-button--sm gv-back" />
+        <ui:Label name="title" text="Ludo" class="gv-page__title" />
+    </ui:VisualElement>
+    <ui:ScrollView name="scroll" mode="Vertical" vertical-scroller-visibility="Hidden" class="gv-page__body">
+        <ui:Label name="rating" class="gv-muted" />
+        <ui:VisualElement name="modes" class="gv-section" />
+        <ui:Label name="players-label" text="PLAYERS" class="gv-label" />
+        <ui:VisualElement name="players" class="gv-choices" />
+        <ui:VisualElement name="ai">
+            <ui:Label text="AI LEVEL" class="gv-label" />
+            <ui:VisualElement name="ai-levels" class="gv-choices" />
+        </ui:VisualElement>
+        <ui:VisualElement name="series">
+            <ui:Label text="SERIES" class="gv-label" />
+            <ui:VisualElement name="best-of" class="gv-choices" />
+        </ui:VisualElement>
+        <ui:Button name="rules" text="House rules" class="gv-button gv-button--secondary gv-button--md" />
+        <ui:VisualElement class="gv-section">
+            <ui:Label text="HAVE A ROOM CODE?" class="gv-label" />
+            <ui:VisualElement class="gv-join">
+                <ui:TextField name="code" max-length="6" class="gv-join__field" />
+                <ui:Button name="join" text="Join" class="gv-button gv-button--secondary gv-button--md" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:ScrollView>
+    <ui:VisualElement class="gv-page__footer">
+        <ui:Button name="play" text="Play" class="gv-button gv-button--primary gv-button--lg" />
+    </ui:VisualElement>
+</ui:UXML>

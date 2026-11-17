@@ -354,6 +354,180 @@ namespace GameVerse.Infrastructure.Persistence.Migrations
                     b.ToTable("game_modes", "catalog");
                 });
 
+            modelBuilder.Entity("GameVerse.Platform.Matchmaking.PlayerRating", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("GameId")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("game_id");
+
+                    b.Property<double>("Deviation")
+                        .HasColumnType("double precision")
+                        .HasColumnName("deviation");
+
+                    b.Property<int>("GamesPlayed")
+                        .HasColumnType("integer")
+                        .HasColumnName("games_played");
+
+                    b.Property<DateTimeOffset>("LastPlayedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_played_at");
+
+                    b.Property<double>("Rating")
+                        .HasColumnType("double precision")
+                        .HasColumnName("rating");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.Property<double>("Volatility")
+                        .HasColumnType("double precision")
+                        .HasColumnName("volatility");
+
+                    b.HasKey("UserId", "GameId")
+                        .HasName("pk_ratings");
+
+                    b.HasIndex("GameId", "Rating")
+                        .HasDatabaseName("ix_ratings_game_id_rating");
+
+                    b.ToTable("ratings", "matchmaking");
+                });
+
+            modelBuilder.Entity("GameVerse.Platform.Matchmaking.Room", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("BestOf")
+                        .HasColumnType("integer")
+                        .HasColumnName("best_of");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("character(6)")
+                        .HasColumnName("code")
+                        .IsFixedLength();
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CurrentSessionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("current_session_id");
+
+                    b.Property<DateTimeOffset?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("GameId")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("game_id");
+
+                    b.Property<int>("GameNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_number");
+
+                    b.Property<Guid>("HostUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("host_user_id");
+
+                    b.Property<string>("HouseRulesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("house_rules_json");
+
+                    b.Property<int>("PlayerCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("player_count");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_rooms");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_rooms_code")
+                        .HasFilter("status <> 'closed'");
+
+                    b.HasIndex("CurrentSessionId")
+                        .HasDatabaseName("ix_rooms_current_session_id");
+
+                    b.ToTable("rooms", "matchmaking");
+                });
+
+            modelBuilder.Entity("GameVerse.Platform.Matchmaking.RoomSeat", b =>
+                {
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("room_id");
+
+                    b.Property<int>("Seat")
+                        .HasColumnType("integer")
+                        .HasColumnName("seat");
+
+                    b.Property<string>("DisplayName")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("display_name");
+
+                    b.Property<bool>("Leaving")
+                        .HasColumnType("boolean")
+                        .HasColumnName("leaving");
+
+                    b.Property<bool>("Ready")
+                        .HasColumnType("boolean")
+                        .HasColumnName("ready");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<int>("Wins")
+                        .HasColumnType("integer")
+                        .HasColumnName("wins");
+
+                    b.HasKey("RoomId", "Seat")
+                        .HasName("pk_room_seats");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_room_seats_user_id");
+
+                    b.HasIndex("RoomId", "UserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_room_seats_room_id_user_id")
+                        .HasFilter("user_id IS NOT NULL");
+
+                    b.ToTable("room_seats", "matchmaking");
+                });
+
             modelBuilder.Entity("GameVerse.Platform.Profiles.Profile", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -778,6 +952,16 @@ namespace GameVerse.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_game_modes_games_game_id");
                 });
 
+            modelBuilder.Entity("GameVerse.Platform.Matchmaking.RoomSeat", b =>
+                {
+                    b.HasOne("GameVerse.Platform.Matchmaking.Room", null)
+                        .WithMany("Seats")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_room_seats_rooms_room_id");
+                });
+
             modelBuilder.Entity("GameVerse.Platform.Sessions.MatchResult", b =>
                 {
                     b.HasOne("GameVerse.Platform.Sessions.GameSession", null)
@@ -868,6 +1052,11 @@ namespace GameVerse.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("GameVerse.Platform.Catalog.Game", b =>
                 {
                     b.Navigation("Modes");
+                });
+
+            modelBuilder.Entity("GameVerse.Platform.Matchmaking.Room", b =>
+                {
+                    b.Navigation("Seats");
                 });
 
             modelBuilder.Entity("GameVerse.Platform.Sessions.GameSession", b =>

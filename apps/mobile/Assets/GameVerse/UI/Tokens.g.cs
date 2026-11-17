@@ -42,6 +42,15 @@ namespace GameVerse.UI
 
                 /// <summary>Inputs, wells, board backgrounds (#07080C)</summary>
                 public static readonly Color32 Inset = new Color32(7, 8, 12, 255); // token: color.bg.inset
+
+                /// <summary>Behind sheets and modals (#000000A0)</summary>
+                public static readonly Color32 Scrim = new Color32(0, 0, 0, 160); // token: color.bg.scrim
+
+                /// <summary>Soft contact shadows drawn in code (game pieces, the board plate) (#0000004D)</summary>
+                public static readonly Color32 ShadowSoft = new Color32(0, 0, 0, 77); // token: color.bg.shadow-soft
+
+                /// <summary>Deep shadows drawn in code (a lifted piece, the die) (#000000A6)</summary>
+                public static readonly Color32 ShadowStrong = new Color32(0, 0, 0, 166); // token: color.bg.shadow-strong
             }
 
             public static class Border
@@ -126,6 +135,24 @@ namespace GameVerse.UI
 
                 /// <summary>Category chips, card glows and game headers only (#FFC23D)</summary>
                 public static readonly Color32 Brain = new Color32(255, 194, 61, 255); // token: color.category.brain
+            }
+
+            public static class Game
+            {
+                public static class Ludo
+                {
+                    /// <summary>Ludo seat colour 0: base, home column, tokens (each colour also has its own token shape) (#FF5468)</summary>
+                    public static readonly Color32 Red = new Color32(255, 84, 104, 255); // token: color.game.ludo.red
+
+                    /// <summary>Ludo seat colour 1 (#3DDC97)</summary>
+                    public static readonly Color32 Green = new Color32(61, 220, 151, 255); // token: color.game.ludo.green
+
+                    /// <summary>Ludo seat colour 2 (#FFC23D)</summary>
+                    public static readonly Color32 Yellow = new Color32(255, 194, 61, 255); // token: color.game.ludo.yellow
+
+                    /// <summary>Ludo seat colour 3 (#4DA3FF)</summary>
+                    public static readonly Color32 Blue = new Color32(77, 163, 255, 255); // token: color.game.ludo.blue
+                }
             }
 
             public static class Rank
@@ -273,6 +300,18 @@ namespace GameVerse.UI
             }
         }
 
+        public static class Opacity
+        {
+            /// <summary>Disabled controls (0.45)</summary>
+            public const float Disabled = 0.45f; // token: opacity.disabled
+
+            /// <summary>Inert content, e.g. coming-soon cards (0.6)</summary>
+            public const float Muted = 0.6f; // token: opacity.muted
+
+            /// <summary>Pieces of a player who left (0.35)</summary>
+            public const float Inactive = 0.35f; // token: opacity.inactive
+        }
+
         public static class Radius
         {
             /// <summary>8px</summary>
@@ -301,6 +340,9 @@ namespace GameVerse.UI
         {
             /// <summary>Every pressable scales to this on press (0.96)</summary>
             public const float PressScale = 0.96f; // token: motion.press-scale
+
+            /// <summary>How long a toast stays before it fades (2800ms, in seconds for DOTween/LitMotion)</summary>
+            public const float ToastHold = 2.8f; // token: motion.toast-hold
 
             public static class Instant
             {
@@ -354,6 +396,24 @@ namespace GameVerse.UI
             {
                 /// <summary>One cycle of looping ambient motion: skeleton pulse, live dot, loading dots (1400ms, in seconds for DOTween/LitMotion)</summary>
                 public const float Duration = 1.4f; // token: motion.ambient.duration
+            }
+
+            public static class Game
+            {
+                /// <summary>Ludo die tumble before it settles on the value (600ms, in seconds for DOTween/LitMotion)</summary>
+                public const float DiceRoll = 0.6f; // token: motion.game.dice-roll
+
+                /// <summary>Ludo token moving one square (with a small squash on landing) (90ms, in seconds for DOTween/LitMotion)</summary>
+                public const float TokenHop = 0.09f; // token: motion.game.token-hop
+
+                /// <summary>A captured Ludo token flying back to its base (420ms, in seconds for DOTween/LitMotion)</summary>
+                public const float Capture = 0.42f; // token: motion.game.capture
+
+                /// <summary>Particles bursting from a capture (400ms, in seconds for DOTween/LitMotion)</summary>
+                public const float CaptureBurst = 0.4f; // token: motion.game.capture-burst
+
+                /// <summary>A ring rippling from the centre when a token reaches home (500ms, in seconds for DOTween/LitMotion)</summary>
+                public const float HomeRipple = 0.5f; // token: motion.game.home-ripple
             }
         }
     }

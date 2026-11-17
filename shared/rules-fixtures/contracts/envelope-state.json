@@ -9,7 +9,9 @@
       "seed": 12345,
       "lastMove": null
     },
-    "appliedSeq": null
+    "appliedSeq": null,
+    "turnSeat": 1,
+    "turnDeadline": 1794484800000
   },
   "t": "state",
   "seq": 42,

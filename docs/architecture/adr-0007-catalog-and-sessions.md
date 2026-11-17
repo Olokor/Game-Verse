@@ -21,7 +21,7 @@ Every game shares one registry (the catalog), one way to describe a play session
 
 ### Modes
 - A mode has a `key` unique within its game, a `kind`, a `label` and its allowed `playerCounts`.
-- The kind uses the SessionManifest `mode` vocabulary: `local`, `vs_ai`, `online_ranked`, `online_private`, `solo`.
+- The kind uses the SessionManifest `mode` vocabulary: `local`, `vs_ai`, `online_ranked`, `online_casual` (added by ADR-0010), `online_private`, `solo`.
 - Player counts are a list, not a min/max, because Ludo quick match allows 2 or 4 but not 3.
 - Modes come from `GAME_BRIEFS.md`.
 
@@ -72,7 +72,7 @@ Every game shares one registry (the catalog), one way to describe a play session
 ### Creating sessions
 - `POST /sessions` creates **single-owner sessions only** (`local`, `vs_ai`, `solo`) for an enabled game and an allowed player count. The caller takes seat 0.
 - Ludo vs AI is played through the server's match host, not offline (ADR-0008); only `local` pass-and-play runs entirely on the device.
-- Online sessions are created through `ISessionService` by private rooms and matchmaking.
+- Online sessions are created through `ISessionService` by private rooms (Prompt 1.4, ADR-0009) and matchmaking (1.5, ADR-0010). They start `created` and become `active` when the match host first loads them.
 
 ## Decisions: clients
 

@@ -29,8 +29,10 @@ namespace GameVerse.Editor
         public const int ForwardPlusRendererIndex = 1;
         public const string PanelSettingsPath = Root + "/UI/GameVersePanelSettings.asset";
         public const string ThemePath = Root + "/UI/Theme/GameVerse.tss";
-        public const string HomeDocumentPath = Root + "/UI/Home/Home.uxml";
         public const string BootScenePath = Root + "/Scenes/Boot.unity";
+
+        // API location baked into builds (ADR-0011). Committed empty; BuildScript fills it from GAMEVERSE_API_URL.
+        public const string AppConfigPath = Root + "/Resources/" + GameVerse.Net.AppConfig.ResourcePath + ".asset";
 
         // Error reporting (ADR-0005). The Sentry Unity SDK loads its options from this exact Resources path.
         public const string SentryOptionsPath = "Assets/Resources/Sentry/SentryOptions.asset";
@@ -41,6 +43,7 @@ namespace GameVerse.Editor
         {
             ConfigurePlayer();
             ConfigureErrorReporting();
+            ConfigureAppConfig();
             ConfigureRendering();
             var panel = EnsurePanelSettings();
             EnsureBootScene(panel);
@@ -66,6 +69,10 @@ namespace GameVerse.Editor
             PlayerSettings.SetManagedStrippingLevel(android, ManagedStrippingLevel.Low);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
+
+            // Plain HTTP only in development builds, which talk to `make up` on this PC (adb reverse). Release builds
+            // refuse http:// (Android cleartext off), so production traffic is always TLS (ADR-0011).
+            PlayerSettings.insecureHttpOption = InsecureHttpOption.DevelopmentOnly;
 
             // Web defaults, chosen for download size (measured in the Prompt 0.7 spike; ADR-0002). Per platform,
             // so Android is unaffected. Brotli without decompression fallback means the server must send
@@ -137,6 +144,22 @@ namespace GameVerse.Editor
             options.OptionsConfiguration = configuration;
             EditorUtility.SetDirty(options);
             return options;
+        }
+
+        /// <summary>The API location asset, reset to empty (= the development default) unless a build is filling it.</summary>
+        public static GameVerse.Net.AppConfig ConfigureAppConfig()
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(AppConfigPath));
+            var config = AssetDatabase.LoadAssetAtPath<GameVerse.Net.AppConfig>(AppConfigPath);
+            if (config == null)
+            {
+                config = ScriptableObject.CreateInstance<GameVerse.Net.AppConfig>();
+                AssetDatabase.CreateAsset(config, AppConfigPath);
+            }
+
+            config.ApiBaseUrl = string.Empty;
+            EditorUtility.SetDirty(config);
+            return config;
         }
 
         private static void ConfigureRendering()
@@ -214,6 +237,12 @@ namespace GameVerse.Editor
         private static void EnsureBootScene(PanelSettings panel)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(BootScenePath));
+            if (BootSceneIsCurrent(panel))
+            {
+                EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(BootScenePath, true) };
+                return; // regenerating an identical scene only churns its object ids in git
+            }
+
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             var cameraGo = new GameObject("Main Camera");
@@ -222,15 +251,37 @@ namespace GameVerse.Editor
             camera.backgroundColor = GameVerse.UI.GameVerseTokens.Color.Bg.Base;
             camera.orthographic = true;
             cameraGo.tag = "MainCamera";
+            cameraGo.AddComponent<AudioListener>(); // without one no game sound plays
 
             var boot = new GameObject("Boot");
             var document = boot.AddComponent<UIDocument>();
             document.panelSettings = panel;
-            document.visualTreeAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(HomeDocumentPath);
+            document.visualTreeAsset = null; // Boot builds the shell (router and screens) in code from Resources/Screens
             boot.AddComponent<Boot>();
 
             EditorSceneManager.SaveScene(scene, BootScenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(BootScenePath, true) };
+        }
+
+        /// <summary>True when the saved Boot scene already has a camera and a Boot object wired to this panel.</summary>
+        private static bool BootSceneIsCurrent(PanelSettings panel)
+        {
+            if (!File.Exists(BootScenePath))
+            {
+                return false;
+            }
+
+            var scene = EditorSceneManager.OpenScene(BootScenePath, OpenSceneMode.Single);
+            var hasCamera = false;
+            var bootReady = false;
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                hasCamera |= root.GetComponent<Camera>() != null && root.GetComponent<AudioListener>() != null;
+                var document = root.GetComponent<UIDocument>();
+                bootReady |= root.GetComponent<Boot>() != null && document != null && document.panelSettings == panel && document.visualTreeAsset == null;
+            }
+
+            return hasCamera && bootReady;
         }
     }
 }
